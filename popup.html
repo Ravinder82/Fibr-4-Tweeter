@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TabTalk AI</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">TabTalk AI</h1>
+                <button class="settings-btn" id="settingsBtn" title="Settings">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Settings Panel (Hidden by default) -->
+        <div class="settings-panel" id="settingsPanel" style="display: none;">
+            <div class="settings-content">
+                <h3>Settings</h3>
+                <div class="form-group">
+                    <label for="apiKey">Gemini API Key:</label>
+                    <div class="input-group">
+                        <input type="password" id="apiKey" placeholder="Enter your Gemini API key">
+                        <button type="button" id="toggleKey" class="toggle-btn">👁️</button>
+                    </div>
+                    <small class="help-text">
+                        Get your free API key from 
+                        <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a>
+                    </small>
+                </div>
+                <div class="settings-actions">
+                    <button id="saveSettings" class="btn-primary">Save</button>
+                    <button id="cancelSettings" class="btn-secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Interface -->
+        <div class="chat-interface" id="chatInterface">
+            <!-- Loading State -->
+            <div class="loading-state" id="loadingState">
+                <div class="spinner"></div>
+                <p>Analyzing page content...</p>
+            </div>
+
+            <!-- Setup Required State -->
+            <div class="setup-required" id="setupRequired" style="display: none;">
+                <div class="setup-content">
+                    <h3>Welcome to TabTalk AI!</h3>
+                    <p>To get started, please add your Gemini API key in settings.</p>
+                    <button id="openSettingsBtn" class="btn-primary">Add API Key</button>
+                </div>
+            </div>
+
+            <!-- Chat Container -->
+            <div class="chat-container" id="chatContainer" style="display: none;">
+                <div class="page-info" id="pageInfo">
+                    <div class="page-title" id="pageTitle">Loading...</div>
+                    <div class="page-url" id="pageUrl"></div>
+                </div>
+
+                <div class="messages-container" id="messagesContainer">
+                    <div class="welcome-message">
+                        <div class="assistant-message">
+                            <div class="message-content">
+                                👋 Hi! I'm ready to help you understand this webpage. Ask me anything about its content!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <textarea 
+                            id="messageInput" 
+                            placeholder="Ask me about this page..." 
+                            rows="1"
+                            maxlength="2000"
+                        ></textarea>
+                        <button id="sendBtn" class="send-btn" disabled>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22,2 15,22 11,13 2,9"></polygon>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="input-actions">
+                        <button id="clearChat" class="btn-secondary small">Clear Chat</button>
+                        <div class="quick-actions">
+                            <button class="quick-action" data-prompt="Summarize this page">Summarize</button>
+                            <button class="quick-action" data-prompt="What are the key points?">Key Points</button>
+                            <button class="quick-action" data-prompt="Explain this in simple terms">Simplify</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div class="error-state" id="errorState" style="display: none;">
+                <div class="error-content">
+                    <h3>⚠️ Something went wrong</h3>
+                    <p id="errorMessage">Unable to process this page.</p>
+                    <button id="retryBtn" class="btn-primary">Try Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="marked.min.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html>
