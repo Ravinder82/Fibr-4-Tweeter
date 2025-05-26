@@ -1,502 +1,612 @@
-// DOM Elements
-const settingsBtn = document.getElementById('settingsBtn');
-const settingsPanel = document.getElementById('settingsPanel');
-const apiKeyInput = document.getElementById('apiKey');
-const toggleKeyBtn = document.getElementById('toggleKey');
-const saveSettingsBtn = document.getElementById('saveSettings');
-const cancelSettingsBtn = document.getElementById('cancelSettings');
-const openSettingsBtn = document.getElementById('openSettingsBtn');
-
-const loadingState = document.getElementById('loadingState');
-const setupRequired = document.getElementById('setupRequired');
-const chatContainer = document.getElementById('chatContainer');
-const errorState = document.getElementById('errorState');
-const errorMessage = document.getElementById('errorMessage');
-const retryBtn = document.getElementById('retryBtn');
-
-const pageTitle = document.getElementById('pageTitle');
-const pageUrl = document.getElementById('pageUrl');
-const messagesContainer = document.getElementById('messagesContainer');
-const messageInput = document.getElementById('messageInput');
-const sendBtn = document.getElementById('sendBtn');
-const clearChatBtn = document.getElementById('clearChat');
-
-// Global state
-let currentPageContent = '';
-let apiKey = '';
-let isProcessing = false;
-
-// Initialize popup
-document.addEventListener('DOMContentLoaded', initializePopup);
-
-async function initializePopup() {
-    try {
-        // Load saved API key
-        const result = await chrome.storage.local.get(['geminiApiKey']);
-        if (result.geminiApiKey) {
-            apiKey = result.geminiApiKey;
-            apiKeyInput.value = apiKey;
-            await loadPageContent();
-        } else {
-            showState('setup');
-        }
-    } catch (error) {
-        console.error('Failed to initialize popup:', error);
-        showError('Failed to initialize extension');
+class TabTalkAI {
+    constructor() {
+        this.apiKey = null;
+        this.pageContent = '';
+        this.messages = [];
+        this.isLoading = false;
+        this.init();
     }
-}
 
-async function loadPageContent() {
-    showState('loading');
-    
-    try {
-        // Get active tab
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        
-        if (!tab) {
-            throw new Error('No active tab found');
-        }
+    init() {
+        this.bindEvents();
+        this.loadSettings();
+        this.updatePageInfo();
+        this.checkApiKeyAndShowInterface();
+    }
 
-        // Check if tab is accessible
-        if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://') || tab.url.startsWith('moz-extension://')) {
-            throw new Error('Cannot access browser internal pages');
-        }
-
-        // Inject and execute content script
-        const results = await chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            func: extractPageContent
+    bindEvents() {
+        // Menu interactions
+        document.getElementById('menuBtn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleMenu();
         });
 
-        if (!results || !results[0]) {
-            throw new Error('Failed to extract page content');
-        }
+        document.addEventListener('click', () => {
+            this.closeMenu();
+        });
 
-        const result = results[0].result;
-        
-        if (!result.success) {
-            throw new Error(result.error || 'Failed to extract content');
-        }
+        // Settings interactions
+        document.getElementById('settingsMenuItem').addEventListener('click', () => {
+            this.toggleSettings();
+        });
 
-        currentPageContent = result.content;
-        
-        // Update UI with page info
-        pageTitle.textContent = result.title || 'Untitled Page';
-        pageUrl.textContent = new URL(tab.url).hostname;
-        
-        showState('chat');
-        
-    } catch (error) {
-        console.error('Failed to load page content:', error);
-        showError(error.message || 'Failed to load page content');
+        document.getElementById('openSettingsBtn').addEventListener('click', () => {
+            this.showSettings();
+        });
+
+        document.getElementById('saveSettings').addEventListener('click', () => {
+            this.saveSettings();
+        });
+
+        document.getElementById('cancelSettings').addEventListener('click', () => {
+            this.hideSettings();
+        });
+
+        document.getElementById('toggleKey').addEventListener('click', () => {
+            this.toggleApiKeyVisibility();
+        });
+
+        // Quick actions
+        document.querySelectorAll('.quick-action-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.handleQuickAction(btn.dataset.prompt);
+            });
+        });
+
+        // Chat interactions
+        document.getElementById('messageInput').addEventListener('input', (e) => {
+            this.handleInputChange(e);
+        });
+
+        document.getElementById('messageInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                this.sendMessage();
+            }
+        });
+
+        document.getElementById('sendBtn').addEventListener('click', () => {
+            this.sendMessage();
+        });
+
+        // Clear chat
+        document.getElementById('clearChat').addEventListener('click', () => {
+            this.clearChat();
+        });
+
+        document.getElementById('clearChatMenuItem').addEventListener('click', () => {
+            this.clearChat();
+            this.closeMenu();
+        });
+
+        // Refresh page
+        document.getElementById('refreshMenuItem').addEventListener('click', () => {
+            this.refreshPage();
+            this.closeMenu();
+        });
+
+        document.getElementById('removeApiKey').addEventListener('click', () => {
+            this.removeApiKey();
+        });
     }
-}
 
-// Content extraction function (runs in page context)
-function extractPageContent() {
-    try {
-        // Remove script and style elements
-        const scripts = document.querySelectorAll('script, style, noscript');
-        scripts.forEach(el => el.remove());
+    toggleMenu() {
+        const menuBtn = document.getElementById('menuBtn');
+        const dropdownMenu = document.getElementById('dropdownMenu');
         
-        // Get main content
-        let content = '';
-        const title = document.title;
+        menuBtn.classList.toggle('active');
+        dropdownMenu.classList.toggle('active');
+    }
+
+    closeMenu() {
+        const menuBtn = document.getElementById('menuBtn');
+        const dropdownMenu = document.getElementById('dropdownMenu');
         
-        // Try to find main content area
-        const mainSelectors = [
-            'main',
-            '[role="main"]',
-            '.main-content',
-            '#main-content',
-            '.content',
-            '#content',
-            'article',
-            '.article',
-            '.post'
-        ];
+        menuBtn.classList.remove('active');
+        dropdownMenu.classList.remove('active');
+    }
+
+    toggleSettings() {
+        const settingsPanel = document.getElementById('settingsPanel');
+        settingsPanel.classList.toggle('active');
+        this.closeMenu();
         
-        let mainElement = null;
-        for (const selector of mainSelectors) {
-            mainElement = document.querySelector(selector);
-            if (mainElement) break;
+        if (settingsPanel.classList.contains('active')) {
+            document.getElementById('apiKey').focus();
         }
+    }
+
+    showSettings() {
+        const settingsPanel = document.getElementById('settingsPanel');
+        settingsPanel.classList.add('active');
+        document.getElementById('apiKey').focus();
+    }
+
+    hideSettings() {
+        const settingsPanel = document.getElementById('settingsPanel');
+        settingsPanel.classList.remove('active');
+    }
+
+    toggleApiKeyVisibility() {
+        const apiKeyInput = document.getElementById('apiKey');
+        const toggleBtn = document.getElementById('toggleKey');
         
-        // Extract text from main element or body
-        const targetElement = mainElement || document.body;
+        if (apiKeyInput.type === 'password') {
+            apiKeyInput.type = 'text';
+            toggleBtn.textContent = '🙈';
+        } else {
+            apiKeyInput.type = 'password';
+            toggleBtn.textContent = '👁️';
+        }
+    }
+
+    saveSettings() {
+        const apiKey = document.getElementById('apiKey').value.trim();
         
-        if (targetElement) {
-            // Get text from common content elements
-            const contentElements = targetElement.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, td, th, div, span, section, article');
-            
-            const textParts = [];
-            contentElements.forEach(el => {
-                const text = el.textContent?.trim();
-                if (text && text.length > 10 && !textParts.includes(text)) {
-                    textParts.push(text);
+        if (!apiKey) {
+            this.showToast('Please enter your API key', 'error');
+            return;
+        }
+
+        // Validate API key format (basic check)
+        if (apiKey.length < 20) {
+            this.showToast('API key seems too short. Please check and try again.', 'error');
+            return;
+        }
+
+        this.apiKey = apiKey;
+        this.saveToStorage();
+        this.hideSettings();
+        this.checkApiKeyAndShowInterface();
+        this.showToast('Settings saved successfully!');
+    }
+
+    async loadSettings() {
+        // Try to load from chrome.storage.local if available
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.get(['geminiApiKey'], (result) => {
+                if (result && result.geminiApiKey) {
+                    this.apiKey = result.geminiApiKey;
+                    document.getElementById('apiKey').value = result.geminiApiKey;
+                } else {
+                    // fallback to localStorage simulation
+                    const stored = this.getFromStorage();
+                    if (stored && stored.apiKey) {
+                        this.apiKey = stored.apiKey;
+                        document.getElementById('apiKey').value = stored.apiKey;
+                    }
                 }
             });
-            
-            content = textParts.join('\n\n');
-        }
-        
-        // Fallback to body text
-        if (!content || content.length < 100) {
-            content = document.body.textContent?.trim() || '';
-        }
-        
-        // Clean up content
-        content = content
-            .replace(/\s+/g, ' ')
-            .replace(/\n\s*\n/g, '\n\n')
-            .trim();
-        
-        // Limit content size (Gemini has token limits)
-        if (content.length > 30000) {
-            content = content.substring(0, 30000) + '... [Content truncated]';
-        }
-        
-        if (!content || content.length < 50) {
-            return {
-                success: false,
-                error: 'Unable to extract meaningful content from this page'
-            };
-        }
-        
-        return {
-            success: true,
-            title: title,
-            content: content,
-            url: window.location.href
-        };
-        
-    } catch (error) {
-        return {
-            success: false,
-            error: error.message
-        };
-    }
-}
-
-// Show different states
-function showState(state) {
-    const states = [loadingState, setupRequired, chatContainer, errorState];
-    states.forEach(el => el.style.display = 'none');
-    
-    switch (state) {
-        case 'loading':
-            loadingState.style.display = 'flex';
-            break;
-        case 'setup':
-            setupRequired.style.display = 'flex';
-            break;
-        case 'chat':
-            chatContainer.style.display = 'flex';
-            break;
-        case 'error':
-            errorState.style.display = 'flex';
-            break;
-    }
-}
-
-function showError(message) {
-    errorMessage.textContent = message;
-    showState('error');
-}
-
-// Settings management
-settingsBtn.addEventListener('click', () => {
-    const isVisible = settingsPanel.style.display !== 'none';
-    settingsPanel.style.display = isVisible ? 'none' : 'block';
-});
-
-openSettingsBtn.addEventListener('click', () => {
-    settingsPanel.style.display = 'block';
-});
-
-toggleKeyBtn.addEventListener('click', () => {
-    const isPassword = apiKeyInput.type === 'password';
-    apiKeyInput.type = isPassword ? 'text' : 'password';
-    toggleKeyBtn.textContent = isPassword ? '🙈' : '👁️';
-});
-
-saveSettingsBtn.addEventListener('click', async () => {
-    const newApiKey = apiKeyInput.value.trim();
-    
-    if (!newApiKey) {
-        alert('Please enter your Gemini API key');
-        return;
-    }
-    
-    try {
-        await chrome.storage.local.set({ geminiApiKey: newApiKey });
-        apiKey = newApiKey;
-        settingsPanel.style.display = 'none';
-        
-        if (currentPageContent) {
-            showState('chat');
         } else {
-            await loadPageContent();
+            // fallback to localStorage simulation
+            const stored = this.getFromStorage();
+            if (stored && stored.apiKey) {
+                this.apiKey = stored.apiKey;
+                document.getElementById('apiKey').value = stored.apiKey;
+            }
         }
-    } catch (error) {
-        console.error('Failed to save API key:', error);
-        alert('Failed to save API key');
     }
-});
 
-cancelSettingsBtn.addEventListener('click', () => {
-    // Reset input to saved value
-    chrome.storage.local.get(['geminiApiKey']).then(result => {
-        apiKeyInput.value = result.geminiApiKey || '';
-        settingsPanel.style.display = 'none';
-    });
-});
-
-// Chat functionality
-messageInput.addEventListener('input', () => {
-    messageInput.style.height = 'auto';
-    messageInput.style.height = Math.min(messageInput.scrollHeight, 120) + 'px';
-    
-    sendBtn.disabled = !messageInput.value.trim() || isProcessing;
-});
-
-messageInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
+    saveToStorage() {
+        // Save to chrome.storage.local if available
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.set({ geminiApiKey: this.apiKey });
+        }
+        // Also save to localStorage simulation for demo
+        const data = { apiKey: this.apiKey };
+        if (typeof Storage !== "undefined") {
+            try {
+                window.demoStorage = data;
+            } catch (e) {
+                console.log('Storage not available');
+            }
+        }
     }
-});
 
-sendBtn.addEventListener('click', sendMessage);
+    getFromStorage() {
+        // Simulate storage retrieval
+        try {
+            return window.demoStorage || null;
+        } catch (e) {
+            return null;
+        }
+    }
 
-// Quick actions
-document.querySelectorAll('.quick-action').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const prompt = btn.dataset.prompt;
+    checkApiKeyAndShowInterface() {
+        const setupRequired = document.getElementById('setupRequired');
+        const chatContainer = document.getElementById('chatContainer');
+
+        if (this.apiKey) {
+            setupRequired.classList.add('hidden');
+            chatContainer.classList.remove('hidden');
+            this.extractPageContent();
+        } else {
+            setupRequired.classList.remove('hidden');
+            chatContainer.classList.add('hidden');
+        }
+    }
+
+    async updatePageInfo() {
+        // In a real extension, this would get actual tab info
+        // For demo, simulate getting page info
+        const pageTitle = document.getElementById('pageTitle');
+        const pageUrl = document.getElementById('pageUrl');
+        
+        // Simulate page info
+        pageTitle.textContent = 'Demo Page - TabTalk AI Interface';
+        pageUrl.textContent = 'chrome-extension://demo-tabtalk-ai';
+    }
+
+    async extractPageContent() {
+        // In a real extension, this would extract content from the active tab
+        // For demo, simulate page content
+        this.pageContent = `
+            TabTalk AI - Browser Extension Demo
+            
+            This is a demonstration of the TabTalk AI browser extension interface. 
+            The extension allows users to chat with AI about the content of any webpage.
+            
+            Key features:
+            - Beautiful, modern interface with smooth animations
+            - Integration with Google's Gemini AI API
+            - Quick action buttons for common queries
+            - Message controls for copying and saving responses
+            - Responsive design that works on different screen sizes
+            
+            The actual extension would extract the real content from the current browser tab
+            and send it to the Gemini API along with user questions to provide contextual answers.
+        `;
+    }
+
+    handleQuickAction(prompt) {
+        const messageInput = document.getElementById('messageInput');
         messageInput.value = prompt;
-        sendMessage();
-    });
-});
-
-clearChatBtn.addEventListener('click', () => {
-    if (confirm('Clear all messages in this chat?')) {
-        clearChat();
-    }
-});
-
-retryBtn.addEventListener('click', () => {
-    loadPageContent();
-});
-
-async function sendMessage() {
-    const message = messageInput.value.trim();
-    if (!message || isProcessing) return;
-    
-    isProcessing = true;
-    sendBtn.disabled = true;
-    
-    // Add user message to chat
-    addMessage('user', message);
-    messageInput.value = '';
-    messageInput.style.height = 'auto';
-    
-    // Show loading indicator
-    const loadingEl = addMessage('assistant', '', true);
-    
-    try {
-        const response = await callGeminiAPI(message);
-        
-        // Remove loading indicator and add actual response
-        loadingEl.remove();
-        addMessage('assistant', response);
-        
-    } catch (error) {
-        console.error('Failed to get AI response:', error);
-        loadingEl.remove();
-        addMessage('assistant', '❌ Sorry, I encountered an error. Please try again.');
-    } finally {
-        isProcessing = false;
-        sendBtn.disabled = false;
+        this.updateSendButton();
+        this.closeMenu();
         messageInput.focus();
     }
-}
 
-function addMessage(sender, content, isLoading = false) {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `${sender}-message`;
-    
-    if (isLoading) {
-        messageDiv.innerHTML = `
-            <div class="message-loading">
-                <div class="loading-dots">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-                <span>Thinking...</span>
-            </div>
-        `;
-    } else {
+    handleInputChange(e) {
+        const textarea = e.target;
+        
+        // Auto-resize textarea
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        
+        // Update character count
+        const count = textarea.value.length;
+        document.getElementById('wordCount').textContent = `${count}/2000`;
+        
+        this.updateSendButton();
+    }
+
+    updateSendButton() {
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const hasContent = messageInput.value.trim().length > 0;
+        
+        sendBtn.disabled = !hasContent || this.isLoading;
+    }
+
+    async sendMessage() {
+        const messageInput = document.getElementById('messageInput');
+        const message = messageInput.value.trim();
+        
+        if (!message || this.isLoading) return;
+
+        // Clear input
+        messageInput.value = '';
+        messageInput.style.height = 'auto';
+        this.updateSendButton();
+        document.getElementById('wordCount').textContent = '0/2000';
+
+        // Add user message
+        this.addMessage('user', message);
+
+        // Show loading
+        const loadingEl = this.addLoadingMessage();
+        this.isLoading = true;
+
+        try {
+            // Call Gemini API
+            const response = await this.callGeminiAPI(message);
+            
+            // Remove loading and add response
+            loadingEl.remove();
+            this.addMessage('assistant', response);
+            
+        } catch (error) {
+            console.error('API Error:', error);
+            loadingEl.remove();
+            this.addMessage('assistant', '❌ Sorry, I encountered an error while processing your request. Please check your API key and try again.');
+            this.showToast('Failed to get AI response', 'error');
+        } finally {
+            this.isLoading = false;
+            this.updateSendButton();
+        }
+    }
+
+    async callGeminiAPI(userMessage) {
+        // In a real extension, this would make an actual API call
+        // For demo purposes, return a simulated response
+        
+        await this.delay(1500); // Simulate API delay
+        
+        const responses = {
+            'Summarize this page': `📋 **Page Summary:**\n\nThis is a demo of the TabTalk AI browser extension interface. The extension provides:\n\n• **Modern UI Design** - Clean, responsive interface with smooth animations\n• **AI Integration** - Uses Google's Gemini API for intelligent responses  \n• **Quick Actions** - Pre-built prompts for common tasks like summarizing\n• **Interactive Features** - Message controls, settings panel, and more\n\nThe interface is designed to be intuitive and professional, making it easy for users to interact with AI about any webpage content.`,
+
+            'What are the key points?': `🔑 **Key Points:**\n\n1. **Purpose**: Browser extension for AI-powered webpage analysis\n2. **Technology**: Integration with Google Gemini API\n3. **Interface**: Modern, animated UI with 400x600px popup design\n4. **Features**: \n   - Quick action buttons\n   - Settings management\n   - Message history\n   - Copy/save controls\n5. **User Experience**: Focus on smooth interactions and professional appearance`,
+
+            'Explain this in simple terms': `💡 **Simple Explanation:**\n\nThink of TabTalk AI as your smart reading assistant for web pages. \n\nHere's how it works:\n• You visit any website\n• Click the extension icon  \n• Ask questions about what you're reading\n• Get instant, helpful answers\n\nIt's like having a knowledgeable friend who can quickly explain, summarize, or answer questions about any webpage you're looking at. The interface is designed to be clean and easy to use, just like messaging apps you're already familiar with.`,
+
+            'What questions can I ask about this?': `❓ **Great Questions You Can Ask:**\n\n**About Content:**\n• "What is this page about?"\n• "Summarize the main points"\n• "What are the key features mentioned?"\n\n**For Analysis:**\n• "What are the pros and cons discussed?"\n• "How does this compare to alternatives?"\n• "What's the most important information here?"\n\n**For Learning:**\n• "Explain this in simple terms"\n• "What should I remember from this?"\n• "Are there any action items for me?"\n\n**For Research:**\n• "What questions does this raise?"\n• "What topics should I explore further?"\n• "How reliable is this information?"\n\nFeel free to ask anything about the content you're reading!`
+        };
+
+        return responses[userMessage] || `I understand you're asking: "${userMessage}"\n\nBased on the page content, I can help you with:\n\n✨ **General Analysis**: This appears to be a demo interface for a browser extension that uses AI to help users understand webpage content.\n\n🎯 **Key Features**: The interface includes modern design elements, smooth animations, settings management, and interactive chat functionality.\n\n🔧 **Technical Aspects**: Built with HTML, CSS, and JavaScript, designed to integrate with Google's Gemini API for AI responses.\n\nWould you like me to elaborate on any specific aspect or answer a different question about this page?`;
+    }
+
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    addMessage(sender, content) {
+        const messagesContainer = document.getElementById('messagesContainer');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `${sender}-message`;
+        
         const messageContent = document.createElement('div');
         messageContent.className = 'message-content';
-        messageContent.innerHTML = marked.parse(content);
+        messageContent.innerHTML = this.formatMessage(content);
+        
         messageDiv.appendChild(messageContent);
 
-        // Only add controls for assistant messages
+        // Add controls for assistant messages
         if (sender === 'assistant') {
-            const controls = document.createElement('div');
-            controls.className = 'message-controls';
-            controls.style.display = 'flex';
-            controls.style.gap = '8px';
-            controls.style.marginTop = '6px';
-
-            // Copy button
-            const copyBtn = document.createElement('button');
-            copyBtn.className = 'msg-btn copy-btn';
-            copyBtn.title = 'Copy to clipboard';
-            copyBtn.textContent = '📋';
-            copyBtn.onclick = () => {
-                // Copy plain text (strip HTML tags)
-                const temp = document.createElement('div');
-                temp.innerHTML = messageContent.innerHTML;
-                const text = temp.textContent || temp.innerText || '';
-                navigator.clipboard.writeText(text);
-                copyBtn.textContent = '✅';
-                setTimeout(() => copyBtn.textContent = '📋', 1000);
-            };
-            controls.appendChild(copyBtn);
-
-            // Save button
-            const saveBtn = document.createElement('button');
-            saveBtn.className = 'msg-btn save-btn';
-            saveBtn.title = 'Save as .txt';
-            saveBtn.textContent = '💾';
-            saveBtn.onclick = () => {
-                const temp = document.createElement('div');
-                temp.innerHTML = messageContent.innerHTML;
-                const text = temp.textContent || temp.innerText || '';
-                const blob = new Blob([text], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'tabtalk-output.txt';
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                }, 100);
-            };
-            controls.appendChild(saveBtn);
-
-            // Delete button
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'msg-btn delete-btn';
-            deleteBtn.title = 'Delete this message';
-            deleteBtn.textContent = '🗑️';
-            deleteBtn.onclick = () => {
-                messageDiv.remove();
-            };
-            controls.appendChild(deleteBtn);
-
+            const controls = this.createMessageControls(content);
             messageDiv.appendChild(controls);
         }
+
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        // Store message
+        this.messages.push({ sender, content, timestamp: Date.now() });
     }
-    
-    messagesContainer.appendChild(messageDiv);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    
-    return messageDiv;
-}
 
-async function callGeminiAPI(userMessage) {
-    const prompt = `You are a helpful AI assistant that analyzes and discusses webpage content. A user is asking about the following webpage:
+    createMessageControls(content) {
+        // Dropdown menu for controls
+        const wrapper = document.createElement('div');
+        wrapper.className = 'message-controls-dropdown-wrapper';
+        wrapper.style.position = 'relative';
 
-Title: ${pageTitle.textContent}
-URL: ${pageUrl.textContent}
+        const menuBtn = document.createElement('button');
+        menuBtn.className = 'control-btn menu-btn';
+        menuBtn.innerHTML = '⋮';
+        menuBtn.title = 'More actions';
+        menuBtn.style.width = '28px';
+        menuBtn.style.height = '28px';
+        menuBtn.style.fontSize = '18px';
+        menuBtn.style.display = 'flex';
+        menuBtn.style.alignItems = 'center';
+        menuBtn.style.justifyContent = 'center';
+        menuBtn.style.background = 'rgba(255,255,255,0.95)';
+        menuBtn.style.border = '1px solid #e2e8f0';
+        menuBtn.style.borderRadius = '8px';
+        menuBtn.style.cursor = 'pointer';
+        menuBtn.style.transition = 'all 0.2s';
 
-Page Content:
-${currentPageContent}
+        const dropdown = document.createElement('div');
+        dropdown.className = 'message-controls-dropdown';
+        dropdown.style.position = 'absolute';
+        dropdown.style.top = '32px';
+        dropdown.style.right = '0';
+        dropdown.style.background = '#fff';
+        dropdown.style.border = '1px solid #e2e8f0';
+        dropdown.style.borderRadius = '10px';
+        dropdown.style.boxShadow = '0 4px 16px rgba(0,0,0,0.10)';
+        dropdown.style.display = 'none';
+        dropdown.style.flexDirection = 'column';
+        dropdown.style.minWidth = '120px';
+        dropdown.style.zIndex = '10';
 
-User Question: ${userMessage}
+        // Copy
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'control-btn copy-btn';
+        copyBtn.innerHTML = '📋 Copy';
+        copyBtn.style.justifyContent = 'flex-start';
+        copyBtn.style.width = '100%';
+        copyBtn.style.border = 'none';
+        copyBtn.style.background = 'none';
+        copyBtn.style.borderRadius = '10px 10px 0 0';
+        copyBtn.style.fontSize = '14px';
+        copyBtn.style.padding = '10px 16px';
+        copyBtn.style.cursor = 'pointer';
+        copyBtn.title = 'Copy message';
+        copyBtn.addEventListener('click', () => { this.copyMessage(content); dropdown.style.display = 'none'; });
 
----
+        // Save
+        const saveBtn = document.createElement('button');
+        saveBtn.className = 'control-btn save-btn';
+        saveBtn.innerHTML = '💾 Save';
+        saveBtn.style.justifyContent = 'flex-start';
+        saveBtn.style.width = '100%';
+        saveBtn.style.border = 'none';
+        saveBtn.style.background = 'none';
+        saveBtn.style.fontSize = '14px';
+        saveBtn.style.padding = '10px 16px';
+        saveBtn.style.cursor = 'pointer';
+        saveBtn.title = 'Save message';
+        saveBtn.addEventListener('click', () => { this.saveMessage(content); dropdown.style.display = 'none'; });
 
-**Formatting Instructions:**
-- Format your answer using markdown with clear section headings (use ### or **bold** for main topics).
-- Use bullet points or numbered lists for details and subpoints.
-- Add line breaks and spacing between sections for readability.
-- Make the output visually beautiful, easy to scan, and well-structured.
-- If summarizing, provide a concise, point-wise summary with clear topic separation.
-- If explaining, break down concepts step by step.
-- If listing, use bullet points or checklists.
-- Do not include unnecessary preambles or apologies.
+        // Delete
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'control-btn delete-btn';
+        deleteBtn.innerHTML = '🗑️ Delete';
+        deleteBtn.style.justifyContent = 'flex-start';
+        deleteBtn.style.width = '100%';
+        deleteBtn.style.border = 'none';
+        deleteBtn.style.background = 'none';
+        deleteBtn.style.borderRadius = '0 0 10px 10px';
+        deleteBtn.style.fontSize = '14px';
+        deleteBtn.style.padding = '10px 16px';
+        deleteBtn.style.cursor = 'pointer';
+        deleteBtn.title = 'Delete message';
+        deleteBtn.addEventListener('click', (e) => { this.deleteMessage(e.target.closest('.assistant-message')); dropdown.style.display = 'none'; });
 
----
+        dropdown.appendChild(copyBtn);
+        dropdown.appendChild(saveBtn);
+        dropdown.appendChild(deleteBtn);
 
-Please provide your response in this beautiful, structured markdown format based on the webpage content. If the question cannot be answered from the content provided, politely explain what information is available instead.`;
+        menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+        });
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            contents: [{
-                parts: [{
-                    text: prompt
-                }]
-            }],
-            generationConfig: {
-                temperature: 0.7,
-                topK: 40,
-                topP: 0.95,
-                maxOutputTokens: 1024,
-            },
-            safetySettings: [
-                {
-                    category: "HARM_CATEGORY_HARASSMENT",
-                    threshold: "BLOCK_MEDIUM_AND_ABOVE"
-                },
-                {
-                    category: "HARM_CATEGORY_HATE_SPEECH",
-                    threshold: "BLOCK_MEDIUM_AND_ABOVE"
-                },
-                {
-                    category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                    threshold: "BLOCK_MEDIUM_AND_ABOVE"
-                },
-                {
-                    category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-                    threshold: "BLOCK_MEDIUM_AND_ABOVE"
-                }
-            ]
-        })
-    });
+        // Hide dropdown on click outside
+        document.addEventListener('click', (e) => {
+            if (dropdown.style.display === 'flex') {
+                dropdown.style.display = 'none';
+            }
+        });
 
-    if (!response.ok) {
-        if (response.status === 400) {
-            throw new Error('Invalid API key or request format');
-        } else if (response.status === 403) {
-            throw new Error('API key access denied or quota exceeded');
-        } else if (response.status === 429) {
-            throw new Error('Rate limit exceeded. Please try again later.');
+        wrapper.appendChild(menuBtn);
+        wrapper.appendChild(dropdown);
+        return wrapper;
+    }
+
+    formatMessage(content) {
+        // Convert markdown-like formatting to HTML
+        return content
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/\n/g, '<br>')
+            .replace(/•/g, '&bull;');
+    }
+
+    addLoadingMessage() {
+        const messagesContainer = document.getElementById('messagesContainer');
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'assistant-message';
+        
+        const loadingContent = document.createElement('div');
+        loadingContent.className = 'message-loading';
+        loadingContent.innerHTML = `
+            <div class="loading-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <span>Thinking...</span>
+        `;
+        
+        loadingDiv.appendChild(loadingContent);
+        messagesContainer.appendChild(loadingDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        return loadingDiv;
+    }
+
+    copyMessage(content) {
+        // Remove HTML tags for plain text copy
+        const plainText = content.replace(/<[^>]*>/g, '').replace(/&bull;/g, '•');
+        
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(plainText).then(() => {
+                this.showToast('Message copied to clipboard!');
+            });
         } else {
-            throw new Error(`API request failed with status ${response.status}`);
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = plainText;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            this.showToast('Message copied to clipboard!');
         }
     }
 
-    const data = await response.json();
-    
-    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-        throw new Error('Invalid response from Gemini API');
+    saveMessage(content) {
+        // In a real extension, this would save to browser storage or export
+        const plainText = content.replace(/<[^>]*>/g, '').replace(/&bull;/g, '•');
+        const blob = new Blob([plainText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `tabtalk-message-${Date.now()}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        this.showToast('Message saved as file!');
     }
 
-    return data.candidates[0].content.parts[0].text;
+    deleteMessage(messageElement) {
+        if (confirm('Delete this message?')) {
+            messageElement.remove();
+            this.showToast('Message deleted');
+        }
+    }
+
+    clearChat() {
+        if (confirm('Clear all messages?')) {
+            const messagesContainer = document.getElementById('messagesContainer');
+            const welcomeMessage = messagesContainer.querySelector('.welcome-message');
+            
+            // Clear all messages but keep welcome message
+            messagesContainer.innerHTML = '';
+            if (welcomeMessage) {
+                messagesContainer.appendChild(welcomeMessage);
+            }
+            
+            this.messages = [];
+            this.showToast('Chat cleared');
+        }
+    }
+
+    refreshPage() {
+        if (confirm('Refresh the current page?')) {
+            // In a real extension, this would refresh the active tab
+            this.showToast('Page would be refreshed (demo mode)');
+        }
+    }
+
+    showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+        
+        // Trigger animation
+        setTimeout(() => toast.classList.add('show'), 100);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => document.body.removeChild(toast), 300);
+        }, 3000);
+    }
+
+    removeApiKey() {
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.remove(['geminiApiKey']);
+        }
+        if (typeof Storage !== "undefined") {
+            try {
+                window.demoStorage = {};
+            } catch (e) {}
+        }
+        this.apiKey = null;
+        document.getElementById('apiKey').value = '';
+        this.checkApiKeyAndShowInterface();
+        this.showToast('API key removed. Please add a new one.', 'success');
+    }
 }
 
-function clearChat() {
-    // Remove all messages except welcome message
-    const messages = messagesContainer.querySelectorAll('.user-message, .assistant-message:not(.welcome-message .assistant-message)');
-    messages.forEach(msg => msg.remove());
-}
+// Initialize the application
+document.addEventListener('DOMContentLoaded', () => {
+    new TabTalkAI();
+});

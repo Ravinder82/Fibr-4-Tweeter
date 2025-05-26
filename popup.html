@@ -8,23 +8,51 @@
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
+        <!-- Enhanced Header -->
         <header class="header">
             <div class="header-content">
                 <h1 class="logo">TabTalk AI</h1>
-                <button class="settings-btn" id="settingsBtn" title="Settings">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"></path>
-                    </svg>
-                </button>
+                <div class="header-actions">
+                    <button class="menu-btn" id="menuBtn" title="Menu">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                    <!-- Animated Dropdown Menu -->
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <div class="menu-section">
+                            <div class="menu-item" id="settingsMenuItem">
+                                <span class="icon">⚙️</span>
+                                <span>Settings</span>
+                            </div>
+                            <div class="menu-item" id="clearChatMenuItem">
+                                <span class="icon">🗑️</span>
+                                <span>Clear Chat</span>
+                            </div>
+                            <div class="menu-item" id="refreshMenuItem">
+                                <span class="icon">🔄</span>
+                                <span>Refresh Page</span>
+                            </div>
+                        </div>
+                        <div class="menu-section">
+                            <div style="padding: 8px 16px; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Quick Actions</div>
+                            <div class="quick-actions-menu">
+                                <button class="quick-action-btn" data-prompt="Summarize this page">📋 Summarize</button>
+                                <button class="quick-action-btn" data-prompt="What are the key points?">🔑 Key Points</button>
+                                <button class="quick-action-btn" data-prompt="Explain this in simple terms">💡 Simplify</button>
+                                <button class="quick-action-btn" data-prompt="What questions can I ask about this?">❓ Suggest Q's</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </header>
-
-        <!-- Settings Panel (Hidden by default) -->
-        <div class="settings-panel" id="settingsPanel" style="display: none;">
+        <!-- Settings Panel -->
+        <div class="settings-panel" id="settingsPanel">
             <div class="settings-content">
-                <h3>Settings</h3>
+                <h3>⚙️ Settings</h3>
                 <div class="form-group">
                     <label for="apiKey">Gemini API Key:</label>
                     <div class="input-group">
@@ -37,36 +65,28 @@
                     </small>
                 </div>
                 <div class="settings-actions">
-                    <button id="saveSettings" class="btn-primary">Save</button>
+                    <button id="saveSettings" class="btn-primary">Save Settings</button>
                     <button id="cancelSettings" class="btn-secondary">Cancel</button>
+                    <button id="removeApiKey" class="btn-secondary">Remove API Key</button>
                 </div>
             </div>
         </div>
-
         <!-- Chat Interface -->
         <div class="chat-interface" id="chatInterface">
-            <!-- Loading State -->
-            <div class="loading-state" id="loadingState">
-                <div class="spinner"></div>
-                <p>Analyzing page content...</p>
-            </div>
-
             <!-- Setup Required State -->
-            <div class="setup-required" id="setupRequired" style="display: none;">
+            <div class="setup-required" id="setupRequired">
                 <div class="setup-content">
-                    <h3>Welcome to TabTalk AI!</h3>
-                    <p>To get started, please add your Gemini API key in settings.</p>
+                    <h3>🚀 Welcome to TabTalk AI!</h3>
+                    <p>To get started, please add your Gemini API key in settings. It's free and takes just a minute!</p>
                     <button id="openSettingsBtn" class="btn-primary">Add API Key</button>
                 </div>
             </div>
-
             <!-- Chat Container -->
-            <div class="chat-container" id="chatContainer" style="display: none;">
+            <div class="chat-container hidden" id="chatContainer">
                 <div class="page-info" id="pageInfo">
-                    <div class="page-title" id="pageTitle">Loading...</div>
-                    <div class="page-url" id="pageUrl"></div>
+                    <div class="page-title" id="pageTitle">Current Page</div>
+                    <div class="page-url" id="pageUrl">Loading...</div>
                 </div>
-
                 <div class="messages-container" id="messagesContainer">
                     <div class="welcome-message">
                         <div class="assistant-message">
@@ -76,7 +96,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="input-container">
                     <div class="input-wrapper">
                         <textarea 
@@ -92,28 +111,14 @@
                             </svg>
                         </button>
                     </div>
-                    <div class="input-actions">
-                        <button id="clearChat" class="btn-secondary small">Clear Chat</button>
-                        <div class="quick-actions">
-                            <button class="quick-action" data-prompt="Summarize this page">Summarize</button>
-                            <button class="quick-action" data-prompt="What are the key points?">Key Points</button>
-                            <button class="quick-action" data-prompt="Explain this in simple terms">Simplify</button>
-                        </div>
+                    <div class="input-footer">
+                        <button id="clearChat" class="clear-chat-btn">🗑️ Clear Chat</button>
+                        <div class="word-count" id="wordCount">0/2000</div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Error State -->
-            <div class="error-state" id="errorState" style="display: none;">
-                <div class="error-content">
-                    <h3>⚠️ Something went wrong</h3>
-                    <p id="errorMessage">Unable to process this page.</p>
-                    <button id="retryBtn" class="btn-primary">Try Again</button>
                 </div>
             </div>
         </div>
     </div>
-
     <script src="marked.min.js"></script>
     <script src="popup.js"></script>
 </body>
