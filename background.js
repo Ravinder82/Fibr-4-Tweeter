@@ -52,11 +52,12 @@ async function handleGeminiAPI(request, sender, sendResponse) {
         const apiKey = result.geminiApiKey;
         
         if (!apiKey) {
-            throw new Error('Gemini API key not configured');
+            sendResponse({ success: false, error: 'Gemini API key not configured. Please add your key in the extension settings.' });
+            return; // Stop execution if API key is missing
         }
         
         // Make API call
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -65,7 +66,10 @@ async function handleGeminiAPI(request, sender, sendResponse) {
         });
         
         if (!response.ok) {
-            throw new Error(`API request failed with status ${response.status}`);
+            const errorDetail = await response.text(); // Attempt to read response body for more details
+            console.error(`API request failed with status ${response.status}: ${errorDetail}`);
+            sendResponse({ success: false, error: `API request failed with status ${response.status}. Details: ${errorDetail.substring(0, 200)}...` }); // Send status and limited detail
+            return; // Stop execution if response is not ok
         }
         
         const data = await response.json();
@@ -73,7 +77,7 @@ async function handleGeminiAPI(request, sender, sendResponse) {
         
     } catch (error) {
         console.error('Gemini API error:', error);
-        sendResponse({ success: false, error: error.message });
+        sendResponse({ success: false, error: `An unexpected error occurred: ${error.message}` });
     }
 }
 
