@@ -13,12 +13,13 @@
     // Listen for messages from popup or background script
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (request.action === 'extractPageContent') {
+            // Use robust extraction function
             try {
-                const content = extractPageContent();
-                sendResponse({ success: true, content: content });
-            } catch (error) {
-                console.error('Content extraction failed:', error);
-                sendResponse({ success: false, error: error.message });
+                const extracted = extractPageContent();
+                console.log('Extracted content:', extracted);
+                sendResponse({ success: true, content: extracted });
+            } catch (e) {
+                sendResponse({ success: false, error: e.message });
             }
             return true;
         }
@@ -66,6 +67,11 @@
             let content = '';
             const title = document.title || '';
             const url = window.location.href;
+            
+            // Add: Check for unsupported URLs
+            if (window.location.protocol === 'chrome:' || window.location.protocol === 'chrome-extension:' || window.location.protocol === 'file:') {
+                throw new Error('This page type is not supported for extraction. Try on a regular website.');
+            }
             
             // Try to find the main content area
             const mainContentSelectors = [
@@ -130,7 +136,7 @@
                 content = textBlocks.join('\n\n');
             }
             
-            // Fallback to document body if no content found
+            // Fallback to document.body.innerText if no content found
             if (!content || content.length < 100) {
                 content = document.body.innerText || document.body.textContent || '';
             }
@@ -148,8 +154,10 @@
                 content = content.substring(0, maxLength) + '\n\n[Content truncated due to length...]';
             }
             
+            console.log('Extracted content:', content); // Log for debugging
+            
             if (!content || content.length < 50) {
-                throw new Error('Unable to extract meaningful content from this page');
+                throw new Error('Unable to extract meaningful content from this page. It may be a browser/extension page, a PDF, or have very little visible text.');
             }
             
             return {
@@ -241,8 +249,11 @@
     const observer = new MutationObserver(() => {
         if (window.location.href !== lastUrl) {
             lastUrl = window.location.href;
-            // Page changed, could notify extension
+            // Page changed, notify extension
             console.log('TabTalk AI: Page navigation detected');
+            if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+                chrome.runtime.sendMessage({ action: 'tabtalk_page_changed' });
+            }
         }
     });
     
@@ -256,5 +267,4 @@
         observer.disconnect();
         removeExistingHighlights();
     });
-    
 })();
