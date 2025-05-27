@@ -4,10 +4,12 @@ class TabTalkAI {
         this.pageContent = '';
         this.messages = [];
         this.isLoading = false;
+        this.lastExtractionFailed = false;
         this.init();
     }
 
     init() {
+        this.onboarding = new TabTalkOnboarding(this);
         this.bindEvents();
         this.loadSettings();
         this.updatePageInfo();
@@ -47,11 +49,14 @@ class TabTalkAI {
         });
 
         // Quick actions
-        document.querySelectorAll('.quick-action-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                this.handleQuickAction(btn.dataset.prompt);
+        const quickActionsInline = document.getElementById('quickActionsInline');
+        if (quickActionsInline) {
+            quickActionsInline.querySelectorAll('.quick-action-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    this.handleQuickAction(btn.dataset.prompt);
+                });
             });
-        });
+        }
 
         // Chat interactions
         document.getElementById('messageInput').addEventListener('input', (e) => {
@@ -176,6 +181,8 @@ class TabTalkAI {
                         document.getElementById('apiKey').value = stored.apiKey;
                     }
                 }
+                // After loading API key, decide onboarding vs chat
+                this.handleOnboardingDisplay();
             });
         } else {
             // fallback to localStorage simulation
@@ -184,6 +191,8 @@ class TabTalkAI {
                 this.apiKey = stored.apiKey;
                 document.getElementById('apiKey').value = stored.apiKey;
             }
+            // After loading API key, decide onboarding vs chat
+            this.handleOnboardingDisplay();
         }
     }
 
@@ -227,14 +236,25 @@ class TabTalkAI {
     }
 
     async updatePageInfo() {
-        // In a real extension, this would get actual tab info
-        // For demo, simulate getting page info
         const pageTitle = document.getElementById('pageTitle');
         const pageUrl = document.getElementById('pageUrl');
-        
-        // Simulate page info
-        pageTitle.textContent = 'Demo Page - TabTalk AI Interface';
-        pageUrl.textContent = 'chrome-extension://demo-tabtalk-ai';
+        // Try to get the active tab's info using Chrome API
+        if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.query) {
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                if (tabs && tabs.length > 0) {
+                    const tab = tabs[0];
+                    pageTitle.textContent = tab.title || 'Untitled Page';
+                    pageUrl.textContent = tab.url || '';
+                } else {
+                    pageTitle.textContent = 'Demo Page - TabTalk AI Interface';
+                    pageUrl.textContent = 'chrome-extension://demo-tabtalk-ai';
+                }
+            });
+        } else {
+            // Fallback to demo values
+            pageTitle.textContent = 'Demo Page - TabTalk AI Interface';
+            pageUrl.textContent = 'chrome-extension://demo-tabtalk-ai';
+        }
     }
 
     async extractPageContent() {
@@ -291,30 +311,54 @@ class TabTalkAI {
     async sendMessage() {
         const messageInput = document.getElementById('messageInput');
         const message = messageInput.value.trim();
-        
         if (!message || this.isLoading) return;
-
         // Clear input
         messageInput.value = '';
         messageInput.style.height = 'auto';
         this.updateSendButton();
         document.getElementById('wordCount').textContent = '0/2000';
-
         // Add user message
         this.addMessage('user', message);
-
         // Show loading
         const loadingEl = this.addLoadingMessage();
         this.isLoading = true;
-
         try {
-            // Call Gemini API
-            const response = await this.callGeminiAPI(message);
-            
+            // Get real page content from content script
+            const pageContent = await this.getRealPageContent();
+            if (!pageContent || pageContent.trim().length < 30) {
+                loadingEl.remove();
+                this.addMessage('assistant', 
+                    '⚠️ Unable to extract content from this page.<br>' +
+                    'Possible reasons:<br>' +
+                    '- This is a browser or extension page (e.g., chrome://, PDF, or extension popup)<br>' +
+                    '- The page uses advanced JavaScript or loads content dynamically<br>' +
+                    '- The page has very little visible text<br>' +
+                    'Try on a regular website like a news article or blog post.' +
+                    (pageContent ? '<br><br>Extracted snippet:<br><code>' + pageContent.slice(0, 200) + (pageContent.length > 200 ? '...' : '') + '</code>' : '') +
+                    '<br><button id="retryExtractionBtn" class="btn-primary" style="margin-top:12px;">🔄 Retry Extraction</button>'
+                );
+                this.showToast('Content extraction failed. See chat for details.', 'error');
+                // Add event listener for retry button
+                setTimeout(() => {
+                    const retryBtn = document.getElementById('retryExtractionBtn');
+                    if (retryBtn) {
+                        retryBtn.onclick = () => {
+                            this.sendMessage();
+                        };
+                    }
+                }, 100);
+                // Set a flag to auto-retry if content script notifies of page change
+                this.lastExtractionFailed = true;
+                return;
+            } else {
+                this.lastExtractionFailed = false;
+            }
+            console.log('Extracted page content:', pageContent);
+            // Call Gemini API with real content
+            const response = await this.callGeminiAPI(message, pageContent);
             // Remove loading and add response
             loadingEl.remove();
             this.addMessage('assistant', response);
-            
         } catch (error) {
             console.error('API Error:', error);
             loadingEl.remove();
@@ -326,23 +370,62 @@ class TabTalkAI {
         }
     }
 
-    async callGeminiAPI(userMessage) {
-        // In a real extension, this would make an actual API call
-        // For demo purposes, return a simulated response
-        
-        await this.delay(1500); // Simulate API delay
-        
-        const responses = {
-            'Summarize this page': `📋 **Page Summary:**\n\nThis is a demo of the TabTalk AI browser extension interface. The extension provides:\n\n• **Modern UI Design** - Clean, responsive interface with smooth animations\n• **AI Integration** - Uses Google's Gemini API for intelligent responses  \n• **Quick Actions** - Pre-built prompts for common tasks like summarizing\n• **Interactive Features** - Message controls, settings panel, and more\n\nThe interface is designed to be intuitive and professional, making it easy for users to interact with AI about any webpage content.`,
+    async getRealPageContent() {
+        return new Promise((resolve, reject) => {
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                if (tabs && tabs.length > 0) {
+                    const tabId = tabs[0].id;
+                    chrome.tabs.sendMessage(tabId, { action: 'extractPageContent' }, (response) => {
+                        if (chrome.runtime.lastError) {
+                            console.error('Error sending message to content script:', chrome.runtime.lastError.message);
+                            resolve('');
+                        } else if (response && response.success && response.content && response.content.content) {
+                            resolve(response.content.content);
+                        } else {
+                            if (!response) {
+                                console.error('Received no response from content script.');
+                                resolve('');
+                            } else if (response.error) {
+                                console.error('Content script reported an error:', response.error);
+                                resolve('');
+                            } else {
+                                console.error('Received unexpected response format from content script:', response);
+                                resolve('');
+                            }
+                        }
+                    });
+                } else {
+                    resolve('');
+                }
+            });
+        });
+    }
 
-            'What are the key points?': `🔑 **Key Points:**\n\n1. **Purpose**: Browser extension for AI-powered webpage analysis\n2. **Technology**: Integration with Google Gemini API\n3. **Interface**: Modern, animated UI with 400x600px popup design\n4. **Features**: \n   - Quick action buttons\n   - Settings management\n   - Message history\n   - Copy/save controls\n5. **User Experience**: Focus on smooth interactions and professional appearance`,
-
-            'Explain this in simple terms': `💡 **Simple Explanation:**\n\nThink of TabTalk AI as your smart reading assistant for web pages. \n\nHere's how it works:\n• You visit any website\n• Click the extension icon  \n• Ask questions about what you're reading\n• Get instant, helpful answers\n\nIt's like having a knowledgeable friend who can quickly explain, summarize, or answer questions about any webpage you're looking at. The interface is designed to be clean and easy to use, just like messaging apps you're already familiar with.`,
-
-            'What questions can I ask about this?': `❓ **Great Questions You Can Ask:**\n\n**About Content:**\n• "What is this page about?"\n• "Summarize the main points"\n• "What are the key features mentioned?"\n\n**For Analysis:**\n• "What are the pros and cons discussed?"\n• "How does this compare to alternatives?"\n• "What's the most important information here?"\n\n**For Learning:**\n• "Explain this in simple terms"\n• "What should I remember from this?"\n• "Are there any action items for me?"\n\n**For Research:**\n• "What questions does this raise?"\n• "What topics should I explore further?"\n• "How reliable is this information?"\n\nFeel free to ask anything about the content you're reading!`
-        };
-
-        return responses[userMessage] || `I understand you're asking: "${userMessage}"\n\nBased on the page content, I can help you with:\n\n✨ **General Analysis**: This appears to be a demo interface for a browser extension that uses AI to help users understand webpage content.\n\n🎯 **Key Features**: The interface includes modern design elements, smooth animations, settings management, and interactive chat functionality.\n\n🔧 **Technical Aspects**: Built with HTML, CSS, and JavaScript, designed to integrate with Google's Gemini API for AI responses.\n\nWould you like me to elaborate on any specific aspect or answer a different question about this page?`;
+    async callGeminiAPI(userMessage, pageContent) {
+        // Use background script to call Gemini API
+        return new Promise((resolve, reject) => {
+            if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+                chrome.runtime.sendMessage({
+                    action: 'callGeminiAPI',
+                    payload: {
+                        userMessage,
+                        pageContent
+                    }
+                }, (response) => {
+                    if (chrome.runtime.lastError) {
+                        reject(new Error(chrome.runtime.lastError.message));
+                    } else if (response && response.success && response.data) {
+                        // Parse Gemini response (adjust as needed for actual API)
+                        const geminiText = response.data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from Gemini.';
+                        resolve(geminiText);
+                    } else {
+                        reject(new Error(response && response.error ? response.error : 'Unknown error'));
+                    }
+                });
+            } else {
+                reject(new Error('chrome.runtime.sendMessage not available'));
+            }
+        });
     }
 
     delay(ms) {
@@ -604,9 +687,146 @@ class TabTalkAI {
         this.checkApiKeyAndShowInterface();
         this.showToast('API key removed. Please add a new one.', 'success');
     }
+
+    handleOnboardingDisplay() {
+        const onboarding = this.onboarding;
+        const chatInterface = document.getElementById('chatInterface');
+        const settingsPanel = document.getElementById('settingsPanel');
+        if (!this.apiKey) {
+            // Show onboarding, hide chat/settings
+            onboarding.show();
+            chatInterface.classList.add('hidden');
+            settingsPanel.classList.add('hidden');
+        } else {
+            // Hide onboarding, show chat/settings
+            onboarding.hide();
+            chatInterface.classList.remove('hidden');
+            settingsPanel.classList.remove('hidden');
+            this.checkApiKeyAndShowInterface();
+        }
+    }
+}
+
+// Gamified Onboarding Logic
+class TabTalkOnboarding {
+    constructor(mainApp) {
+        this.mainApp = mainApp;
+        this.overlay = document.getElementById('onboardingOverlay');
+        this.stepWelcome = document.getElementById('onboardingStepWelcome');
+        this.stepApiKey = document.getElementById('onboardingStepApiKey');
+        this.stepSuccess = document.getElementById('onboardingStepSuccess');
+        this.apiKeyInput = document.getElementById('onboardingApiKey');
+        this.toggleKeyBtn = document.getElementById('onboardingToggleKey');
+        this.keyIcon = document.getElementById('onboardingKeyIcon');
+        this.errorDiv = document.getElementById('onboardingApiKeyError');
+        this.confettiDiv = document.getElementById('onboardingConfetti');
+        this.bindEvents();
+    }
+
+    bindEvents() {
+        document.getElementById('onboardingGetStarted').onclick = () => this.showStep('apiKey');
+        this.toggleKeyBtn.onclick = () => {
+            if (this.apiKeyInput.type === 'password') {
+                this.apiKeyInput.type = 'text';
+                this.toggleKeyBtn.textContent = '🙈';
+            } else {
+                this.apiKeyInput.type = 'password';
+                this.toggleKeyBtn.textContent = '👁️';
+            }
+        };
+        document.getElementById('onboardingSaveKey').onclick = () => this.saveApiKey();
+        document.getElementById('onboardingCancel').onclick = () => this.showStep('welcome');
+        document.getElementById('onboardingContinue').onclick = () => this.finishOnboarding();
+        this.apiKeyInput.oninput = () => this.validateInput();
+    }
+
+    showStep(step) {
+        this.stepWelcome.classList.add('hidden');
+        this.stepApiKey.classList.add('hidden');
+        this.stepSuccess.classList.add('hidden');
+        if (step === 'welcome') this.stepWelcome.classList.remove('hidden');
+        if (step === 'apiKey') {
+            this.stepApiKey.classList.remove('hidden');
+            this.apiKeyInput.value = '';
+            this.errorDiv.textContent = '';
+            this.keyIcon.classList.remove('unlocked');
+            this.apiKeyInput.type = 'password';
+            this.toggleKeyBtn.textContent = '👁️';
+        }
+        if (step === 'success') {
+            this.stepSuccess.classList.remove('hidden');
+            this.launchConfetti();
+        }
+    }
+
+    validateInput() {
+        const val = this.apiKeyInput.value.trim();
+        if (!val) {
+            this.errorDiv.textContent = '';
+            return false;
+        }
+        if (val.length < 20) {
+            this.errorDiv.textContent = 'API key seems too short.';
+            return false;
+        }
+        this.errorDiv.textContent = '';
+        return true;
+    }
+
+    saveApiKey() {
+        if (!this.validateInput()) return;
+        // Animate key icon
+        this.keyIcon.classList.add('unlocked');
+        setTimeout(() => {
+            // Save key using main app logic
+            this.mainApp.apiKey = this.apiKeyInput.value.trim();
+            this.mainApp.saveToStorage();
+            document.getElementById('apiKey').value = this.apiKeyInput.value.trim(); // Sync with settings panel
+            this.showStep('success');
+        }, 600);
+    }
+
+    launchConfetti() {
+        this.confettiDiv.innerHTML = '';
+        for (let i = 0; i < 18; i++) {
+            const span = document.createElement('span');
+            span.style.left = Math.random() * 95 + '%';
+            span.style.background = `hsl(${Math.random()*360},80%,70%)`;
+            span.style.animationDelay = (Math.random()*0.7).toFixed(2) + 's';
+            this.confettiDiv.appendChild(span);
+        }
+        setTimeout(() => { this.confettiDiv.innerHTML = ''; }, 1800);
+    }
+
+    finishOnboarding() {
+        this.overlay.classList.add('hidden');
+        // Show chat UI and initialize
+        document.getElementById('chatInterface').classList.remove('hidden');
+        document.getElementById('chatContainer').classList.remove('hidden');
+        this.mainApp.checkApiKeyAndShowInterface();
+    }
+
+    show() {
+        this.overlay.classList.remove('hidden');
+        this.showStep('welcome');
+    }
+
+    hide() {
+        this.overlay.classList.add('hidden');
+    }
 }
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     new TabTalkAI();
+    // Listen for content script notifications about page changes
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+        chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+            if (request && request.action === 'tabtalk_page_changed') {
+                if (this.lastExtractionFailed) {
+                    this.sendMessage();
+                }
+            }
+        });
+    }
 });

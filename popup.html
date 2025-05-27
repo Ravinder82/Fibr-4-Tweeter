@@ -95,6 +95,12 @@
                             </div>
                         </div>
                     </div>
+                    <div class="quick-actions-inline" id="quickActionsInline">
+                        <button class="quick-action-btn" data-prompt="Summarize this page">📋 Summarize</button>
+                        <button class="quick-action-btn" data-prompt="What are the key points?">🔑 Key Points</button>
+                        <button class="quick-action-btn" data-prompt="Explain this in simple terms">💡 Simplify</button>
+                        <button class="quick-action-btn" data-prompt="What questions can I ask about this?">❓ Suggest Q's</button>
+                    </div>
                 </div>
                 <div class="input-container">
                     <div class="input-wrapper">
@@ -119,6 +125,43 @@
             </div>
         </div>
     </div>
+    <!-- Gamified Onboarding Overlay -->
+    <div id="onboardingOverlay" class="onboarding-overlay hidden">
+        <!-- Step 1: Welcome -->
+        <div id="onboardingStepWelcome" class="onboarding-step">
+            <div class="assistant-avatar">🤖</div>
+            <h2 class="onboarding-title">Hi! I'm TabTalk.</h2>
+            <p class="onboarding-desc">Let's get you set up!</p>
+            <div class="onboarding-progress">Step 1 of 2: Add API Key</div>
+            <button id="onboardingGetStarted" class="btn-primary">Get Started</button>
+        </div>
+        <!-- Step 2: API Key Entry -->
+        <div id="onboardingStepApiKey" class="onboarding-step hidden">
+            <div class="assistant-avatar">🔑</div>
+            <h2 class="onboarding-title">Unlock TabTalk</h2>
+            <p class="onboarding-desc">Paste your Gemini API key below to unlock chat!</p>
+            <div class="input-group onboarding-input-group">
+                <input type="password" id="onboardingApiKey" placeholder="Enter your Gemini API key">
+                <button type="button" id="onboardingToggleKey" class="toggle-btn">👁️</button>
+                <span id="onboardingKeyIcon" class="key-icon">🔒</span>
+            </div>
+            <div id="onboardingApiKeyError" class="onboarding-error"></div>
+            <div class="onboarding-actions">
+                <button id="onboardingSaveKey" class="btn-primary">Save</button>
+                <button id="onboardingCancel" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+        <!-- Step 3: Success/Celebration -->
+        <div id="onboardingStepSuccess" class="onboarding-step hidden">
+            <div class="assistant-avatar">🎉</div>
+            <h2 class="onboarding-title">You've unlocked TabTalk!</h2>
+            <p class="onboarding-desc">Ready to chat?</p>
+            <div class="onboarding-progress">Step 2 of 2: Start Chatting!</div>
+            <div class="confetti" id="onboardingConfetti"></div>
+            <button id="onboardingContinue" class="btn-primary">Continue to Chat</button>
+        </div>
+    </div>
+    <!-- End Gamified Onboarding Overlay -->
     <script src="marked.min.js"></script>
     <script src="popup.js"></script>
 </body>
