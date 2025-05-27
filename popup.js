@@ -93,6 +93,11 @@ class TabTalkAI {
         document.getElementById('removeApiKey').addEventListener('click', () => {
             this.removeApiKey();
         });
+
+        // Manual Re-extract Content
+        document.getElementById('reextractQuickAction').addEventListener('click', async () => {
+            this.manualReExtract();
+        });
     }
 
     toggleMenu() {
@@ -375,25 +380,41 @@ class TabTalkAI {
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 if (tabs && tabs.length > 0) {
                     const tabId = tabs[0].id;
-                    chrome.tabs.sendMessage(tabId, { action: 'extractPageContent' }, (response) => {
-                        if (chrome.runtime.lastError) {
-                            console.error('Error sending message to content script:', chrome.runtime.lastError.message);
-                            resolve('');
-                        } else if (response && response.success && response.content && response.content.content) {
-                            resolve(response.content.content);
-                        } else {
-                            if (!response) {
-                                console.error('Received no response from content script.');
-                                resolve('');
-                            } else if (response.error) {
-                                console.error('Content script reported an error:', response.error);
-                                resolve('');
-                            } else {
-                                console.error('Received unexpected response format from content script:', response);
-                                resolve('');
-                            }
-                        }
-                    });
+                    
+                    // Set a timeout for the message
+                    const timeout = setTimeout(() => {
+                        console.error('Timeout waiting for response from content script.');
+                        resolve(''); // Resolve with empty string on timeout
+                    }, 5000); // 5 second timeout
+                    
+                    try {
+                         chrome.tabs.sendMessage(tabId, { action: 'extractPageContent' }, (response) => {
+                             clearTimeout(timeout); // Clear timeout if response is received
+ 
+                             // More granular response validation
+                             if (chrome.runtime.lastError) {
+                                 console.error('Error sending message to content script:', chrome.runtime.lastError.message);
+                                 resolve('');
+                             } else if (!response) {
+                                  console.error('Received no response from content script.');
+                                 resolve('');
+                             } else if (response.success === false && response.error) {
+                                  console.error('Content script reported an error:', response.error);
+                                 resolve('');
+                             } else if (response.success === true && response.content && typeof response.content === 'object' && response.content.content !== undefined) {
+                                 // Success case: response has success: true and content.content string
+                                 resolve(response.content.content);
+                             } else {
+                                 // Unexpected response format
+                                 console.error('Received unexpected response format from content script:', response);
+                                 resolve('');
+                             }
+                         });
+                    } catch (e) {
+                        clearTimeout(timeout);
+                        console.error('Exception when sending message to content script:', e);
+                        resolve(''); // Resolve with empty string on exception
+                    }
                 } else {
                     resolve('');
                 }
@@ -705,6 +726,59 @@ class TabTalkAI {
             this.checkApiKeyAndShowInterface();
         }
     }
+
+    async manualReExtract() {
+        console.log('Popup: Manual re-extraction triggered.');
+        if (this.isLoading) {
+            this.showToast('Already loading content.', 'error');
+            return;
+        }
+        this.isLoading = true;
+        const loadingEl = this.addLoadingMessage(); // Store the loading element reference
+
+        try {
+            console.log('Popup: Requesting page content from content script...');
+            const pageContent = await this.getRealPageContent(); // This calls content.js
+            console.log('Popup: Received response from getRealPageContent.');
+
+            // ** Ensure loading state is cleared immediately after awaiting response **
+            loadingEl?.remove(); // Remove the specific loading message element
+            this.isLoading = false; // Reset loading state
+            this.updateSendButton(); // Update button state
+
+            if (!pageContent || pageContent.trim().length < 30) {
+                // Handle extraction failure scenario (content empty or too short)
+                console.log('Popup: Manual re-extraction failed or returned minimal content.');
+                this.lastExtractionFailed = true;
+                // loadingEl?.remove(); // Removed: Handled above
+                this.addMessage('assistant', 
+                    '⚠️ Unable to extract meaningful content from this page after manual attempt.<br>' +
+                    'Possible reasons:<br>' +
+                    '- The page content has not fully loaded dynamically.<br>' +
+                    '- The content is in an iframe or a format that cannot be extracted.<br>' +
+                    'Try waiting a few more seconds, scrolling the page, or manually refreshing the browser tab.<br>' +
+                    (pageContent ? '<br><br>Extracted snippet:<br><code>' + pageContent.slice(0, 200) + (pageContent.length > 200 ? '...' : '') + '</code>' : '')
+                );
+                this.showToast('Content extraction failed.', 'error');
+            } else {
+                // Content extracted successfully
+                console.log('Popup: Manual re-extraction successful.');
+                this.lastExtractionFailed = false;
+                this.pageContent = pageContent; // Store the extracted content
+                // loadingEl?.remove(); // Removed: Handled above
+                this.addMessage('assistant', '✅ Successfully re-extracted page content. You can now ask questions about it.'); // Success message
+                this.showToast('Content re-extracted successfully!');
+            }
+        } catch (error) {
+            console.error('Popup: Exception during manual re-extraction:', error);
+            loadingEl?.remove(); // Ensure loading message is removed on exception
+            this.isLoading = false; // Ensure loading state is reset on exception
+            this.updateSendButton(); // Ensure button state is updated on exception
+            this.addMessage('assistant', '❌ An error occurred during manual re-extraction. Please try again or refresh the page.');
+            this.showToast('Re-extraction failed.', 'error');
+        }
+        // Removed finally block - state reset and button update are now handled after await
+    }
 }
 
 // Gamified Onboarding Logic
@@ -818,13 +892,30 @@ class TabTalkOnboarding {
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
-    new TabTalkAI();
-    // Listen for content script notifications about page changes
+    const app = new TabTalkAI();
+    // Listen for content script notifications about page changes and re-extraction requests
     if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             if (request && request.action === 'tabtalk_page_changed') {
-                if (this.lastExtractionFailed) {
-                    this.sendMessage();
+                console.log('Popup: Page navigation detected');
+                // Auto-retry extraction if the last one failed (e.g., due to navigation)
+                if (app.lastExtractionFailed) {
+                    console.log('Popup: Last extraction failed, attempting auto-retry...');
+                    // No need to send message if last extraction failed, sendMessage will retry extraction
+                }
+                // Update page info anyway on navigation
+                app.updatePageInfo();
+            }
+            if (request && request.action === 'tabtalk_request_re_extract') {
+                console.log('Popup: Received re-extraction request from content script.');
+                // Trigger re-extraction if not currently loading and page content is empty or short
+                if (!app.isLoading && (!app.pageContent || app.pageContent.length < 100)) { // Basic check for empty/short content
+                    console.log('Popup: Triggering automatic re-extraction.');
+                    app.extractPageContent(); // Call the extraction function that sends message to content script
+                } else if (app.isLoading) {
+                    console.log('Popup: Already loading, skipping automatic re-extraction.');
+                } else {
+                    console.log('Popup: Page content already seems sufficient, skipping automatic re-extraction.');
                 }
             }
         });
