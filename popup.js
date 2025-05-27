@@ -324,12 +324,15 @@ class TabTalkAI {
         document.getElementById('wordCount').textContent = '0/2000';
         // Add user message
         this.addMessage('user', message);
+
         // Show loading
         const loadingEl = this.addLoadingMessage();
         this.isLoading = true;
+
         try {
             // Get real page content from content script
             const pageContent = await this.getRealPageContent();
+
             if (!pageContent || pageContent.trim().length < 30) {
                 loadingEl.remove();
                 this.addMessage('assistant', 
@@ -358,12 +361,27 @@ class TabTalkAI {
             } else {
                 this.lastExtractionFailed = false;
             }
+
             console.log('Extracted page content:', pageContent);
-            // Call Gemini API with real content
-            const response = await this.callGeminiAPI(message, pageContent);
+
+            // ** NEW: Construct the payload in the format expected by the Gemini API **
+            const apiPayload = {
+                contents: [
+                    {
+                        parts: [
+                            { text: `Analyze the following webpage content and answer the user's question.\n\nWebpage Content:\n${pageContent}\n\nUser Question:\n${message}` }
+                        ]
+                    }
+                ]
+            };
+
+            // Call Gemini API with the correctly formatted payload
+            const response = await this.callGeminiAPI(apiPayload); // Pass the entire payload object
+
             // Remove loading and add response
             loadingEl.remove();
             this.addMessage('assistant', response);
+
         } catch (error) {
             console.error('API Error:', error);
             loadingEl.remove();
@@ -380,41 +398,73 @@ class TabTalkAI {
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 if (tabs && tabs.length > 0) {
                     const tabId = tabs[0].id;
-                    
-                    // Set a timeout for the message
-                    const timeout = setTimeout(() => {
-                        console.error('Timeout waiting for response from content script.');
+
+                    // Set a timeout for the entire process (sending message + getting response)
+                    const totalTimeout = setTimeout(() => {
+                        console.error('Total timeout waiting for response from content script.');
                         resolve(''); // Resolve with empty string on timeout
-                    }, 5000); // 5 second timeout
-                    
-                    try {
-                         chrome.tabs.sendMessage(tabId, { action: 'extractPageContent' }, (response) => {
-                             clearTimeout(timeout); // Clear timeout if response is received
- 
-                             // More granular response validation
-                             if (chrome.runtime.lastError) {
-                                 console.error('Error sending message to content script:', chrome.runtime.lastError.message);
-                                 resolve('');
-                             } else if (!response) {
-                                  console.error('Received no response from content script.');
-                                 resolve('');
-                             } else if (response.success === false && response.error) {
-                                  console.error('Content script reported an error:', response.error);
-                                 resolve('');
-                             } else if (response.success === true && response.content && typeof response.content === 'object' && response.content.content !== undefined) {
-                                 // Success case: response has success: true and content.content string
-                                 resolve(response.content.content);
-                             } else {
-                                 // Unexpected response format
-                                 console.error('Received unexpected response format from content script:', response);
-                                 resolve('');
-                             }
-                         });
-                    } catch (e) {
-                        clearTimeout(timeout);
-                        console.error('Exception when sending message to content script:', e);
-                        resolve(''); // Resolve with empty string on exception
-                    }
+                    }, 10000); // Increased total timeout to 10 seconds
+
+                    const attemptSendMessage = (retriesLeft) => {
+                        if (retriesLeft < 0) {
+                            console.error('Failed to send message to content script after multiple retries.');
+                            clearTimeout(totalTimeout);
+                            resolve('');
+                            return;
+                        }
+
+                        // Set a timeout for this specific message attempt
+                        const attemptTimeout = setTimeout(() => {
+                             console.warn(`Message attempt timed out. Retries left: ${retriesLeft}`);
+                             attemptSendMessage(retriesLeft - 1);
+                        }, 3000); // Timeout for each message attempt
+
+                        try {
+                            chrome.tabs.sendMessage(tabId, { action: 'extractPageContent' }, (response) => {
+                                clearTimeout(attemptTimeout); // Clear attempt timeout
+                                clearTimeout(totalTimeout); // Clear total timeout
+
+                                // More granular response validation
+                                if (chrome.runtime.lastError) {
+                                    const errorMsg = chrome.runtime.lastError.message;
+                                    console.warn(`Error sending message attempt: ${errorMsg}. Retries left: ${retriesLeft}`);
+                                    // If the error indicates the tab is not ready/loading, retry
+                                    if (errorMsg.includes('Could not establish connection. Receiving end does not exist.') ||
+                                        errorMsg.includes('The message port closed before a response was received.')) {
+                                         // Add a small delay before retrying
+                                         setTimeout(() => attemptSendMessage(retriesLeft - 1), 500); // Wait 500ms before retry
+                                    } else {
+                                        // Other errors are likely not temporary, resolve with error or empty
+                                        console.error('Content script reported a non-retryable error:', errorMsg);
+                                        resolve('');
+                                    }
+
+                                } else if (!response) {
+                                    console.error('Received no response from content script.');
+                                    resolve('');
+                                } else if (response.success === false && response.error) {
+                                    console.error('Content script reported an error:', response.error);
+                                    resolve('');
+                                } else if (response.success === true && response.content && typeof response.content === 'object' && response.content.content !== undefined) {
+                                    // Success case: response has success: true and content.content string
+                                    resolve(response.content.content);
+                                } else {
+                                    // Unexpected response format
+                                    console.error('Received unexpected response format from content script:', response);
+                                    resolve('');
+                                }
+                            });
+                        } catch (e) {
+                            clearTimeout(attemptTimeout); // Clear attempt timeout
+                            clearTimeout(totalTimeout); // Clear total timeout
+                            console.error('Exception when sending message to content script:', e);
+                            resolve(''); // Resolve with empty string on exception
+                        }
+                    };
+
+                    // Start the first attempt
+                    attemptSendMessage(3); // Start with 3 retries
+
                 } else {
                     resolve('');
                 }
@@ -422,16 +472,13 @@ class TabTalkAI {
         });
     }
 
-    async callGeminiAPI(userMessage, pageContent) {
+    async callGeminiAPI(payload) { // Accept the correctly formatted payload as an argument
         // Use background script to call Gemini API
         return new Promise((resolve, reject) => {
             if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
                 chrome.runtime.sendMessage({
                     action: 'callGeminiAPI',
-                    payload: {
-                        userMessage,
-                        pageContent
-                    }
+                    payload: payload // Pass the payload directly
                 }, (response) => {
                     if (chrome.runtime.lastError) {
                         reject(new Error(chrome.runtime.lastError.message));
