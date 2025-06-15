@@ -2,171 +2,74 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TabTalk AI</title>
     <link rel="stylesheet" href="popup.css">
 </head>
 <body>
     <div class="container">
-        <!-- Enhanced Header -->
+        <!-- HEADER: Always visible -->
         <header class="header">
-            <div class="header-content">
-                <h1 class="logo">TabTalk AI</h1>
-                <div class="header-actions">
-                    <button class="menu-btn" id="menuBtn" title="Menu">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="3" y1="6" x2="21" y2="6"></line>
-                            <line x1="3" y1="12" x2="21" y2="12"></line>
-                            <line x1="3" y1="18" x2="21" y2="18"></line>
-                        </svg>
-                    </button>
-                    <!-- Animated Dropdown Menu -->
-                    <div class="dropdown-menu" id="dropdownMenu">
-                        <div class="menu-section">
-                            <div class="menu-item" id="settingsMenuItem">
-                                <span class="icon">⚙️</span>
-                                <span>Settings</span>
-                            </div>
-                            <div class="menu-item" id="clearChatMenuItem">
-                                <span class="icon">🗑️</span>
-                                <span>Clear Chat</span>
-                            </div>
-                            <div class="menu-item" id="refreshMenuItem">
-                                <span class="icon">🔄</span>
-                                <span>Refresh Page</span>
-                            </div>
-                        </div>
-                        <div class="menu-section">
-                            <div style="padding: 8px 16px; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Quick Actions</div>
-                            <div class="quick-actions-menu">
-                                <button class="quick-action-btn" data-prompt="Summarize this page">📋 Summarize</button>
-                                <button class="quick-action-btn" data-prompt="What are the key points?">🔑 Key Points</button>
-                                <button class="quick-action-btn" data-prompt="Explain this in simple terms">💡 Simplify</button>
-                                <button class="quick-action-btn" data-prompt="What questions can I ask about this?">❓ Suggest Q's</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="logo">
+                <img src="icons/icon48.png" alt="logo" class="logo-icon">
+                <h1>TabTalk AI</h1>
             </div>
+            <button id="menu-button" class="menu-button" title="Menu">☰</button>
         </header>
-        <!-- Settings Panel -->
-        <div class="settings-panel" id="settingsPanel">
-            <div class="settings-content">
-                <h3>⚙️ Settings</h3>
+
+        <!-- DROPDOWN MENU: Hidden by default -->
+        <div id="dropdown-menu" class="dropdown-menu hidden">
+            <a href="#" id="menu-settings-link">⚙️ Settings</a>
+            <a href="#" id="menu-refresh-link">🔄 Re-Analyze Page</a>
+        </div>
+
+        <!-- MAIN CONTENT: This holds all our different views -->
+        <main id="main-content">
+
+            <!-- VIEW 1: ONBOARDING (For new users) -->
+            <div id="onboarding-view" class="view hidden">
+                <h2>Welcome to TabTalk AI!</h2>
+                <p>To get started, you need a free Google Gemini API Key.</p>
+                <button id="onboarding-go-to-settings" class="button-primary">Add API Key</button>
+            </div>
+
+            <!-- VIEW 2: SETTINGS (For entering the API Key) -->
+            <div id="settings-view" class="view hidden">
+                <h2>Settings</h2>
                 <div class="form-group">
-                    <label for="apiKey">Gemini API Key:</label>
-                    <div class="input-group">
-                        <input type="password" id="apiKey" placeholder="Enter your Gemini API key">
-                        <button type="button" id="toggleKey" class="toggle-btn">👁️</button>
-                    </div>
-                    <small class="help-text">
-                        Get your free API key from 
-                        <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a>
-                    </small>
+                    <label for="api-key-input">Gemini API Key</label>
+                    <input type="password" id="api-key-input" placeholder="Paste your key here">
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="help-link">How to get a key?</a>
                 </div>
-                <div class="settings-actions">
-                    <button id="saveSettings" class="btn-primary">Save Settings</button>
-                    <button id="cancelSettings" class="btn-secondary">Cancel</button>
-                    <button id="removeApiKey" class="btn-secondary">Remove API Key</button>
+                <div class="button-group">
+                    <button id="settings-cancel-button" class="button-secondary">Cancel</button>
+                    <button id="settings-save-button" class="button-primary">Save Key</button>
                 </div>
             </div>
-        </div>
-        <!-- Chat Interface -->
-        <div class="chat-interface" id="chatInterface">
-            <!-- Setup Required State -->
-            <div class="setup-required" id="setupRequired">
-                <div class="setup-content">
-                    <h3>🚀 Welcome to TabTalk AI!</h3>
-                    <p>To get started, please add your Gemini API key in settings. It's free and takes just a minute!</p>
-                    <button id="openSettingsBtn" class="btn-primary">Add API Key</button>
+            
+            <!-- VIEW 3: CHAT (The main interface) -->
+            <div id="chat-view" class="view hidden">
+                <div class="page-info">
+                    <p id="page-title">Loading page...</p>
+                    <div id="page-status" class="page-status"></div>
+                </div>
+                <div id="messages-container" class="messages-container">
+                    <!-- Chat messages will be added here by JavaScript -->
+                </div>
+                <div class="input-area">
+                    <textarea id="message-input" placeholder="Ask about this page..." rows="1"></textarea>
+                    <button id="send-button" title="Send" disabled>▶</button>
                 </div>
             </div>
-            <!-- Chat Container -->
-            <div class="chat-container hidden" id="chatContainer">
-                <div class="page-info" id="pageInfo">
-                    <div class="page-title" id="pageTitle">Current Page</div>
-                    <div class="page-url" id="pageUrl">Loading...</div>
-                </div>
-                <div class="messages-container" id="messagesContainer">
-                    <div class="welcome-message">
-                        <div class="assistant-message">
-                            <div class="message-content">
-                                👋 Hi! I'm ready to help you understand this webpage. Ask me anything about its content!
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Moved and Renamed Re-extract/Retry button with info -->
-                    <div id="retryExtractionSection" style="text-align: center; margin-bottom: 16px;">
-                        <button class="btn-secondary" id="reextractQuickAction" style="margin-bottom: 8px;">🔄 Retry Extraction</button>
-                        <p style="font-size: 11px; color: #64748b;">If extraction fails, try refreshing the page manually in your browser tab.</p>
-                    </div>
-                    <div class="quick-actions-inline" id="quickActionsInline">
-                        <button class="quick-action-btn" data-prompt="Summarize this page">📋 Summarize</button>
-                        <button class="quick-action-btn" data-prompt="What are the key points?">🔑 Key Points</button>
-                        <button class="quick-action-btn" data-prompt="Explain this in simple terms">💡 Simplify</button>
-                        <button class="quick-action-btn" data-prompt="What questions can I ask about this?">❓ Suggest Q's</button>
-                    </div>
-                </div>
-                <div class="input-container">
-                    <div class="input-wrapper">
-                        <textarea 
-                            id="messageInput" 
-                            placeholder="Ask me about this page..." 
-                            rows="1"
-                            maxlength="2000"
-                        ></textarea>
-                        <button id="sendBtn" class="send-btn" disabled>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="22" y1="2" x2="11" y2="13"></line>
-                                <polygon points="22,2 15,22 11,13 2,9"></polygon>
-                            </svg>
-                        </button>
-                    </div>
-                    <div class="input-footer">
-                        <button id="clearChat" class="clear-chat-btn">🗑️ Clear Chat</button>
-                        <div class="word-count" id="wordCount">0/2000</div>
-                    </div>
-                </div>
+
+            <!-- VIEW 4: STATUS (For loading or critical errors) -->
+            <div id="status-view" class="view">
+                <div class="spinner"></div>
+                <p id="status-text">Initializing...</p>
             </div>
-        </div>
+            
+        </main>
     </div>
-    <!-- Gamified Onboarding Overlay -->
-    <div id="onboardingOverlay" class="onboarding-overlay hidden">
-        <!-- Step 1: Welcome -->
-        <div id="onboardingStepWelcome" class="onboarding-step">
-            <div class="assistant-avatar">🤖</div>
-            <h2 class="onboarding-title">Hi! I'm TabTalk.</h2>
-            <p class="onboarding-desc">Let's get you set up!</p>
-            <div class="onboarding-progress">Step 1 of 2: Add API Key</div>
-            <button id="onboardingGetStarted" class="btn-primary">Get Started</button>
-        </div>
-        <!-- Step 2: API Key Entry -->
-        <div id="onboardingStepApiKey" class="onboarding-step hidden">
-            <div class="assistant-avatar">🔑</div>
-            <h2 class="onboarding-title">Unlock TabTalk</h2>
-            <p class="onboarding-desc">Paste your Gemini API key below to unlock chat!</p>
-            <div class="input-group onboarding-input-group">
-                <input type="password" id="onboardingApiKey" placeholder="Enter your Gemini API key">
-                <button type="button" id="onboardingToggleKey" class="toggle-btn">👁️</button>
-                <span id="onboardingKeyIcon" class="key-icon">🔒</span>
-            </div>
-            <div id="onboardingApiKeyError" class="onboarding-error"></div>
-            <div class="onboarding-actions">
-                <button id="onboardingSaveKey" class="btn-primary">Save</button>
-                <button id="onboardingCancel" class="btn-secondary">Cancel</button>
-            </div>
-        </div>
-        <!-- Step 3: Success/Celebration -->
-        <div id="onboardingStepSuccess" class="onboarding-step hidden">
-            <div class="assistant-avatar">🎉</div>
-            <h2 class="onboarding-title">You've unlocked TabTalk!</h2>
-            <p class="onboarding-desc">Ready to chat?</p>
-            <div class="onboarding-progress">Step 2 of 2: Start Chatting!</div>
-            <div class="confetti" id="onboardingConfetti"></div>
-            <button id="onboardingContinue" class="btn-primary">Continue to Chat</button>
-        </div>
-    </div>
-    <!-- End Gamified Onboarding Overlay -->
+    <!-- Scripts -->
     <script src="marked.min.js"></script>
     <script src="popup.js"></script>
 </body>

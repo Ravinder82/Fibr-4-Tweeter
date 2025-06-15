@@ -1,104 +1,51 @@
-// Background script for TabTalk AI Chrome Extension
+// background.js - FINAL VERSION with KEY TRACING
 
-chrome.runtime.onInstalled.addListener((details) => {
-    if (details.reason === 'install') {
-        console.log('TabTalk AI installed successfully');
-        
-        // Set default settings
-        chrome.storage.local.set({
-            geminiApiKey: '',
-            settings: {
-                autoAnalyze: true,
-                responseLength: 'medium'
-            }
-        });
-    }
-});
+const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_API_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/';
 
-// Handle extension icon click
-chrome.action.onClicked.addListener((tab) => {
-    // The popup will handle the interaction
-    console.log('Extension icon clicked for tab:', tab.id);
-});
-
-// Handle messages from content script or popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === 'extractContent') {
-        handleContentExtraction(request, sender, sendResponse);
-        return true; // Will respond asynchronously
-    }
-    
     if (request.action === 'callGeminiAPI') {
-        handleGeminiAPI(request, sender, sendResponse);
-        return true; // Will respond asynchronously
-    }
-});
+        const { apiKey, payload } = request;
 
-async function handleContentExtraction(request, sender, sendResponse) {
-    try {
-        // This function could be used for more complex content extraction
-        // For now, content extraction is handled directly in the popup
-        sendResponse({ success: true });
-    } catch (error) {
-        console.error('Content extraction error:', error);
-        sendResponse({ success: false, error: error.message });
-    }
-}
+        // --- KEY TRACING LOG 4 ---
+        console.log("Background: Received this key from popup:", apiKey);
 
-async function handleGeminiAPI(request, sender, sendResponse) {
-    try {
-        // Get API key from storage
-        const result = await chrome.storage.local.get(['geminiApiKey']);
-        const apiKey = result.geminiApiKey;
-        
         if (!apiKey) {
-            sendResponse({ success: false, error: 'Gemini API key not configured. Please add your key in the extension settings.' });
-            return; // Stop execution if API key is missing
+            sendResponse({ success: false, error: 'API Key was missing in the message to the background script.' });
+            return true;
         }
-        
-        // Make API call
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+
+        (async () => {
+            const response = await callGeminiApi(apiKey, payload);
+            sendResponse(response);
+        })();
+            
+        return true;
+    }
+});
+
+async function callGeminiApi(apiKey, payload) {
+    const fullUrl = `${GEMINI_API_BASE_URL}${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+    try {
+        const response = await fetch(fullUrl, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(request.payload)
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
-        
+        const responseText = await response.text();
         if (!response.ok) {
-            const errorDetail = await response.text(); // Attempt to read response body for more details
-            console.error(`API request failed with status ${response.status}: ${errorDetail}`);
-            sendResponse({ success: false, error: `API request failed with status ${response.status}. Details: ${errorDetail.substring(0, 200)}...` }); // Send status and limited detail
-            return; // Stop execution if response is not ok
+            let errorMessage = `API request failed (Status: ${response.status}).`;
+            try {
+                const errorJson = JSON.parse(responseText);
+                if (errorJson?.error?.message) errorMessage = `API Error: ${errorJson.error.message}`;
+            } catch (e) {
+                errorMessage += ` Details: ${responseText.substring(0, 150)}...`;
+            }
+            console.error(`TabTalk AI (background): API Error Details: ${responseText}`);
+            return { success: false, error: errorMessage };
         }
-        
-        const data = await response.json();
-        sendResponse({ success: true, data: data });
-        
+        return { success: true, data: JSON.parse(responseText) };
     } catch (error) {
-        console.error('Gemini API error:', error);
-        sendResponse({ success: false, error: `An unexpected error occurred: ${error.message}` });
+        return { success: false, error: `A network error occurred: ${error.message}` };
     }
 }
-
-// Handle extension uninstall (cleanup)
-chrome.runtime.onSuspend.addListener(() => {
-    console.log('TabTalk AI background script suspended');
-});
-
-// Monitor tab updates for potential auto-analysis feature
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (changeInfo.status === 'complete' && tab.url) {
-        // Could trigger auto-analysis here if enabled in settings
-        console.log('Page loaded:', tab.url);
-    }
-});
-
-// Error handling for uncaught errors
-self.addEventListener('unhandledrejection', (event) => {
-    console.error('Unhandled promise rejection in background script:', event.reason);
-});
-
-self.addEventListener('error', (event) => {
-    console.error('Error in background script:', event.error);
-});

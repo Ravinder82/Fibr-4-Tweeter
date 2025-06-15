@@ -1,5 +1,0 @@
-{
-  "dependencies": {
-    "@clerk/chrome-extension": "^2.4.8"
-  }
-}

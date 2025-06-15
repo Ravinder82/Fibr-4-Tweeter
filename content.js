@@ -1,270 +1,57 @@
-// Content script for TabTalk AI Chrome Extension
-// This script runs in the context of web pages
+// content.js - FINAL VERSION
+// This script is injected programmatically. It runs, extracts text, and returns a result.
 
-(function() {
-    'use strict';
-    
-    // Prevent multiple injections
-    if (window.tabTalkAIContentScriptLoaded) {
-        return;
-    }
-    window.tabTalkAIContentScriptLoaded = true;
-    
-    // Listen for messages from popup or background script
-    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-        if (request.action === 'extractPageContent') {
-            // Use robust extraction function
-            try {
-                const extracted = extractPageContent();
-                console.log('Extracted content:', extracted);
-                sendResponse({ success: true, content: extracted });
-            } catch (e) {
-                sendResponse({ success: false, error: e.message });
-            }
-            return true;
-        }
-        
-        if (request.action === 'getPageInfo') {
-            try {
-                const info = getPageInfo();
-                sendResponse({ success: true, info: info });
-            } catch (error) {
-                console.error('Failed to get page info:', error);
-                sendResponse({ success: false, error: error.message });
-            }
-            return true;
-        }
-        
-        if (request.action === 'highlightText') {
-            try {
-                highlightTextInPage(request.text);
-                sendResponse({ success: true });
-            } catch (error) {
-                console.error('Failed to highlight text:', error);
-                sendResponse({ success: false, error: error.message });
-            }
-            return true;
-        }
-    });
-    
-    function extractPageContent() {
-        // Remove or hide elements that shouldn't be included
-        const elementsToHide = [
-            'script', 'style', 'noscript', 'iframe', 'embed', 'object',
-            'nav', 'header', 'footer', '.nav', '.navbar', '.menu',
-            '.sidebar', '.advertisement', '.ads', '.popup', '.modal'
+function extractAndReturnContent() {
+    try {
+        // Create a clone of the body to avoid modifying the live page and to
+        // get a snapshot of the DOM at this moment.
+        const bodyClone = document.body.cloneNode(true);
+
+        // Selectors for elements to remove from the clone. These are typically non-content elements.
+        const selectorsToRemove = [
+            'script', 'style', 'noscript', 'iframe', 'embed', 'object', 'svg', 'canvas', 'img', 'video', 'audio',
+            'nav', 'header', 'footer', 'aside',
+            '.nav', '.navbar', '.menu', '.sidebar',
+            '.advertisement', '.ads', '.popup', '.modal', '[role="dialog"]',
+            '.cookie-notice', '.cookie-banner', '.gdpr',
+            '[aria-hidden="true"]', '[data-nosnippet]'
         ];
-        
-        const hiddenElements = [];
-        elementsToHide.forEach(selector => {
-            document.querySelectorAll(selector).forEach(el => {
-                el.style.display = 'none';
-                hiddenElements.push({ element: el, originalDisplay: el.style.display });
-            });
-        });
-        
-        try {
-            let content = '';
-            const title = document.title || '';
-            const url = window.location.href;
-            
-            // Add: Check for unsupported URLs
-            if (window.location.protocol === 'chrome:' || window.location.protocol === 'chrome-extension:' || window.location.protocol === 'file:') {
-                throw new Error('This page type is not supported for extraction. Try on a regular website.');
-            }
-            
-            // Try to find the main content area
-            const mainContentSelectors = [
-                'main',
-                '[role="main"]',
-                '.main-content',
-                '#main-content',
-                '.content',
-                '#content',
-                'article',
-                '.article',
-                '.post-content',
-                '.entry-content',
-                '.page-content',
-                '.article-body'
-            ];
-            
-            let mainElement = null;
-            for (const selector of mainContentSelectors) {
-                mainElement = document.querySelector(selector);
-                if (mainElement && mainElement.textContent.trim().length > 100) {
-                    break;
-                }
-            }
-            
-            // If no main content found, use body
-            const targetElement = mainElement || document.body;
-            
-            if (targetElement) {
-                // Extract meaningful text content
-                const contentElements = targetElement.querySelectorAll(
-                    'p, h1, h2, h3, h4, h5, h6, li, td, th, blockquote, pre, div[class*="text"], div[class*="content"], span[class*="text"]'
-                );
-                
-                const textBlocks = [];
-                const seenTexts = new Set();
-                
-                contentElements.forEach(el => {
-                    // Skip if element is hidden or has no visible text
-                    if (el.offsetParent === null && el.style.display !== 'none') return;
-                    
-                    const text = el.textContent?.trim();
-                    if (text && text.length > 20 && !seenTexts.has(text)) {
-                        // Filter out navigation, ads, etc.
-                        const classList = el.className.toLowerCase();
-                        const skipPatterns = [
-                            'nav', 'menu', 'footer', 'header', 'sidebar', 'ad',
-                            'advertisement', 'popup', 'modal', 'cookie', 'banner'
-                        ];
-                        
-                        const shouldSkip = skipPatterns.some(pattern => 
-                            classList.includes(pattern) || el.closest(`[class*="${pattern}"]`)
-                        );
-                        
-                        if (!shouldSkip) {
-                            textBlocks.push(text);
-                            seenTexts.add(text);
-                        }
-                    }
-                });
-                
-                content = textBlocks.join('\n\n');
-            }
-            
-            // Fallback to document.body.innerText if no content found
-            if (!content || content.length < 100) {
-                content = document.body.innerText || document.body.textContent || '';
-            }
-            
-            // Clean up the content
-            content = content
-                .replace(/\s+/g, ' ')
-                .replace(/\n\s*\n/g, '\n\n')
-                .replace(/^\s+|\s+$/g, '')
-                .trim();
-            
-            // Limit content size for API efficiency
-            const maxLength = 25000;
-            if (content.length > maxLength) {
-                content = content.substring(0, maxLength) + '\n\n[Content truncated due to length...]';
-            }
-            
-            console.log('Extracted content:', content); // Log for debugging
-            
-            if (!content || content.length < 50) {
-                throw new Error('Unable to extract meaningful content from this page. It may be a browser/extension page, a PDF, or have very little visible text.');
-            }
-            
-            return {
-                title: title,
-                content: content,
-                url: url,
-                wordCount: content.split(/\s+/).length,
-                characterCount: content.length
-            };
-            
-        } finally {
-            // Restore hidden elements
-            hiddenElements.forEach(({ element, originalDisplay }) => {
-                element.style.display = originalDisplay;
-            });
-        }
-    }
-    
-    function getPageInfo() {
-        return {
-            title: document.title || 'Untitled',
-            url: window.location.href,
-            domain: window.location.hostname,
-            pathname: window.location.pathname,
-            wordCount: (document.body.textContent || '').split(/\s+/).filter(word => word.length > 0).length,
-            lastModified: document.lastModified || null,
-            lang: document.documentElement.lang || 'unknown'
-        };
-    }
-    
-    function highlightTextInPage(searchText) {
-        // Remove existing highlights
-        removeExistingHighlights();
-        
-        if (!searchText || searchText.length < 3) return;
-        
-        const walker = document.createTreeWalker(
-            document.body,
-            NodeFilter.SHOW_TEXT,
-            {
-                acceptNode: function(node) {
-                    // Skip script and style elements
-                    const parent = node.parentElement;
-                    if (parent && (parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE')) {
-                        return NodeFilter.FILTER_REJECT;
-                    }
-                    return NodeFilter.FILTER_ACCEPT;
-                }
-            }
-        );
-        
-        const textNodes = [];
-        let node;
-        while (node = walker.nextNode()) {
-            if (node.textContent.toLowerCase().includes(searchText.toLowerCase())) {
-                textNodes.push(node);
-            }
-        }
-        
-        textNodes.forEach(textNode => {
-            const parent = textNode.parentNode;
-            const text = textNode.textContent;
-            const regex = new RegExp(`(${escapeRegExp(searchText)})`, 'gi');
-            
-            if (regex.test(text)) {
-                const highlightedHTML = text.replace(regex, '<mark style="background-color: #ffeb3b; padding: 2px 4px; border-radius: 2px;" class="tabtalk-highlight">$1</mark>');
-                const wrapper = document.createElement('span');
-                wrapper.innerHTML = highlightedHTML;
-                parent.replaceChild(wrapper, textNode);
+
+        selectorsToRemove.forEach(selector => {
+            try {
+                // Query the cloned body, not the live document
+                bodyClone.querySelectorAll(selector).forEach(el => el.remove());
+            } catch (e) {
+                // Ignore if a selector is invalid, allows for robustness
             }
         });
-    }
-    
-    function removeExistingHighlights() {
-        const highlights = document.querySelectorAll('.tabtalk-highlight');
-        highlights.forEach(highlight => {
-            const parent = highlight.parentNode;
-            parent.replaceChild(document.createTextNode(highlight.textContent), highlight);
-            parent.normalize();
-        });
-    }
-    
-    function escapeRegExp(string) {
-        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-    
-    // Auto-detect page changes for SPAs
-    let lastUrl = window.location.href;
-    const observer = new MutationObserver(() => {
-        if (window.location.href !== lastUrl) {
-            lastUrl = window.location.href;
-            // Page changed, notify extension
-            console.log('TabTalk AI: Page navigation detected');
-            if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
-                chrome.runtime.sendMessage({ action: 'tabtalk_page_changed' });
-            }
+
+        // Get the text content from the modified clone
+        let content = bodyClone.innerText;
+        
+        // Clean up the extracted text:
+        // 1. Replace multiple newlines/spaces with a single newline for readability.
+        // 2. Trim whitespace from the start and end.
+        content = content.replace(/\s\s+/g, '\n').trim();
+
+        if (!content || content.length < 150) {
+            // If not enough content is found, throw a specific error.
+            // This error message will be sent back to the popup for the user to see.
+            throw new Error('Insufficient text found on the page to provide a meaningful analysis.');
         }
-    });
-    
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
-    
-    // Cleanup on page unload
-    window.addEventListener('beforeunload', () => {
-        observer.disconnect();
-        removeExistingHighlights();
-    });
-})();
+        
+        console.log(`TabTalk AI (content.js): Successfully extracted ${content.length} characters.`);
+        
+        // This is the success value that gets returned to popup.js's executeScript call
+        return { success: true, content: content };
+
+    } catch (e) {
+        console.error("TabTalk AI (content.js): Error during text extraction.", e);
+        // If any error occurs, return a structured error object.
+        return { success: false, error: e.message };
+    }
+}
+
+// The script's final expression is its return value.
+// We call our main function here.
+extractAndReturnContent();
