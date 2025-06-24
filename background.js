@@ -27,6 +27,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 async function callGeminiApi(apiKey, payload) {
     const fullUrl = `${GEMINI_API_BASE_URL}${GEMINI_MODEL}:generateContent?key=${apiKey}`;
     try {
+        console.log(`TabTalk AI (background): Using model: ${GEMINI_MODEL}`);
+        
         const response = await fetch(fullUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

@@ -13,13 +13,25 @@
                 <img src="icons/icon48.png" alt="logo" class="logo-icon">
                 <h1>TabTalk AI</h1>
             </div>
-            <button id="menu-button" class="menu-button" title="Menu">☰</button>
+            <div class="header-controls">
+                <label class="dark-mode-label" title="Toggle Dark Mode">
+                    <input type="checkbox" id="dark-mode-toggle">
+                    <span class="dark-mode-icon">🌓</span>
+                </label>
+                <button id="menu-button" class="menu-button" title="Menu">☰</button>
+            </div>
         </header>
 
-        <!-- DROPDOWN MENU: Hidden by default -->
-        <div id="dropdown-menu" class="dropdown-menu hidden">
-            <a href="#" id="menu-settings-link">⚙️ Settings</a>
-            <a href="#" id="menu-refresh-link">🔄 Re-Analyze Page</a>
+        <!-- SIDEBAR: Hidden by default -->
+        <div id="sidebar" class="sidebar hidden">
+            <a href="#" id="menu-summary-link">📝 Summary</a>
+            <a href="#" id="menu-keypoints-link">🔑 Key Points</a>
+            <a href="#" id="menu-analysis-link">📊 Analysis Report</a>
+            <a href="#" id="menu-faq-link">❓ FAQ Generator</a>
+            <a href="#" id="menu-factcheck-link">✅ Fact Checker</a>
+            <div class="sidebar-divider"></div>
+            <a href="#" id="menu-settings-link">⚙️ Gemini API Setup</a>
+            <a href="#" id="menu-refresh-link">🗑️ Clear Chat</a>
         </div>
 
         <!-- MAIN CONTENT: This holds all our different views -->
@@ -27,35 +39,12 @@
 
             <!-- VIEW 1: SETTINGS (For entering the API Key) -->
             <div id="settings-view" class="view hidden">
-                <h2>Settings</h2>
-                <div class="settings-grid">
+                <h2>Gemini API Setup</h2>
+                <div class="settings-container">
                     <div class="form-group api-key">
                         <label for="api-key-input">Gemini API Key</label>
                         <input type="password" id="api-key-input" placeholder="Paste your key here">
                         <a href="https://aistudio.google.com/app/apikey" target="_blank" class="help-link">Get key</a>
-                    </div>
-                    <div class="form-group display-name">
-                        <label for="display-name-input">Name</label>
-                        <input type="text" id="display-name-input" placeholder="Your name (optional)">
-                    </div>
-                    <div class="form-group avatar">
-                        <label for="avatar-input">Avatar</label>
-                        <input type="file" id="avatar-input" accept="image/*">
-                        <div id="avatar-preview"></div>
-                    </div>
-                    <div class="toggle-group">
-                        <div class="toggle-item">
-                            <label for="dark-mode-toggle">Dark Mode</label>
-                            <input type="checkbox" id="dark-mode-toggle">
-                        </div>
-                        <div class="toggle-item">
-                            <label for="notifications-toggle">Notifications</label>
-                            <input type="checkbox" id="notifications-toggle">
-                        </div>
-                        <div class="toggle-item">
-                            <label for="high-contrast-toggle">High Contrast</label>
-                            <input type="checkbox" id="high-contrast-toggle">
-                        </div>
                     </div>
                 </div>
                 <div class="button-group">
@@ -109,6 +98,7 @@
     </div>
     <!-- Scripts -->
     <script src="marked.min.js"></script>
+    <script src="html2pdf.bundle.min.js"></script>
     <script src="popup.js"></script>
     <div id="aria-status" class="visually-hidden" aria-live="polite"></div>
 </body>
