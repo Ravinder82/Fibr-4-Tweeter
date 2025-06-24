@@ -25,24 +25,42 @@
         <!-- MAIN CONTENT: This holds all our different views -->
         <main id="main-content">
 
-            <!-- VIEW 1: ONBOARDING (For new users) -->
-            <div id="onboarding-view" class="view hidden">
-                <h2>Welcome to TabTalk AI!</h2>
-                <p>To get started, you need a free Google Gemini API Key.</p>
-                <button id="onboarding-go-to-settings" class="button-primary">Add API Key</button>
-            </div>
-
-            <!-- VIEW 2: SETTINGS (For entering the API Key) -->
+            <!-- VIEW 1: SETTINGS (For entering the API Key) -->
             <div id="settings-view" class="view hidden">
                 <h2>Settings</h2>
-                <div class="form-group">
-                    <label for="api-key-input">Gemini API Key</label>
-                    <input type="password" id="api-key-input" placeholder="Paste your key here">
-                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="help-link">How to get a key?</a>
+                <div class="settings-grid">
+                    <div class="form-group api-key">
+                        <label for="api-key-input">Gemini API Key</label>
+                        <input type="password" id="api-key-input" placeholder="Paste your key here">
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="help-link">Get key</a>
+                    </div>
+                    <div class="form-group display-name">
+                        <label for="display-name-input">Name</label>
+                        <input type="text" id="display-name-input" placeholder="Your name (optional)">
+                    </div>
+                    <div class="form-group avatar">
+                        <label for="avatar-input">Avatar</label>
+                        <input type="file" id="avatar-input" accept="image/*">
+                        <div id="avatar-preview"></div>
+                    </div>
+                    <div class="toggle-group">
+                        <div class="toggle-item">
+                            <label for="dark-mode-toggle">Dark Mode</label>
+                            <input type="checkbox" id="dark-mode-toggle">
+                        </div>
+                        <div class="toggle-item">
+                            <label for="notifications-toggle">Notifications</label>
+                            <input type="checkbox" id="notifications-toggle">
+                        </div>
+                        <div class="toggle-item">
+                            <label for="high-contrast-toggle">High Contrast</label>
+                            <input type="checkbox" id="high-contrast-toggle">
+                        </div>
+                    </div>
                 </div>
                 <div class="button-group">
                     <button id="settings-cancel-button" class="button-secondary">Cancel</button>
-                    <button id="settings-save-button" class="button-primary">Save Key</button>
+                    <button id="settings-save-button" class="button-primary">Save</button>
                 </div>
             </div>
             
@@ -56,8 +74,28 @@
                     <!-- Chat messages will be added here by JavaScript -->
                 </div>
                 <div class="input-area">
-                    <textarea id="message-input" placeholder="Ask about this page..." rows="1"></textarea>
-                    <button id="send-button" title="Send" disabled>▶</button>
+                    <div class="input-bar">
+                        <textarea id="message-input" placeholder="Ask about this page..." rows="1" aria-label="Message input"></textarea>
+                        <div class="formatting-toolbar">
+                            <button class="format-button" title="Code" aria-label="Code block">{}</button>
+                            <button class="format-button" title="Link" aria-label="Insert link">🔗</button>
+                            <button class="tool-button" id="clear-chat-button" title="Clear chat" aria-label="Clear chat">🗑️</button>
+                            <button class="tool-button" id="export-chat-button" title="Export chat" aria-label="Export chat">⬇️</button>
+                        </div>
+                        <button id="send-button" title="Send message" aria-label="Send message" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855a.5.5 0 0 0-.09.89l4.736 3.14L13 5.5V9l2.25-3.25L13 2.5v3.75L4.159 9.25l4.776 3.175a.5.5 0 0 0 .75-.225l6.229-10.889a.5.5 0 0 0 .25-.625Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="input-footer">
+                        <div class="input-hints">
+                            <span class="input-hint">↵ Send</span>
+                            <span class="input-hint">⇧+↵ Line</span>
+                            <span class="input-hint">Esc Clear</span>
+                        </div>
+                        <span class="char-count" aria-live="polite">0/2000</span>
+                    </div>
                 </div>
             </div>
 
@@ -72,5 +110,6 @@
     <!-- Scripts -->
     <script src="marked.min.js"></script>
     <script src="popup.js"></script>
+    <div id="aria-status" class="visually-hidden" aria-live="polite"></div>
 </body>
 </html>
