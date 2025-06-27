@@ -30,6 +30,9 @@ class TabTalkAI {
         this.sidebar = document.getElementById('sidebar');
         this.exportChatButton = document.getElementById('export-chat-button');
         this.inputActions = document.querySelector('.input-actions');
+        this.quickActions = document.getElementById('quick-actions');
+        this.quickSummaryBtn = document.getElementById('quick-summary');
+        this.quickKeypointsBtn = document.getElementById('quick-keypoints');
 
         if (typeof marked !== 'undefined') {
             this.marked = marked;
@@ -291,6 +294,20 @@ class TabTalkAI {
                 }
             });
         });
+
+        // Quick actions buttons
+        if (this.quickSummaryBtn) {
+            this.quickSummaryBtn.addEventListener('click', async () => {
+                await this.generateSpecialContent('summary');
+                this.quickActions.classList.add('hidden');
+            });
+        }
+        if (this.quickKeypointsBtn) {
+            this.quickKeypointsBtn.addEventListener('click', async () => {
+                await this.generateSpecialContent('keypoints');
+                this.quickActions.classList.add('hidden');
+            });
+        }
     }
 
     setAriaStatus(msg) {
@@ -319,6 +336,14 @@ class TabTalkAI {
         
         if (state === 'status') {
             this.statusText.textContent = statusMessage;
+        }
+
+        // Show or hide the onboarding infographic when in settings view
+        if (state === 'settings') {
+            const onboardingInfo = document.querySelector('.onboarding-info');
+            if (onboardingInfo) {
+                onboardingInfo.style.display = this.apiKey ? 'none' : 'block';
+            }
         }
         this.setAriaStatus(`Switched to ${state} view. ${statusMessage}`);
     }
@@ -409,6 +434,10 @@ class TabTalkAI {
         // Update the view after saving
         this.updateViewState('chat');
         
+        // Hide onboarding infographic now that key is saved
+        const onboardingInfo = document.querySelector('.onboarding-info');
+        if (onboardingInfo) onboardingInfo.style.display = 'none';
+        
         // If we don't have page content yet, fetch it
         if (!this.pageContent) {
             await this.getAndCachePageContent();
@@ -436,6 +465,7 @@ class TabTalkAI {
             if (result.success) {
                 this.pageContent = result.content;
                 this.pageStatus.textContent = `✅ Content loaded (${(result.content.length / 1024).toFixed(1)} KB)`;
+                this.updateQuickActionsVisibility();
             } else {
                 throw new Error(result.error);
             }
@@ -602,20 +632,39 @@ class TabTalkAI {
             }, index * 100);
         });
         
+        // Toggle first-time infographic visibility
+        const emptyState = document.getElementById('empty-state');
+        if (emptyState) {
+            if (this.chatHistory.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+            }
+        }
+
         // Scroll to bottom
         this.messagesContainer.scrollTo({
             top: this.messagesContainer.scrollHeight,
             behavior: 'smooth'
         });
+
+        // Update quick actions depending on chat state
+        this.updateQuickActionsVisibility();
     }
     
     setLoading(isLoading, statusMessage = '...') {
         this.isLoading = isLoading;
         this.sendButton.disabled = isLoading || this.messageInput.value.trim().length === 0;
         this.messageInput.disabled = isLoading;
-        if(isLoading) {
+        if (isLoading) {
             this.pageStatus.textContent = statusMessage;
             this.setAriaStatus(statusMessage);
+        } else {
+            // Loading finished – if no explicit success message already, show a generic done.
+            if (!this.pageStatus.textContent.startsWith('✅')) {
+                this.pageStatus.textContent = '✅ Done';
+            }
+            this.setAriaStatus('Ready');
         }
     }
 
@@ -1159,6 +1208,15 @@ class TabTalkAI {
             console.error('Error setting up PDF generation:', error);
             alert('Error generating PDF: ' + error.message);
             this.setLoading(false);
+        }
+    }
+
+    updateQuickActionsVisibility() {
+        if (!this.quickActions) return;
+        if (this.pageContent && this.chatHistory.length === 0) {
+            this.quickActions.classList.remove('hidden');
+        } else {
+            this.quickActions.classList.add('hidden');
         }
     }
 }

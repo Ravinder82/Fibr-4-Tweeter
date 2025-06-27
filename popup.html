@@ -22,13 +22,18 @@
             </div>
         </header>
 
+        <!-- QUICK ACTIONS: Summary & Key Points -->
+        <div id="quick-actions" class="quick-actions hidden" aria-label="Quick actions">
+            <button id="quick-summary" class="quick-btn" title="Generate summary">📝 Summary</button>
+            <button id="quick-keypoints" class="quick-btn" title="Generate key points">🔑 Key Points</button>
+        </div>
+
         <!-- SIDEBAR: Hidden by default -->
         <div id="sidebar" class="sidebar hidden">
             <a href="#" id="menu-summary-link">📝 Summary</a>
             <a href="#" id="menu-keypoints-link">🔑 Key Points</a>
             <a href="#" id="menu-analysis-link">📊 Analysis Report</a>
             <a href="#" id="menu-faq-link">❓ FAQ Generator</a>
-            <a href="#" id="menu-factcheck-link">✅ Fact Checker</a>
             <div class="sidebar-divider"></div>
             <a href="#" id="menu-settings-link">⚙️ Gemini API Setup</a>
             <a href="#" id="menu-refresh-link">🗑️ Clear Chat</a>
@@ -51,6 +56,14 @@
                     <button id="settings-cancel-button" class="button-secondary">Cancel</button>
                     <button id="settings-save-button" class="button-primary">Save</button>
                 </div>
+                <div class="onboarding-info">
+                    <h3>Get started in 3 quick steps</h3>
+                    <ol>
+                        <li>Visit <strong>ai.google.com/studio</strong></li>
+                        <li>Create an API key &amp; enable <strong>Gemini API</strong></li>
+                        <li>Paste the key into TabTalk AI</li>
+                    </ol>
+                </div>
             </div>
             
             <!-- VIEW 3: CHAT (The main interface) -->
@@ -61,6 +74,15 @@
                 </div>
                 <div id="messages-container" class="messages-container">
                     <!-- Chat messages will be added here by JavaScript -->
+                </div>
+                <div id="empty-state" class="empty-state hidden" aria-hidden="true">
+                    <img src="icons/icon128.png" alt="TabTalk AI logo" class="hero">
+                    <h2>Get started in 3 quick steps</h2>
+                    <ol>
+                        <li>Visit <strong>ai.google.com/studio</strong></li>
+                        <li>Create an API key &amp; enable <strong>Gemini API</strong></li>
+                        <li>Paste the key into TabTalk AI</li>
+                    </ol>
                 </div>
                 <div class="input-area">
                     <div class="input-bar">
@@ -78,11 +100,6 @@
                         </button>
                     </div>
                     <div class="input-footer">
-                        <div class="input-hints">
-                            <span class="input-hint">↵ Send</span>
-                            <span class="input-hint">⇧+↵ Line</span>
-                            <span class="input-hint">Esc Clear</span>
-                        </div>
                         <span class="char-count" aria-live="polite">0/2000</span>
                     </div>
                 </div>

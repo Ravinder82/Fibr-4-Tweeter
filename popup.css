@@ -494,7 +494,7 @@ main {
 /* Footer */
 .input-footer {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     padding: 4px 8px 0;
     font-size: 11px;
@@ -870,6 +870,8 @@ body.high-contrast #send-button {
     z-index: 1000;
     border-left: 1px solid var(--border-color);
     box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
 }
 
 .sidebar a {
@@ -1066,4 +1068,76 @@ body.high-contrast #send-button {
 
 .factcheck-message .content li {
     margin-bottom: 8px;
+}
+
+/* Empty state (infographic) */
+.empty-state {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-top: 40px;
+}
+.empty-state .hero {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    opacity: 0.85;
+}
+.empty-state h2 {
+    font-size: 18px;
+    margin-bottom: 12px;
+}
+.empty-state ol {
+    text-align: left;
+    margin: 0 auto;
+    display: inline-block;
+    padding-left: 20px;
+}
+.empty-state.hidden { display: none !important; }
+
+/* Onboarding info inside settings */
+.onboarding-info {
+    margin-top: 24px;
+    text-align: left;
+    color: var(--text-secondary);
+}
+.onboarding-info h3 {
+    font-size: 16px;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+.onboarding-info ol {
+    padding-left: 20px;
+    line-height: 1.6;
+}
+
+.quick-actions {
+    display: flex;
+    gap: 10px;
+    padding: 6px 16px;
+    background: var(--primary-bg);
+    border-bottom: 1px solid var(--border-color);
+    align-items: center;
+    height: 36px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    z-index: 2;
+}
+
+.quick-btn {
+    background: var(--secondary-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    padding: 4px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.quick-btn:hover {
+    background: var(--accent-color);
+    color: #fff;
+}
+
+.quick-btn:active {
+    transform: translateY(1px);
 }

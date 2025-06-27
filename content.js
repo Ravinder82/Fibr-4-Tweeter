@@ -70,8 +70,9 @@ function extractAndReturnContent() {
             metaString = `Product: ${meta.product}\nPrice: ${meta.price}\nAvailability: ${meta.availability}`;
         }
         const structuredContent = `---SITE TYPE---\n${siteType}\n---PAGE TITLE---\n${pageTitle}\n---PAGE URL---\n${pageUrl}\n${metaString ? '---METADATA---\n' + metaString + '\n' : ''}---PAGE CONTENT---\n${mainContent}`;
-        if (!mainContent || mainContent.length < 150) {
-            throw new Error('Insufficient text found on the page to provide a meaningful analysis.');
+        // If very little content was found, still proceed but mark it as minimal.
+        if (!mainContent || mainContent.length < 30) {
+            console.warn('TabTalk AI (content): Very little text found on the page – proceeding with minimal content.');
         }
         return { success: true, content: structuredContent };
     } catch (e) {
