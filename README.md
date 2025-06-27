@@ -1,189 +1,162 @@
-# TabTalk AI: Conversational Web Assistant
+# TabTalk AI - Web Application
 
-A Chrome extension that allows you to chat with any webpage using Google's Gemini AI. Ask questions, get summaries, and understand content more efficiently.
+A static web application that replicates the functionality and design of the TabTalk AI Chrome extension. This version allows you to chat with webpage content using Google's Gemini AI directly in your browser.
 
 ## Features
 
 - 🤖 **AI-Powered Conversations**: Chat with webpage content using Google Gemini
-- 📄 **Smart Content Extraction**: Automatically extracts and processes main content from web pages
-- 💬 **Intuitive Interface**: Clean, modern UI inspired by OpenAI's design principles
-- ⚡ **Quick Actions**: One-click summarization and key points extraction
-- 🔒 **Privacy-Focused**: Your API key is stored locally, no data is sent to external servers
-- 🎯 **Context-Aware**: AI understands the specific page you're viewing
+- 📄 **URL Analysis**: Enter any webpage URL to extract and analyze content
+- 💬 **Intuitive Interface**: Clean, modern UI matching the original extension design
+- ⚡ **Quick Actions**: One-click summarization, key points, analysis, and FAQ generation
+- 🌓 **Dark Mode**: Toggle between light and dark themes
+- 🔒 **Privacy-Focused**: Your API key is stored locally in your browser
+- 📱 **Responsive Design**: Works on desktop, tablet, and mobile devices
+- 💾 **Export Chat**: Download your conversations as JSON files
 
-## Installation
+## Getting Started
 
-### Method 1: Install from Chrome Web Store (Coming Soon)
-The extension will be available on the Chrome Web Store soon.
+### 1. Set Up Your Gemini API Key
 
-### Method 2: Developer Installation
+1. Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Sign in with your Google account
+3. Create a new API key (free tier available)
+4. Copy your API key
 
-1. **Download the Extension**
-   - Clone this repository or download the ZIP file
-   - Extract all files to a folder on your computer
+### 2. Use the Application
 
-2. **Load in Chrome**
-   - Open Chrome and go to `chrome://extensions/`
-   - Enable "Developer mode" (toggle in top right)
-   - Click "Load unpacked"
-   - Select the folder containing the extension files
+1. Open the web application
+2. Click "Setup API Key" in the demo modal
+3. Enter your Gemini API key and save
+4. Start chatting with webpage content!
 
-3. **Get Your Gemini API Key**
-   - Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
-   - Sign in with your Google account
-   - Create a new API key (free tier available)
+## How to Use
 
-4. **Configure the Extension**
-   - Click the TabTalk AI extension icon in your browser toolbar
-   - Click the settings gear icon
-   - Enter your Gemini API key and save
+### Analyze a Webpage
+1. Click the menu button (☰) and select "Enter URL"
+2. Paste any webpage URL
+3. Click "Analyze Page" to extract content
+4. Start asking questions about the content
 
-## Usage
+### Quick Actions
+Use the quick action buttons for common tasks:
+- **📝 Summary**: Get a concise summary
+- **🔑 Key Points**: Extract main points
+- **📊 Analysis**: Detailed content analysis
+- **❓ FAQ**: Generate frequently asked questions
 
-1. **Navigate to Any Webpage**
-   - Visit any article, blog post, news site, or content page
+### Chat Features
+- Type questions naturally about the content
+- Use markdown formatting in responses
+- Export your chat history
+- Clear chat to start fresh
+- Toggle dark mode for comfortable viewing
 
-2. **Open TabTalk AI**
-   - Click the extension icon in your toolbar
-   - The extension will automatically analyze the page content
+## Demo Mode
 
-3. **Start Chatting**
-   - Type your question in the chat input
-   - Use quick actions for common tasks:
-     - "Summarize" - Get a concise summary
-     - "Key Points" - Extract main points
-     - "Simplify" - Explain in simple terms
+If you don't have an API key yet, you can try the demo mode to explore the interface with simulated responses. This gives you a feel for how the application works before setting up your API key.
 
-4. **Example Questions**
-   - "What is this article about?"
-   - "Summarize the main arguments"
-   - "What are the key statistics mentioned?"
-   - "Explain this technical concept in simple terms"
-   - "What conclusions does the author draw?"
+## Technical Details
 
-## File Structure
+### Built With
+- **HTML5**: Semantic markup and accessibility features
+- **CSS3**: Modern styling with CSS Grid and Flexbox
+- **Vanilla JavaScript**: No frameworks, maximum compatibility
+- **Google Gemini API**: AI-powered content analysis
+- **Marked.js**: Markdown parsing for rich text display
 
-```
-tabtalk-ai/
-├── manifest.json          # Extension configuration
-├── popup.html            # Main interface HTML
-├── popup.css            # Styling for the interface
-├── popup.js             # Main popup functionality
-├── background.js        # Background service worker
-├── content.js          # Content script for page analysis
-├── icons/              # Extension icons (16x16, 32x32, 48x48, 128x128)
-└── README.md           # This file
-```
+### Browser Compatibility
+- Chrome 88+
+- Firefox 85+
+- Safari 14+
+- Edge 88+
 
-## Features Explained
-
-### Content Extraction
-- Intelligently identifies main content areas
-- Filters out navigation, ads, and irrelevant elements
-- Handles various page layouts and structures
-- Supports both static and dynamic content
-
-### AI Integration
-- Uses Google Gemini Pro model
-- Context-aware responses based on page content
-- Handles long content through intelligent chunking
-- Safety filters and content moderation
-
-### User Interface
-- Responsive design that works on all screen sizes
-- Keyboard shortcuts (Enter to send, Shift+Enter for new line)
-- Auto-resizing input field
-- Conversation history within current session
-- Clear chat functionality
+### Features
+- Progressive Web App (PWA) capabilities
+- Service Worker for offline functionality
+- Local storage for settings and API keys
+- Responsive design for all screen sizes
+- Keyboard shortcuts and accessibility support
 
 ## Privacy & Security
 
-- **Local Storage**: Your API key is stored locally in Chrome's secure storage
-- **No Data Collection**: We don't collect or store any of your browsing data
-- **Direct API Calls**: Communications go directly from your browser to Google's servers
+- **Local Storage**: Your API key is stored locally in your browser
+- **No Data Collection**: We don't collect or store any of your data
+- **Direct API Calls**: Communications go directly to Google's servers
 - **Open Source**: All code is available for inspection
-
-## Limitations
-
-- **API Key Required**: You need your own free Gemini API key
-- **Content Length**: Very long pages are truncated to stay within API limits
-- **Browser Pages**: Cannot access chrome:// or extension pages for security reasons
-- **Dynamic Content**: Some heavily dynamic sites may require page refresh
-
-## Troubleshooting
-
-### Extension Not Working
-- Ensure you've entered a valid Gemini API key
-- Check that the page has loaded completely
-- Try refreshing the page and reopening the extension
-
-### No Content Extracted
-- Some pages may have content that's difficult to extract
-- Try scrolling down to load more content (for infinite scroll pages)
-- Check if the page requires login or has access restrictions
-
-### API Errors
-- **Invalid API Key**: Double-check your API key in settings
-- **Quota Exceeded**: You may have hit the free tier limits
-- **Rate Limiting**: Wait a few moments and try again
 
 ## Development
 
-### Setup Development Environment
-```bash
-# Clone the repository
-git clone <repository-url>
-cd tabtalk-ai
+### Local Development
+1. Clone or download the project files
+2. Serve the files using a local web server:
+   ```bash
+   # Using Python
+   python -m http.server 8000
+   
+   # Using Node.js
+   npx serve .
+   
+   # Using PHP
+   php -S localhost:8000
+   ```
+3. Open `http://localhost:8000` in your browser
 
-# Load in Chrome for testing
-# Go to chrome://extensions/
-# Enable Developer mode
-# Click "Load unpacked" and select the directory
+### File Structure
+```
+tabtalk-ai-webapp/
+├── index.html          # Main HTML file
+├── styles.css          # All styling
+├── app.js             # Main application logic
+├── sw.js              # Service worker for PWA
+├── manifest.json      # PWA manifest
+└── README.md          # This file
 ```
 
-### Making Changes
-- Edit the source files
-- Click the refresh button in chrome://extensions/ for your extension
-- Reload the extension popup to see changes
+## Limitations
 
-### API Integration
-The extension uses Google's Gemini Pro API with the following endpoint:
-```
-https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent
-```
+- **API Key Required**: You need your own free Gemini API key for full functionality
+- **CORS Restrictions**: Some websites may block content extraction due to CORS policies
+- **Rate Limits**: Subject to Google's API rate limits (generous free tier)
+- **Content Length**: Very long pages are truncated to stay within API limits
+
+## Troubleshooting
+
+### Common Issues
+
+**"API request failed" error**
+- Check that your API key is correct
+- Ensure you have API quota remaining
+- Try again after a few moments if rate limited
+
+**"Cannot analyze this URL" error**
+- Some websites block automated content extraction
+- Try copying and pasting the content directly instead
+
+**Interface not loading properly**
+- Ensure JavaScript is enabled in your browser
+- Try refreshing the page
+- Check browser console for error messages
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests.
-
-### Areas for Contribution
-- Improved content extraction for specific site types
-- Additional language support
+Contributions are welcome! Areas for improvement:
+- Enhanced content extraction methods
+- Additional AI model support
 - UI/UX enhancements
-- Performance optimizations
-- Bug fixes and testing
+- Mobile app version
+- Browser extension port
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the original project for details.
 
 ## Support
 
-If you encounter any issues or have questions:
+For issues or questions:
 1. Check the troubleshooting section above
-2. Visit the [Google AI Studio documentation](https://ai.google.dev/docs)
-3. Open an issue in this repository
-
-## Future Enhancements
-
-- Multi-tab conversations
-- Persistent chat history
-- Voice input/output
-- Document upload support
-- Custom AI personas
-- Integration with note-taking apps
+2. Review the [Google AI Studio documentation](https://ai.google.dev/docs)
+3. Open an issue in the project repository
 
 ---
 
-**Note**: This extension requires a free Google Gemini API key. Google provides a generous free tier for personal use. Visit [Google AI Studio](https://makersuite.google.com/app/apikey) to get started.
-
+**Note**: This web application requires a free Google Gemini API key. Google provides a generous free tier for personal use. Visit [Google AI Studio](https://aistudio.google.com/app/apikey) to get started.
