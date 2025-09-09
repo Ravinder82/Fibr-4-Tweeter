@@ -1,0 +1,26 @@
+{
+  "name": "tabtalk-ai",
+  "version": "1.0.0",
+  "description": "TabTalk AI - Chat with any webpage using Google Gemini",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run build:extension && npm run build:web",
+    "build:extension": "esbuild src/extension/popup.js --bundle --outfile=dist/extension/popup.js --minify && cp -r icons dist/extension/ && cp manifest.json dist/extension/ && cp src/extension/content.js dist/extension/ && cp src/extension/background.js dist/extension/",
+    "build:web": "esbuild src/web-app/app.js --bundle --outfile=dist/web/app.js --minify && cp index.html dist/web/ && cp styles.css dist/web/ && cp sw.js dist/web/ && cp manifest.webmanifest dist/web/",
+    "dev": "npm run dev:extension & npm run dev:web",
+    "dev:extension": "esbuild src/extension/popup.js --bundle --outfile=dist/extension/popup.js --watch",
+    "dev:web": "esbuild src/web-app/app.js --bundle --outfile=dist/web/app.js --watch",
+    "clean": "rm -rf dist/",
+    "package:extension": "cd dist/extension && zip -r ../../tabtalk-ai-extension.zip .",
+    "package:web": "cd dist/web && zip -r ../../tabtalk-ai-web.zip ."
+  },
+  "keywords": ["ai", "chat", "gemini", "chrome-extension", "web-app"],
+  "author": "TabTalk AI Team",
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.19.0"
+  },
+  "dependencies": {
+    "marked": "^4.3.0"
+  }
+}

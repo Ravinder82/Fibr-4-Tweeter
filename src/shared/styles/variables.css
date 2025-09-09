@@ -1,0 +1,41 @@
+/* src/shared/styles/variables.css */
+:root {
+    --primary-bg: #f0f4f8;
+    --secondary-bg: #e2e8f0;
+    --border-color: #cbd5e1;
+    --text-primary: #1a202c;
+    --text-secondary: #4a5568;
+    --accent-color: #3182ce;
+    --message-bg: #edf2f7;
+    --user-message-bg: linear-gradient(135deg, #bee3f8 0%, #ebf8ff 100%);
+    --assistant-message-bg: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --error-color: #ef4444;
+}
+
+/* Dark mode variables */
+[data-theme="dark"] {
+    --primary-bg: #18181b;
+    --secondary-bg: #23232a;
+    --border-color: #2d2d36;
+    --text-primary: #f1f5f9;
+    --text-secondary: #a1a1aa;
+    --accent-color: #6366f1;
+    --message-bg: #2d2d36;
+    --user-message-bg: linear-gradient(135deg, #1e293b 0%, #1e1e2a 100%);
+    --assistant-message-bg: linear-gradient(135deg, #2d2d36 0%, #23232a 100%);
+}
+
+/* High contrast mode */
+[data-theme="high-contrast"] {
+    --primary-bg: #000 !important;
+    --secondary-bg: #fff !important;
+    --border-color: #fff !important;
+    --text-primary: #fff !important;
+    --text-secondary: #fff !important;
+    --accent-color: #ff0 !important;
+    --message-bg: #000 !important;
+    --user-message-bg: #000 !important;
+    --assistant-message-bg: #000 !important;
+}
