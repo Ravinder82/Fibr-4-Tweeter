@@ -280,14 +280,23 @@ class TabTalkAI {
     this.stateManager.saveState();
     this.apiClient = new GeminiAPIClient(apiKey, 'web');
     
-    // Hide onboarding info
-    const onboardingInfo = document.querySelector('.onboarding-info');
-    if (onboardingInfo) {
-      onboardingInfo.style.display = 'none';
+    // Show success message
+    this.showView('status');
+    if (this.domElements.statusText) {
+      this.domElements.statusText.textContent = '✅ API key saved successfully! Initializing...';
     }
     
-    this.showView('chat');
-    this.addMessage('assistant', 'Great! Your API key has been saved. You can now chat with any webpage content. Try pasting a URL or some text to get started!');
+    // Small delay to show the success message
+    setTimeout(() => {
+      // Hide onboarding info
+      const onboardingInfo = document.querySelector('.onboarding-info');
+      if (onboardingInfo) {
+        onboardingInfo.style.display = 'none';
+      }
+      
+      this.showView('chat');
+      this.addMessage('assistant', 'Great! Your API key has been saved. You can now chat with any webpage content. Try pasting a URL or some text to get started!');
+    }, 1500);
   }
 
   cancelSettings() {

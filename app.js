@@ -213,8 +213,15 @@ class TabTalkAI {
         localStorage.setItem('tabtalk_api_key', apiKey);
         this.isDemo = false;
         
-        this.showView('chat');
-        this.addMessage('assistant', 'Great! Your API key has been saved. You can now chat with any webpage content. Try pasting a URL or some text to get started!');
+        // Show success message
+        this.showView('status');
+        document.getElementById('status-text').textContent = '✅ API key saved successfully! Initializing...';
+        
+        // Small delay to show the success message
+        setTimeout(() => {
+            this.showView('chat');
+            this.addMessage('assistant', 'Great! Your API key has been saved. You can now chat with any webpage content. Try pasting a URL or some text to get started!');
+        }, 1500);
     }
 
     cancelSettings() {

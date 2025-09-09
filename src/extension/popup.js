@@ -252,16 +252,23 @@ class TabTalkAI {
     await this.stateManager.saveState();
     
     this.apiClient = new GeminiAPIClient(newApiKey, 'extension');
-    this.updateViewState('chat');
     
-    // Hide onboarding info
-    const onboardingInfo = document.querySelector('.onboarding-info');
-    if (onboardingInfo) onboardingInfo.style.display = 'none';
+    // Show success message
+    this.updateViewState('status', '✅ API key saved successfully! Initializing...');
     
-    // Fetch page content if not already done
-    if (!this.pageContent) {
-      await this.getAndCachePageContent();
-    }
+    // Small delay to show the success message
+    setTimeout(() => {
+      this.updateViewState('chat');
+      
+      // Hide onboarding info
+      const onboardingInfo = document.querySelector('.onboarding-info');
+      if (onboardingInfo) onboardingInfo.style.display = 'none';
+      
+      // Fetch page content if not already done
+      if (!this.pageContent) {
+        this.getAndCachePageContent();
+      }
+    }, 1500);
   }
 
   async handleDeleteApiKey() {

@@ -13,6 +13,11 @@ export class MessageRenderer {
     const messageEl = document.createElement('div');
     messageEl.classList.add('message', message.role, 'visible');
     
+    // Add content type specific class for styling
+    if (message.contentType) {
+      messageEl.classList.add(`${message.contentType}-message`);
+    }
+    
     const headerEl = document.createElement('div');
     headerEl.classList.add('message-header');
     
@@ -23,18 +28,27 @@ export class MessageRenderer {
     if (message.role === 'user') {
       avatarEl.textContent = '👤';
     } else {
-      if (message.contentType === 'summary') {
-        avatarEl.textContent = '📝';
-      } else if (message.contentType === 'keypoints') {
-        avatarEl.textContent = '🔑';
-      } else if (message.contentType === 'analysis') {
-        avatarEl.textContent = '📊';
-      } else if (message.contentType === 'faq') {
-        avatarEl.textContent = '❓';
-      } else if (message.contentType === 'factcheck') {
-        avatarEl.textContent = '✅';
-      } else {
-        avatarEl.textContent = '🤖';
+      switch (message.contentType) {
+        case 'summary':
+          avatarEl.textContent = '📝';
+          break;
+        case 'keypoints':
+          avatarEl.textContent = '🔑';
+          break;
+        case 'analysis':
+          avatarEl.textContent = '📊';
+          break;
+        case 'faq':
+          avatarEl.textContent = '❓';
+          break;
+        case 'factcheck':
+          avatarEl.textContent = '✅';
+          break;
+        case 'tweet':
+          avatarEl.textContent = '🐦';
+          break;
+        default:
+          avatarEl.textContent = '🤖';
       }
     }
     
@@ -63,6 +77,25 @@ export class MessageRenderer {
       contentEl.innerHTML = this.marked.parse(message.content);
     } else {
       contentEl.textContent = message.content || '';
+    }
+    
+    // Add copy button for assistant messages
+    if (message.role === 'assistant') {
+      const copyButton = document.createElement('button');
+      copyButton.classList.add('copy-button');
+      copyButton.innerHTML = '📋';
+      copyButton.title = 'Copy to clipboard';
+      copyButton.addEventListener('click', () => {
+        navigator.clipboard.writeText(message.content).then(() => {
+          // Show feedback
+          const originalText = copyButton.innerHTML;
+          copyButton.innerHTML = '✓';
+          setTimeout(() => {
+            copyButton.innerHTML = originalText;
+          }, 2000);
+        });
+      });
+      contentEl.appendChild(copyButton);
     }
     
     messageEl.appendChild(headerEl);

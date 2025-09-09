@@ -278,80 +278,6 @@
     margin-bottom: 8px;
 }
 
-/* Tweet Content Style */
-.tweet-message .content {
-    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-    border-left: 4px solid #1da1f2;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(29, 161, 242, 0.1);
-    line-height: 1.5;
-}
-
-.tweet-message .content strong {
-    color: #1da1f2;
-    font-size: 16px;
-    display: block;
-    margin-top: 16px;
-    margin-bottom: 8px;
-    font-weight: 700;
-}
-
-.tweet-message .content p {
-    margin-bottom: 14px;
-    line-height: 1.6;
-}
-
-.tweet-message .content a {
-    color: #1da1f2;
-    text-decoration: none;
-    font-weight: 600;
-}
-
-.tweet-message .content a:hover {
-    text-decoration: underline;
-}
-
-.tweet-message .content ul,
-.tweet-message .content ol {
-    margin-top: 12px;
-    margin-bottom: 12px;
-    padding-left: 20px;
-}
-
-.tweet-message .content li {
-    margin-bottom: 8px;
-    line-height: 1.5;
-}
-
-.tweet-message .content blockquote {
-    border-left: 3px solid #1da1f2;
-    padding-left: 16px;
-    margin: 12px 0;
-    color: #333;
-    font-style: italic;
-}
-
-.tweet-message .content h1,
-.tweet-message .content h2,
-.tweet-message .content h3 {
-    color: #1da1f2;
-    margin-top: 16px;
-    margin-bottom: 8px;
-    font-weight: 700;
-}
-
-.tweet-message .content h2 {
-    font-size: 18px;
-    border-bottom: 1px solid rgba(29, 161, 242, 0.2);
-    padding-bottom: 4px;
-}
-
-.tweet-message .content h3 {
-    font-size: 16px;
-}
-
 /* Dark mode adjustments */
 body.dark-mode .content code {
     background: rgba(255, 255, 255, 0.1);
@@ -378,38 +304,9 @@ body.dark-mode .faq-message .content strong {
     color: #fde047; /* Yellow instead of purple */
 }
 
-body.dark-mode .factcheck-message .content {
-    background: linear-gradient(135deg, #14532d 0%, #166534 100%);
-    border-left: 4px solid #4ade80;
-    color: #f8fafc;
-}
-
-/* Tweet Content Style for Dark Mode */
-body.dark-mode .tweet-message .content {
-    background: linear-gradient(135deg, #0c4a6e 0%, #0369a1 100%);
-    border-left: 4px solid #38bdf8;
-    color: #f8fafc;
-    box-shadow: 0 4px 6px rgba(56, 189, 248, 0.1);
-}
-
-body.dark-mode .tweet-message .content strong {
-    color: #38bdf8;
-}
-
-body.dark-mode .tweet-message .content a {
-    color: #38bdf8;
-}
-
-body.dark-mode .tweet-message .content blockquote {
-    border-left-color: #38bdf8;
-    color: #e2e8f0;
-}
-
-body.dark-mode .tweet-message .content h1,
-body.dark-mode .tweet-message .content h2,
-body.dark-mode .tweet-message .content h3 {
-    color: #38bdf8;
-    border-bottom-color: rgba(56, 189, 248, 0.2);
+body.dark-mode .factcheck-message .content h2,
+body.dark-mode .factcheck-message .content h3 {
+    color: #a7e3a1;
 }
 
 body.dark-mode .copy-button {
