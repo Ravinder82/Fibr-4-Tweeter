@@ -81,7 +81,8 @@ class TabTalkAI {
       sidebar: document.getElementById('sidebar'),
       exportChatButton: document.getElementById('export-chat-button'),
       quickActions: document.getElementById('quick-actions'),
-      darkModeToggle: document.getElementById('dark-mode-toggle')
+      darkModeToggle: document.getElementById('dark-mode-toggle'),
+      deleteApiKeyButton: document.getElementById('delete-api-key-button')
     };
   }
 
@@ -89,6 +90,7 @@ class TabTalkAI {
     // View switching
     const settingsCancelButton = document.getElementById('settings-cancel-button');
     const settingsSaveButton = document.getElementById('settings-save-button');
+    const deleteApiKeyButton = document.getElementById('delete-api-key-button');
     
     if (settingsCancelButton) {
       settingsCancelButton.addEventListener('click', () => {
@@ -99,6 +101,10 @@ class TabTalkAI {
     
     if (settingsSaveButton) {
       settingsSaveButton.addEventListener('click', this.handleSaveSettings);
+    }
+    
+    if (deleteApiKeyButton) {
+      deleteApiKeyButton.addEventListener('click', () => this.handleDeleteApiKey());
     }
     
     // Menu logic
@@ -258,6 +264,29 @@ class TabTalkAI {
     }
   }
 
+  async handleDeleteApiKey() {
+    if (!confirm('Are you sure you want to delete your API key? You will need to enter a new key to use TabTalk AI.')) {
+      return;
+    }
+    
+    // Clear the API key from storage using StateManager
+    await this.stateManager.deleteApiKey();
+    await this.stateManager.saveState();
+    
+    // Clear the input field
+    if (this.domElements.apiKeyInput) {
+      this.domElements.apiKeyInput.value = '';
+    }
+    
+    // Show the delete button only when there's an existing API key
+    if (this.domElements.deleteApiKeyButton) {
+      this.domElements.deleteApiKeyButton.classList.add('hidden');
+    }
+    
+    // Stay in settings view
+    this.updateViewState('settings');
+  }
+
   async getAndCachePageContent() {
     if (!this.currentTab) return;
     
@@ -301,6 +330,16 @@ class TabTalkAI {
         this.domElements.messageInput.focus();
       } else if (state === 'settings' && this.domElements.apiKeyInput) {
         this.domElements.apiKeyInput.focus();
+        
+        // Show delete button only when there's an existing API key
+        const currentState = this.stateManager.getState();
+        if (this.domElements.deleteApiKeyButton) {
+          if (currentState.apiKey) {
+            this.domElements.deleteApiKeyButton.classList.remove('hidden');
+          } else {
+            this.domElements.deleteApiKeyButton.classList.add('hidden');
+          }
+        }
       }
     } else {
       console.error(`View "${state}" not found`);
@@ -390,6 +429,16 @@ class TabTalkAI {
       top: this.domElements.messagesContainer.scrollHeight,
       behavior: 'smooth'
     });
+    
+    // Update empty state visibility
+    const emptyState = document.getElementById('empty-state');
+    if (emptyState) {
+      if (state.chatHistory.length === 0) {
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+      }
+    }
     
     // Update quick actions
     this.updateQuickActionsVisibility();

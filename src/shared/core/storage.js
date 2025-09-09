@@ -69,4 +69,13 @@ export class StorageManager {
       localStorage.clear();
     }
   }
+
+  async deleteApiKey() {
+    if (this.environment === 'extension') {
+      return chrome.storage.local.remove(['geminiApiKey', 'apiKeySet']);
+    } else {
+      localStorage.removeItem('tabtalk_api_key');
+      localStorage.removeItem('apiKeySet');
+    }
+  }
 }

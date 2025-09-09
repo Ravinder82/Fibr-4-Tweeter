@@ -54,6 +54,11 @@ export class StateManager {
     }
   }
 
+  async deleteApiKey() {
+    await this.storage.deleteApiKey();
+    this.state.apiKey = null;
+  }
+
   updateApiKey(apiKey) {
     this.state.apiKey = apiKey;
   }
