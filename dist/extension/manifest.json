@@ -25,6 +25,12 @@
         "https://*/*",
         "http://*/*"
     ],
+    "web_accessible_resources": [
+        {
+            "resources": ["content.js", "marked.min.js", "html2pdf.bundle.min.js"],
+            "matches": ["<all_urls>"]
+        }
+    ],
     "icons": {
         "16": "icons/icon16.png",
         "32": "icons/icon32.png",
