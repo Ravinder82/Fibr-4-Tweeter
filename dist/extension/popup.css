@@ -150,6 +150,24 @@ body.dark-mode .content {
     -webkit-backdrop-filter: blur(10px);
 }
 
+.twitter-card {
+    margin: 16px 0;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.25) 0%, 
+        rgba(255, 255, 255, 0.1) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 
+        0 8px 32px rgba(31, 38, 135, 0.37),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
 .menu-button:hover {
     background: rgba(99, 102, 241, 0.2);
     transform: translateY(-1px);
@@ -511,9 +529,313 @@ body.dark-mode .sidebar a {
 
 .sidebar-divider {
     height: 1px;
-    background: var(--border-color);
-    margin: 8px 20px;
-    opacity: 0.5;
+    background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+    margin: 8px 0;
+    opacity: 0.6;
+}
+
+.sidebar-section-title {
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-color);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+    margin: 4px 0;
+}
+
+/* Twitter Content Cards */
+.twitter-content-container {
+    margin: 15px 0;
+    position: relative;
+}
+
+.twitter-card {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.25) 0%, 
+        rgba(255, 255, 255, 0.1) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 
+        0 8px 32px rgba(31, 38, 135, 0.37),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.twitter-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 12px 48px rgba(31, 38, 135, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.twitter-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: linear-gradient(90deg, 
+        rgba(255, 255, 255, 0.2) 0%, 
+        rgba(255, 255, 255, 0.1) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+}
+
+.twitter-card-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.twitter-card-title::before {
+    content: "🐦";
+    font-size: 16px;
+}
+
+.twitter-copy-btn {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.2) 0%, 
+        rgba(255, 255, 255, 0.1) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    color: var(--text-primary);
+    backdrop-filter: blur(5px);
+}
+
+.twitter-copy-btn:hover {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.3) 0%, 
+        rgba(255, 255, 255, 0.2) 100%);
+    transform: scale(1.05);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.twitter-card-content {
+    padding: 16px;
+}
+
+.twitter-text {
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    line-height: 1.4;
+    color: var(--text-primary);
+    resize: none;
+    width: 100%;
+    min-height: 80px;
+    height: auto;
+    overflow: hidden;
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.twitter-text:focus {
+    background: rgba(29, 155, 240, 0.05);
+    box-shadow: inset 0 0 0 2px rgba(29, 155, 240, 0.2);
+}
+
+
+.twitter-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.twitter-length-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, rgba(29, 155, 240, 0.08) 0%, rgba(120, 119, 198, 0.05) 100%);
+    border-radius: 8px;
+    border: 1px solid rgba(29, 155, 240, 0.1);
+}
+
+.length-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 80px;
+}
+
+.length-slider {
+    flex: 1;
+    height: 6px;
+    background: linear-gradient(90deg, 
+        rgba(29, 155, 240, 0.2) 0%, 
+        rgba(120, 119, 198, 0.2) 50%, 
+        rgba(29, 155, 240, 0.2) 100%);
+    border-radius: 3px;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.length-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: linear-gradient(135deg, #1d9bf0 0%, #7877c6 100%);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 8px rgba(29, 155, 240, 0.3);
+    transition: all 0.2s ease;
+}
+
+.length-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 4px 12px rgba(29, 155, 240, 0.5);
+}
+
+.length-display {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-color);
+    min-width: 35px;
+    text-align: center;
+}
+
+.regenerate-btn {
+    background: linear-gradient(135deg, rgba(29, 155, 240, 0.1) 0%, rgba(120, 119, 198, 0.1) 100%);
+    border: 1px solid rgba(29, 155, 240, 0.2);
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+}
+
+.regenerate-btn:hover {
+    background: linear-gradient(135deg, rgba(29, 155, 240, 0.2) 0%, rgba(120, 119, 198, 0.2) 100%);
+    transform: scale(1.05);
+    border-color: rgba(29, 155, 240, 0.3);
+}
+
+.regenerate-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.twitter-char-count {
+    text-align: right;
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Progress Bar Animation */
+.progress-container {
+    margin: 15px 0;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(29, 155, 240, 0.05) 0%, rgba(120, 119, 198, 0.05) 100%);
+    border: 1px solid rgba(29, 155, 240, 0.1);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.progress-message {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.progress-message::before {
+    content: "⚡";
+    font-size: 16px;
+    animation: pulse 1.5s infinite;
+}
+
+.progress-bar {
+    height: 6px;
+    background: rgba(29, 155, 240, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, 
+        #1d9bf0 0%, 
+        #7877c6 25%, 
+        #ff6b35 50%, 
+        #7877c6 75%, 
+        #1d9bf0 100%);
+    border-radius: 3px;
+    width: 0%;
+    transition: width 3s ease-in-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.3) 50%, 
+        transparent 100%);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Dark mode progress bar */
+.dark-mode .progress-container {
+    background: linear-gradient(135deg, rgba(29, 155, 240, 0.08) 0%, rgba(120, 119, 198, 0.08) 100%);
+    border-color: rgba(29, 155, 240, 0.2);
+}
+
+/* Dark mode adjustments for Twitter cards */
+.dark-mode .twitter-card {
+    background: linear-gradient(135deg, rgba(29, 155, 240, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+    border-color: rgba(29, 155, 240, 0.3);
+}
+
+.dark-mode .twitter-card-header {
+    background: linear-gradient(90deg, rgba(29, 155, 240, 0.12) 0%, rgba(120, 119, 198, 0.08) 100%);
+    border-bottom-color: rgba(29, 155, 240, 0.2);
+}
+
+.dark-mode .twitter-text:focus {
+    background: rgba(29, 155, 240, 0.08);
 }
 
 /* Settings View */

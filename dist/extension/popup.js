@@ -31,8 +31,8 @@ class TabTalkAI {
         // exportChatButton removed - functionality moved to sidebar only
         this.inputActions = document.querySelector('.input-actions');
         this.quickActions = document.getElementById('quick-actions');
-        this.quickSummaryBtn = document.getElementById('quick-summary');
-        this.quickKeypointsBtn = document.getElementById('quick-keypoints');
+        this.quickTwitterBtn = document.getElementById('quick-twitter');
+        this.quickThreadBtn = document.getElementById('quick-thread');
 
         if (typeof marked !== 'undefined') {
             this.marked = marked;
@@ -237,10 +237,32 @@ class TabTalkAI {
                 this.messageInput.setAttribute('aria-expanded', 'false');
             });
         }
-        // Toolbar buttons removed - functionality available in sidebar menu only
-        // Export format select removed with toolbar
+        // Clear chat button (inside input-actions)
+        const clearChatButton = this.inputActions ? this.inputActions.querySelector('#clear-chat-button') : document.getElementById('clear-chat-button');
+        if (clearChatButton) {
+            clearChatButton.addEventListener('click', async () => {
+                if (confirm('Clear all chat history for this page?')) {
+                    this.chatHistory = [];
+                    await this.saveState();
+                    this.renderMessages();
+                }
+            });
+        }
+        // Export chat button (inside input-actions)
+        const exportChatButton = this.inputActions ? this.inputActions.querySelector('#export-chat-button') : this.exportChatButton;
+        if (exportChatButton) {
+            exportChatButton.addEventListener('click', () => this.handleExportChat());
+        }
+        // Export format select (inside input-actions)
+        const exportFormatSelect = this.inputActions ? this.inputActions.querySelector('#export-format-select') : this.exportFormatSelect;
+        if (exportFormatSelect) {
+            exportFormatSelect.setAttribute('aria-label', 'Export format');
+        }
         // Accessibility: set aria-labels
         if (this.sendButton) this.sendButton.setAttribute('aria-label', 'Send message');
+        if (clearChatButton) clearChatButton.setAttribute('aria-label', 'Clear chat history');
+        if (exportChatButton) exportChatButton.setAttribute('aria-label', 'Export chat');
+        if (exportFormatSelect) exportFormatSelect.setAttribute('aria-label', 'Export format');
         if (this.menuButton) this.menuButton.setAttribute('aria-label', 'Open menu');
         if (this.apiKeyInput) this.apiKeyInput.setAttribute('aria-label', 'Gemini API Key');
         if (this.darkModeToggle) this.darkModeToggle.setAttribute('aria-label', 'Toggle dark mode');
@@ -260,19 +282,30 @@ class TabTalkAI {
             }
         });
         // Formatting buttons
-        // Format buttons removed - toolbar functionality eliminated
+        this.formatButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (button.id === 'clear-chat-button') {
+                    this.handleClearChat();
+                } else if (button.id === 'export-chat-button') {
+                    this.handleExportChat();
+                } else {
+                    this.handleFormatting(button.getAttribute('title').toLowerCase());
+                }
+            });
+        });
 
-        // Quick actions buttons
-        if (this.quickSummaryBtn) {
-            this.quickSummaryBtn.addEventListener('click', async () => {
-                await this.generateSpecialContent('summary');
-                this.quickActions.classList.add('hidden');
+        // Quick actions buttons - Twitter content creation
+        if (this.quickTwitterBtn) {
+            this.quickTwitterBtn.addEventListener('click', async () => {
+                await this.generateSocialContent('twitter');
+                // Don't hide - keep buttons visible for multiple generations
             });
         }
-        if (this.quickKeypointsBtn) {
-            this.quickKeypointsBtn.addEventListener('click', async () => {
-                await this.generateSpecialContent('keypoints');
-                this.quickActions.classList.add('hidden');
+        if (this.quickThreadBtn) {
+            this.quickThreadBtn.addEventListener('click', async () => {
+                await this.generateSocialContent('thread');
+                // Don't hide - keep buttons visible for multiple generations
             });
         }
     }
@@ -1180,10 +1213,518 @@ class TabTalkAI {
 
     updateQuickActionsVisibility() {
         if (!this.quickActions) return;
-        if (this.pageContent && this.chatHistory.length === 0) {
+        // Keep Twitter quick actions visible whenever there's page content
+        if (this.pageContent) {
             this.quickActions.classList.remove('hidden');
         } else {
             this.quickActions.classList.add('hidden');
+        }
+    }
+
+    async generateSocialContent(platform) {
+        if (!this.pageContent || !this.apiKey) {
+            this.addMessage('assistant', '❌ Please set up your Gemini API key first and ensure page content is loaded.');
+            return;
+        }
+
+        this.setLoading(true, `Generating ${platform} content...`);
+        console.log(`TabTalk AI: Generating ${platform} content for page: ${this.currentTab?.title}`);
+
+        try {
+            let systemPrompt = '';
+            let userPrompt = '';
+            let emoji = '';
+
+            if (platform === 'twitter') {
+                emoji = '🐦';
+                systemPrompt = `You are a Twitter/X Premium content creation expert. Create clean, professional, copy-paste ready tweets. Focus on structured content with proper formatting. ABSOLUTELY NEVER include hashtags, asterisks for emphasis, or formatting noise. Output should be immediately usable on Twitter.`;
+                
+                userPrompt = `Create a clean, professional Twitter/X post from this content:
+
+STRICT FORMATTING REQUIREMENTS:
+- NO hashtags, NO # symbols anywhere - this will destroy the account
+- NO asterisks (*) for emphasis - use natural language instead
+- NO "(line break)" text - use actual line breaks
+- NO markdown formatting or special characters
+- Use clean paragraph structure with proper spacing
+- Include relevant emojis naturally in the text
+- Use bullet points (•) or numbers for lists if needed
+- Keep it conversational and engaging
+- Make it immediately copy-paste ready for Twitter
+
+CONTENT STRUCTURE:
+- Start with an engaging hook
+- Use natural line breaks for readability  
+- Include 1-2 relevant emojis per paragraph
+- End with a compelling call-to-action
+- Focus on value and insights
+
+CONTENT TO TRANSFORM:
+${this.pageContent}
+
+OUTPUT: Clean, professional tweet ready to copy-paste to Twitter (no hashtags, no formatting noise).`;
+
+            } else if (platform === 'thread') {
+                emoji = '🧵';
+                systemPrompt = `You are a Twitter Premium thread specialist. Create clean, professional, copy-paste ready thread content. Focus on structured, valuable content with proper formatting. ABSOLUTELY NEVER include hashtags, asterisks for emphasis, or formatting noise. Each tweet should be immediately usable on Twitter.`;
+                
+                userPrompt = `Create a clean, professional Twitter thread from this content:
+
+STRICT FORMATTING REQUIREMENTS:
+- Create 3-8 tweets numbered (1/n, 2/n, etc.)
+- NO hashtags, NO # symbols anywhere - this will destroy the account
+- NO asterisks (*) for emphasis - use natural language instead
+- NO "(line break)" text - use actual line breaks
+- NO markdown formatting or special characters
+- Use clean paragraph structure with proper spacing
+- Include relevant emojis naturally in the text
+- Use bullet points (•) or numbers for lists if needed
+- Make each tweet immediately copy-paste ready for Twitter
+
+THREAD STRUCTURE:
+- 1/n: Engaging hook with natural formatting
+- 2/n-n/n: Value-packed content with proper spacing
+- Final tweet: Strong call-to-action
+- Use natural line breaks between ideas
+- Include 1-2 relevant emojis per tweet
+
+CONTENT TO TRANSFORM:
+${this.pageContent}
+
+OUTPUT FORMAT:
+1/n: [Clean hook content]
+2/n: [Clean insight content]  
+3/n: [Clean analysis content]
+...
+n/n: [Clean conclusion with CTA]`;
+
+            } else {
+                this.addMessage('assistant', '❌ Only Twitter/X Post and Twitter Thread are supported.');
+                return;
+            }
+
+            // Show progress bar instead of user message
+            this.showProgressBar(`Generating ${platform === 'twitter' ? 'Twitter/X Post' : 'Twitter Thread'}...`);
+
+            // Use the existing callGeminiAPIWithSystemPrompt method
+            const response = await this.callGeminiAPIWithSystemPrompt(systemPrompt, userPrompt);
+            
+            if (response) {
+                console.log(`TabTalk AI: Successfully generated ${platform} content, response length: ${response.length} characters`);
+                const cleanedResponse = this.cleanTwitterContent(response);
+                this.addTwitterMessage('assistant', cleanedResponse, platform);
+                await this.saveState();
+            } else {
+                throw new Error('Empty response received from Gemini API');
+            }
+
+        } catch (error) {
+            console.error('Error generating social content:', error);
+            this.addMessage('assistant', '❌ Error generating social media content. Please check your API key and try again.');
+        } finally {
+            this.setLoading(false);
+            this.hideProgressBar();
+        }
+    }
+
+    showProgressBar(message) {
+        // Remove any existing progress bar
+        this.hideProgressBar();
+        
+        const progressContainer = document.createElement('div');
+        progressContainer.className = 'progress-container';
+        progressContainer.id = 'twitter-progress';
+        
+        progressContainer.innerHTML = `
+            <div class="progress-message">${message}</div>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        `;
+        
+        this.messagesContainer.appendChild(progressContainer);
+        this.messagesContainer.scrollTo({
+            top: this.messagesContainer.scrollHeight,
+            behavior: 'smooth'
+        });
+        
+        // Start progress animation
+        setTimeout(() => {
+            const fill = progressContainer.querySelector('.progress-fill');
+            if (fill) {
+                fill.style.width = '100%';
+            }
+        }, 100);
+    }
+    
+    hideProgressBar() {
+        const existingProgress = document.getElementById('twitter-progress');
+        if (existingProgress) {
+            existingProgress.remove();
+        }
+    }
+
+    addTwitterMessage(role, content, platform) {
+        const timestamp = new Date().toISOString();
+        
+        // Add to chat history
+        this.chatHistory.push({
+            role: role,
+            content: content,
+            timestamp: timestamp,
+            platform: platform
+        });
+
+        // Create custom Twitter display
+        this.renderTwitterContent(content, platform);
+    }
+
+    renderTwitterContent(content, platform) {
+        // Create container for all Twitter content to ensure proper flow
+        const contentContainer = document.createElement('div');
+        contentContainer.className = 'twitter-content-container';
+        
+        if (platform === 'thread') {
+            const tweets = this.parseTwitterThread(content);
+            tweets.forEach((tweet, index) => {
+                const cardTitle = `Thread ${index + 1}/${tweets.length}`;
+                const card = this.createTwitterCard(tweet, cardTitle);
+                card.dataset.platform = platform;
+                contentContainer.appendChild(card);
+            });
+        } else {
+            const card = this.createTwitterCard(content, 'Twitter Post');
+            card.dataset.platform = platform;
+            contentContainer.appendChild(card);
+        }
+        
+        // Add the entire container to messages, ensuring proper document flow
+        this.messagesContainer.appendChild(contentContainer);
+        
+        // Auto-scroll to show new content
+        setTimeout(() => {
+            this.messagesContainer.scrollTo({
+                top: this.messagesContainer.scrollHeight,
+                behavior: 'smooth'
+            });
+        }, 100);
+    }
+
+    parseTwitterThread(content) {
+        // Clean the content first
+        const cleanedContent = this.cleanTwitterContent(content);
+        
+        // Remove the intro text if present
+        let processedContent = cleanedContent.replace(/Here's your clean.*?content:\s*/gi, '').trim();
+        
+        // Split by numbered patterns (1/7, 2/7, etc.) 
+        const tweetPattern = /(\d+\/\d+[\s:]*)/g;
+        const parts = processedContent.split(tweetPattern).filter(part => part.trim());
+        
+        const tweets = [];
+        let currentTweet = '';
+        
+        for (let i = 0; i < parts.length; i++) {
+            const part = parts[i].trim();
+            
+            // Check if this is a tweet number (1/7, 2/7, etc.)
+            if (part.match(/^\d+\/\d+[\s:]*$/)) {
+                // If we have accumulated content, save it as a tweet
+                if (currentTweet.trim()) {
+                    tweets.push(currentTweet.trim());
+                }
+                currentTweet = '';
+            } else {
+                // This is tweet content
+                currentTweet += part + ' ';
+            }
+        }
+        
+        // Add the last tweet if there's content
+        if (currentTweet.trim()) {
+            tweets.push(currentTweet.trim());
+        }
+        
+        // If no proper threads found, try line-based parsing
+        if (tweets.length === 0) {
+            const lines = processedContent.split('\n').filter(line => line.trim());
+            let tempTweet = '';
+            
+            for (const line of lines) {
+                if (line.match(/^\d+\/\d+/)) {
+                    if (tempTweet.trim()) {
+                        tweets.push(tempTweet.trim());
+                    }
+                    tempTweet = line.replace(/^\d+\/\d+[\s:]*/, '').trim();
+                } else if (tempTweet) {
+                    tempTweet += '\n' + line;
+                } else {
+                    tempTweet = line;
+                }
+            }
+            
+            if (tempTweet.trim()) {
+                tweets.push(tempTweet.trim());
+            }
+        }
+        
+        // Fallback: if still no tweets, return original content as single tweet
+        return tweets.length > 0 ? tweets : [processedContent || content];
+    }
+
+    createTwitterCard(tweetContent, cardTitle) {
+        const card = document.createElement('div');
+        card.className = 'twitter-card';
+        
+        card.innerHTML = `
+            <div class="twitter-card-header">
+                <span class="twitter-card-title">${cardTitle}</span>
+                <button class="twitter-copy-btn" title="Copy tweet">📋</button>
+            </div>
+            <div class="twitter-card-content">
+                <textarea class="twitter-text" placeholder="Edit your tweet content...">${tweetContent}</textarea>
+                <div class="twitter-controls">
+                    <div class="twitter-length-control">
+                        <label class="length-label">Target Length:</label>
+                        <input type="range" class="length-slider" min="50" max="2000" value="${Math.max(50, this.getAccurateCharacterCount(tweetContent))}" step="50">
+                        <span class="length-display">${Math.max(50, this.getAccurateCharacterCount(tweetContent))}</span>
+                        <button class="regenerate-btn" title="Regenerate with new length">🔄</button>
+                    </div>
+                    <div class="twitter-char-count">${this.getAccurateCharacterCount(tweetContent)} characters</div>
+                </div>
+            </div>
+        `;
+
+        // Add copy functionality
+        const copyBtn = card.querySelector('.twitter-copy-btn');
+        const textArea = card.querySelector('.twitter-text');
+        
+        // Auto-resize textarea to fit content
+        const autoResizeTextarea = () => {
+            textArea.style.height = 'auto';
+            textArea.style.height = Math.max(80, textArea.scrollHeight) + 'px';
+        };
+        
+        // Initial resize
+        setTimeout(autoResizeTextarea, 0);
+        
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(textArea.value).then(() => {
+                copyBtn.textContent = '✅';
+                copyBtn.title = 'Copied!';
+                setTimeout(() => {
+                    copyBtn.textContent = '📋';
+                    copyBtn.title = 'Copy tweet';
+                }, 2000);
+            });
+        });
+
+        // Update character count on edit with auto-resize
+        textArea.addEventListener('input', () => {
+            const charCount = card.querySelector('.twitter-char-count');
+            const length = this.getAccurateCharacterCount(textArea.value);
+            charCount.textContent = `${length} characters`;
+            charCount.style.color = 'var(--text-secondary)';
+            autoResizeTextarea();
+        });
+
+        // Length slider functionality
+        const lengthSlider = card.querySelector('.length-slider');
+        const lengthDisplay = card.querySelector('.length-display');
+        const regenerateBtn = card.querySelector('.regenerate-btn');
+
+        lengthSlider.addEventListener('input', () => {
+            lengthDisplay.textContent = lengthSlider.value;
+        });
+
+        // Store original content and platform for regeneration
+        card.dataset.originalContent = this.pageContent;
+        card.dataset.platform = cardTitle.includes('Thread') ? 'thread' : 'twitter';
+
+        regenerateBtn.addEventListener('click', async () => {
+            const targetLength = parseInt(lengthSlider.value);
+            const platform = card.dataset.platform;
+            await this.regenerateWithLength(card, targetLength, platform);
+        });
+
+        return card;
+    }
+
+    cleanTwitterContent(content) {
+        if (!content) return content;
+        
+        let cleaned = content;
+        
+        // Remove all hashtags and # symbols
+        cleaned = cleaned.replace(/#\w+/g, '');
+        cleaned = cleaned.replace(/#/g, '');
+        
+        // Remove asterisks used for emphasis (*bold* -> bold)
+        cleaned = cleaned.replace(/\*([^*]+)\*/g, '$1');
+        cleaned = cleaned.replace(/\*\*([^*]+)\*\*/g, '$1');
+        
+        // Replace "(line break)" literals with actual line breaks
+        cleaned = cleaned.replace(/\(line break\)/gi, '\n');
+        cleaned = cleaned.replace(/\[line break\]/gi, '\n');
+        
+        // Remove markdown formatting
+        cleaned = cleaned.replace(/_{2,}([^_]+)_{2,}/g, '$1'); // __text__
+        cleaned = cleaned.replace(/_([^_]+)_/g, '$1'); // _text_
+        
+        // Remove extra markdown symbols
+        cleaned = cleaned.replace(/\*{2,}/g, '');
+        cleaned = cleaned.replace(/_{2,}/g, '');
+        
+        // Clean up bullet points - standardize to •
+        cleaned = cleaned.replace(/[-*]\s+/g, '• ');
+        
+        // Remove extra whitespace and normalize line breaks
+        cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+        cleaned = cleaned.replace(/[ \t]+/g, ' ');
+        
+        // Trim and ensure proper structure
+        cleaned = cleaned.trim();
+        
+        // Remove any remaining formatting artifacts
+        cleaned = cleaned.replace(/\[([^\]]+)\]/g, '$1'); // [text] -> text
+        cleaned = cleaned.replace(/\(([^)]+)\)/g, (match, p1) => {
+            // Keep emojis and natural parentheses, remove formatting ones
+            if (p1.includes('emphasis') || p1.includes('bold') || p1.includes('italic')) {
+                return '';
+            }
+            return match;
+        });
+        
+        return cleaned;
+    }
+
+    getAccurateCharacterCount(text) {
+        if (!text) return 0;
+        
+        // Remove leading/trailing whitespace
+        const trimmedText = text.trim();
+        
+        // Handle different types of characters accurately
+        let count = 0;
+        
+        // Convert to array to properly handle Unicode characters, emojis, etc.
+        const characters = Array.from(trimmedText);
+        
+        for (const char of characters) {
+            // Emoji and special Unicode characters count as 2 on Twitter
+            if (this.isEmojiOrSpecialChar(char)) {
+                count += 2;
+            } else {
+                count += 1;
+            }
+        }
+        
+        return count;
+    }
+
+    isEmojiOrSpecialChar(char) {
+        const codePoint = char.codePointAt(0);
+        
+        // Emoji ranges and special Unicode characters
+        return (
+            (codePoint >= 0x1F000 && codePoint <= 0x1F9FF) || // Emoticons, symbols, pictographs
+            (codePoint >= 0x2600 && codePoint <= 0x26FF) ||   // Miscellaneous symbols
+            (codePoint >= 0x2700 && codePoint <= 0x27BF) ||   // Dingbats
+            (codePoint >= 0x1F600 && codePoint <= 0x1F64F) || // Emoticons
+            (codePoint >= 0x1F300 && codePoint <= 0x1F5FF) || // Misc symbols and pictographs
+            (codePoint >= 0x1F680 && codePoint <= 0x1F6FF) || // Transport and map symbols
+            (codePoint >= 0x1F1E0 && codePoint <= 0x1F1FF) || // Regional indicators (flags)
+            (codePoint >= 0x200D)  // Zero-width joiner and similar
+        );
+    }
+
+    async regenerateWithLength(card, targetLength, platform) {
+        const textArea = card.querySelector('.twitter-text');
+        const regenerateBtn = card.querySelector('.regenerate-btn');
+        const originalContent = card.dataset.originalContent;
+
+        // Show loading state
+        regenerateBtn.textContent = '⏳';
+        regenerateBtn.disabled = true;
+
+        try {
+            let systemPrompt = '';
+            let userPrompt = '';
+
+            if (platform === 'twitter') {
+                systemPrompt = `You are a Twitter/X Premium content creation expert. Create engaging, viral-worthy tweets that drive maximum engagement. Focus on detailed storytelling and valuable insights. NEVER use hashtags in your output.`;
+                
+                userPrompt = `Create a Twitter/X post with EXACTLY ${targetLength} characters (±10 characters acceptable):
+
+STRICT REQUIREMENTS:
+- Target character count: ${targetLength} characters
+- NO HASHTAGS ALLOWED - This rule cannot be broken
+- Make it highly engaging and shareable
+- Use conversational, compelling tone
+- Include emoji strategically to enhance readability
+- Add call-to-action if space allows
+- Focus on delivering maximum value
+
+CONTENT TO TRANSFORM:
+${originalContent}
+
+OUTPUT FORMAT: Tweet content exactly around ${targetLength} characters WITHOUT hashtags.`;
+
+            } else if (platform === 'thread') {
+                const tweetsNeeded = Math.ceil(targetLength / 400); // Approximate tweets needed
+                systemPrompt = `You are a Twitter Premium thread specialist. Create compelling multi-tweet threads that tell detailed stories and provide valuable insights. NEVER use hashtags in your output.`;
+                
+                userPrompt = `Create a Twitter thread with approximately ${targetLength} total characters across ${tweetsNeeded} tweets:
+
+STRICT REQUIREMENTS:
+- Create ${tweetsNeeded} tweets numbered (1/n, 2/n, etc.)
+- Total thread length: approximately ${targetLength} characters
+- NO HASHTAGS ALLOWED anywhere in the thread
+- Each tweet should be comprehensive and valuable
+- Build compelling narrative throughout
+- End with strong call-to-action
+
+CONTENT TO TRANSFORM:
+${originalContent}
+
+OUTPUT FORMAT:
+1/n: [Tweet content]
+2/n: [Tweet content]
+...
+n/n: [Conclusion with CTA]`;
+            }
+
+            const response = await this.callGeminiAPIWithSystemPrompt(systemPrompt, userPrompt);
+            
+            if (response) {
+                const cleanedResponse = this.cleanTwitterContent(response);
+                
+                if (platform === 'thread') {
+                    const tweets = this.parseTwitterThread(cleanedResponse);
+                    const firstTweet = tweets[0] || cleanedResponse;
+                    textArea.value = firstTweet;
+                } else {
+                    textArea.value = cleanedResponse;
+                }
+                
+                // Update character count with auto-resize
+                const charCount = card.querySelector('.twitter-char-count');
+                const accurateLength = this.getAccurateCharacterCount(textArea.value);
+                charCount.textContent = `${accurateLength} characters`;
+                
+                // Auto-resize after content update
+                setTimeout(() => {
+                    textArea.style.height = 'auto';
+                    textArea.style.height = Math.max(80, textArea.scrollHeight) + 'px';
+                }, 0);
+            }
+
+        } catch (error) {
+            console.error('Error regenerating content:', error);
+            alert('Error regenerating content. Please try again.');
+        } finally {
+            regenerateBtn.textContent = '🔄';
+            regenerateBtn.disabled = false;
         }
     }
 }
