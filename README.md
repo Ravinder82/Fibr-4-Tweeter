@@ -25,6 +25,16 @@ TabTalk AI is a sophisticated Chrome extension that enables intelligent conversa
 - **Responsive Layout**: Optimized for Chrome extension popup (400x600px)
 
 ### ⚡ **Advanced User Experience**
+
+## 🎉 Recent Updates
+
+**v1.1.0 - Stability & UI Polish**
+
+- **Critical Bug Fix**: Resolved a major JavaScript syntax error in `ui-render.js` that was preventing the extension from loading correctly. This fix restores all UI components, including the action buttons, and eliminates console errors.
+- **UI Refinements**: Cleaned up and refactored the UI rendering logic for improved performance and stability.
+- **Enhanced Sanitizer**: Improved the content cleaning pipeline to strip unwanted markdown and normalize AI-generated outputs for a cleaner user experience.
+- **Robust Prompts**: Updated AI prompts to enforce stricter output formats, reducing noisy or inconsistent responses.
+- **Code Cleanup**: Performed general code cleanup and refactoring across several files.
 - **Animated Progress Bars**: Beautiful gradient progress with shimmer effects
 - **Character Count Management**: Accurate Unicode and emoji character counting
 - **Auto-Resize Text Areas**: Content-fitted containers with no scrollbars

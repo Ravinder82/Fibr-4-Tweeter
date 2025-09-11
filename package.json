@@ -12,15 +12,16 @@
     "dev:web": "esbuild src/web-app/app.js --bundle --outfile=dist/web/app.js --watch",
     "clean": "rm -rf dist/",
     "package:extension": "cd dist/extension && zip -r ../../tabtalk-ai-extension.zip .",
-    "package:web": "cd dist/web && zip -r ../../tabtalk-ai-web.zip ."
+    "package:web": "cd dist/web && zip -r ../../tabtalk-ai-web.zip .",
+    "test": "node tests/run-all.js",
+    "knip": "knip"
   },
   "keywords": ["ai", "chat", "gemini", "chrome-extension", "web-app"],
   "author": "TabTalk AI Team",
   "license": "MIT",
   "devDependencies": {
-    "esbuild": "^0.19.0"
+    "esbuild": "^0.19.0",
+    "knip": "^5.27.0"
   },
-  "dependencies": {
-    "marked": "^4.3.0"
-  }
+  "dependencies": {}
 }

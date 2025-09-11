@@ -5,22 +5,11 @@ const GEMINI_API_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/mo
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'callGeminiAPI') {
-        const { apiKey, payload } = request;
-
-        // --- KEY TRACING LOG 4 ---
-        console.log("Background: Received this key from popup:", apiKey);
-
-        if (!apiKey) {
-            sendResponse({ success: false, error: 'API Key was missing in the message to the background script.' });
-            return true;
-        }
-
-        (async () => {
-            const response = await callGeminiApi(apiKey, payload);
-            sendResponse(response);
-        })();
-            
-        return true;
+        handleGeminiAPICall(request, sendResponse);
+        return true; // Will respond asynchronously
+    } else if (request.action === 'testApiKey') {
+        testApiKey(request.apiKey, sendResponse);
+        return true; // Will respond asynchronously
     }
 });
 
@@ -49,5 +38,35 @@ async function callGeminiApi(apiKey, payload) {
         return { success: true, data: JSON.parse(responseText) };
     } catch (error) {
         return { success: false, error: `A network error occurred: ${error.message}` };
+    }
+}
+
+function handleGeminiAPICall(request, sendResponse) {
+    try {
+        const apiKey = request.apiKey;
+        const payload = request.payload || {};
+        callGeminiApi(apiKey, payload)
+            .then(sendResponse)
+            .catch(err => sendResponse({ success: false, error: err?.message || String(err) }));
+    } catch (error) {
+        sendResponse({ success: false, error: error?.message || String(error) });
+    }
+}
+
+async function testApiKey(apiKey, sendResponse) {
+    try {
+        const payload = {
+            contents: [
+                { role: 'user', parts: [{ text: 'ping' }] }
+            ]
+        };
+        const result = await callGeminiApi(apiKey, payload);
+        if (result && result.success) {
+            sendResponse({ success: true });
+        } else {
+            sendResponse({ success: false, error: result?.error || 'Unknown error' });
+        }
+    } catch (error) {
+        sendResponse({ success: false, error: error?.message || String(error) });
     }
 }
