@@ -317,69 +317,6 @@
       if (existing) existing.remove();
     },
 
-    loadAndRenderHistory: async function() {
-      const container = document.getElementById('history-container');
-      const preview = document.getElementById('history-preview');
-      if (!container) return;
-      container.innerHTML = '';
-      if (preview) preview.innerHTML = '';
-      const history = await (this.getHistory ? this.getHistory(null) : {});
-      const categories = Object.keys(history || {});
-      if (!categories.length) {
-        container.innerHTML = '<div class="history-empty">No history yet.</div>';
-        return;
-      }
-      categories.forEach(cat => {
-        const items = history[cat] || [];
-        const section = document.createElement('div');
-        section.className = 'history-category';
-        section.innerHTML = `
-          <div class="history-category-header">
-            <h3>${cat}</h3>
-            <button class="button-secondary history-clear-btn" data-clear-category="${cat}">Clear</button>
-          </div>
-          <div class="history-items"></div>
-        `;
-        const itemsEl = section.querySelector('.history-items');
-        items.forEach((rec, idx) => {
-          const item = document.createElement('button');
-          item.className = 'history-item';
-          item.dataset.category = cat;
-          item.dataset.index = String(idx);
-          item.textContent = `${rec.title || rec.domain || 'Untitled'} • ${new Date(rec.timestamp).toLocaleString()}`;
-          itemsEl.appendChild(item);
-        });
-        container.appendChild(section);
-      });
-      container.querySelectorAll('[data-clear-category]').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          const cat = e.currentTarget.dataset.clearCategory;
-          if (confirm(`Clear history for ${cat}?`)) {
-            await this.clearHistoryCategory(cat);
-            await this.loadAndRenderHistory();
-          }
-        });
-      });
-      container.querySelectorAll('.history-item').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const { category, index } = e.currentTarget.dataset;
-          this.previewHistoryItem(category, parseInt(index, 10));
-        });
-      });
-    },
-
-    previewHistoryItem: async function(category, index) {
-      const preview = document.getElementById('history-preview');
-      if (!preview) return;
-      preview.innerHTML = '';
-      const history = await this.getHistory(category);
-      const rec = history?.[index];
-      if (!rec) return;
-      const titleMap = { twitter: '🐦', thread: '🧵', blog: '✍️', summary: '📝', keypoints: '🔑', analysis: '📊', factcheck: '✅' };
-      const title = `${titleMap[rec.type] || '✨'} ${rec.type.charAt(0).toUpperCase() + rec.type.slice(1)}`;
-      const sanitized = this.sanitizeStructuredOutput(rec.type || 'summary', rec.content || '');
-      this.renderCard(title, this.marked ? this.marked.parse(sanitized) : sanitized.replace(/\n/g, '<br>'), { container: preview, markdown: sanitized });
-    }
   };
   window.TabTalkUI = UI;
 })();

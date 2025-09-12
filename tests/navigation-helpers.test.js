@@ -11,14 +11,13 @@ const views = {
   welcome: { id: 'welcome-view', hidden: true },
   'api-setup': { id: 'api-setup-view', hidden: true },
   chat: { id: 'chat-view', hidden: true },
-  settings: { id: 'settings-view', hidden: true },
-  history: { id: 'history-view', hidden: true }
+  settings: { id: 'settings-view', hidden: true }
 };
 
 test('computeViewState shows target view and hides others', () => {
-  const next = computeViewState(views, 'history');
+  const next = computeViewState(views, 'chat');
   Object.keys(views).forEach(k => {
-    if (k === 'history') assert.strictEqual(next[k].hidden, false, 'history should be visible');
+    if (k === 'chat') assert.strictEqual(next[k].hidden, false, 'chat should be visible');
     else assert.strictEqual(next[k].hidden, true, `${k} should be hidden`);
   });
 });

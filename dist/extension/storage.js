@@ -76,43 +76,6 @@
       }
     },
 
-    // Category-wise History Management for future History page
-    async addToHistory(category, record) {
-      try {
-        const { history = {} } = await chrome.storage.local.get(['history']);
-        const list = Array.isArray(history[category]) ? history[category] : [];
-        list.unshift(record);
-        // Keep only latest 50 per category
-        history[category] = list.slice(0, 50);
-        await chrome.storage.local.set({ history });
-        return true;
-      } catch (err) {
-        console.error('addToHistory error:', err);
-        return false;
-      }
-    },
-
-    async getHistory(category = null) {
-      try {
-        const { history = {} } = await chrome.storage.local.get(['history']);
-        return category ? (history[category] || []) : history;
-      } catch (err) {
-        console.error('getHistory error:', err);
-        return category ? [] : {};
-      }
-    },
-
-    async clearHistoryCategory(category) {
-      try {
-        const { history = {} } = await chrome.storage.local.get(['history']);
-        if (history[category]) delete history[category];
-        await chrome.storage.local.set({ history });
-        return true;
-      } catch (err) {
-        console.error('clearHistoryCategory error:', err);
-        return false;
-      }
-    },
 
     async handleDeleteApiKey() {
       if (!confirm('Delete your API key? You will need to set it up again.')) return;

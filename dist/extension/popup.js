@@ -31,8 +31,6 @@ class TabTalkAI {
         this.apiSetupView = document.getElementById('api-setup-view');
         this.chatView = document.getElementById('chat-view');
         this.settingsView = document.getElementById('settings-view');
-        this.historyView = document.getElementById('history-view');
-        
         // Missing properties added here
         this.menuButton = document.getElementById('menu-button');
         // Prefer the actual settings input id from popup.html ('api-key-input')
@@ -44,8 +42,7 @@ class TabTalkAI {
             welcome: this.welcomeView,
             'api-setup': this.apiSetupView,
             chat: this.chatView,
-            settings: this.settingsView,
-            history: this.historyView
+            settings: this.settingsView
         };
     }
 
@@ -149,18 +146,7 @@ class TabTalkAI {
                 if (this.sidebar) this.sidebar.classList.add('hidden');
         });
         }
-        const menuHistoryLink = document.getElementById('menu-history-link');
-        if (menuHistoryLink) {
-            menuHistoryLink.addEventListener('click', async (e) => {
-                e.preventDefault();
-                this.updateViewState('history');
-                if (this.sidebar) {
-                    this.sidebar.classList.add('hidden');
-                    this.sidebar.style.display = 'none';
-                }
-                if (this.loadAndRenderHistory) await this.loadAndRenderHistory();
-            });
-        }
+
         const menuRefreshLink = document.getElementById('menu-refresh-link');
         if (menuRefreshLink) {
             menuRefreshLink.addEventListener('click', async (e) => {
