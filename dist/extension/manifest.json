@@ -27,7 +27,7 @@
     ],
     "web_accessible_resources": [
         {
-            "resources": ["content.js", "marked.min.js", "html2pdf.bundle.min.js"],
+            "resources": ["content.js", "marked.min.js", "html2pdf.bundle.min.js", "assets/fox-ironman.png"],
             "matches": ["<all_urls>"]
         }
     ],
