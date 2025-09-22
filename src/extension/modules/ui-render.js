@@ -1,5 +1,7 @@
 (function() {
   const UI = {
+    // Save button states
+    saveButtonStates: {},
     ensureMarked: function() {
       if (this.marked) return Promise.resolve(true);
       if (document.querySelector('script[data-loader="marked"]')) {
@@ -175,6 +177,9 @@
       container.className = 'twitter-content-container';
       const card = document.createElement('div');
       card.className = 'twitter-card';
+      card.dataset.contentType = options.contentType || 'content';
+      card.dataset.contentId = options.contentId || Date.now().toString();
+      
       const content = document.createElement('div');
       content.className = 'twitter-card-content';
       const markdownAttr = options.markdown ? `data-markdown="${encodeURIComponent(options.markdown)}"` : '';
@@ -183,9 +188,24 @@
           <h3 class="twitter-username">${title}</h3>
           <button class="copy-button" title="Copy">📋</button>
         </div>
-        <div class="structured-html" ${markdownAttr}>${bodyHtml}</div>
+        <div class="structured-html content-text" ${markdownAttr}>${bodyHtml}</div>
       `;
       card.appendChild(content);
+      
+      // Add save button to card header
+      if (window.TabTalkUI && window.TabTalkUI.addSaveButtonToCard) {
+        const contentType = options.contentType || 'content';
+        const contentData = {
+          id: options.contentId || Date.now().toString(),
+          content: options.markdown || bodyHtml,
+          title: title
+        };
+        const cardHeader = card.querySelector('.twitter-card-header');
+        if (cardHeader) {
+          window.TabTalkUI.addSaveButtonToCard(cardHeader, contentType, contentData);
+        }
+      }
+      
       const copyBtn = card.querySelector('.copy-button');
       copyBtn.addEventListener('click', () => {
         const structured = card.querySelector('.structured-html');
@@ -208,6 +228,7 @@
     renderStructuredContent: function(contentType, rawContent) {
       const renderMarkdown = (text) => this.marked ? this.marked.parse(text) : (text || '').replace(/\n/g, '<br>');
       const cleaned = this.sanitizeStructuredOutput(contentType, rawContent);
+      const contentId = Date.now().toString();
 
       switch (contentType) {
         case 'factcheck': {
@@ -216,24 +237,40 @@
             parts.forEach((p, idx) => {
               const title = `✅ Fact Check — Claim ${idx + 1}`;
               const segment = p.trim();
-              this.renderCard(title, renderMarkdown(segment), { markdown: segment });
+              this.renderCard(title, renderMarkdown(segment), { 
+                markdown: segment, 
+                contentType: 'factcheck', 
+                contentId: `${contentId}-${idx}` 
+              });
             });
           } else {
-            this.renderCard('✅ Fact Check', renderMarkdown(cleaned), { markdown: cleaned });
+            this.renderCard('✅ Fact Check', renderMarkdown(cleaned), { 
+              markdown: cleaned, 
+              contentType: 'factcheck', 
+              contentId: contentId 
+            });
           }
           break;
         }
         case 'summary':
         case 'blog': {
           const titleMap = { summary: '📝 Summary', blog: '✍️ Blog Post' };
-          const card = this.renderCard(titleMap[contentType], renderMarkdown(cleaned), { markdown: cleaned });
+          const card = this.renderCard(titleMap[contentType], renderMarkdown(cleaned), { 
+            markdown: cleaned, 
+            contentType: contentType,
+            contentId: contentId 
+          });
           this.attachStructuredRegenerateControls(card, contentType);
           break;
         }
         default: {
           const titleMap = { keypoints: '🔑 Key Points', analysis: '📊 Analysis Report', faq: '❓ FAQ' };
           const title = titleMap[contentType] || '✨ Generated Content';
-          this.renderCard(title, renderMarkdown(cleaned), { markdown: cleaned });
+          this.renderCard(title, renderMarkdown(cleaned), { 
+            markdown: cleaned, 
+            contentType: contentType,
+            contentId: contentId 
+          });
         }
       }
     },
@@ -316,7 +353,90 @@
       const existing = document.getElementById('global-progress');
       if (existing) existing.remove();
     },
-
+    
+    // NEW: Add save button to content cards
+    addSaveButtonToCard: function(cardElement, category, contentData) {
+      if (!cardElement || !category || !contentData) return;
+      
+      // Create save button
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'save-btn';
+      saveBtn.setAttribute('aria-label', 'Save to history');
+      saveBtn.setAttribute('data-category', category);
+      saveBtn.setAttribute('data-content-id', contentData.id || Date.now().toString());
+      saveBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+      </svg>`;
+      
+      // Check if already saved
+      if (window.TabTalkStorage) {
+        window.TabTalkStorage.isContentSaved(category, contentData.id || Date.now().toString())
+          .then(isSaved => {
+            if (isSaved) {
+              saveBtn.classList.add('saved');
+              saveBtn.querySelector('svg').setAttribute('fill', 'currentColor');
+            }
+          });
+      }
+      
+      // Add click handler
+      saveBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const contentId = saveBtn.getAttribute('data-content-id');
+        const category = saveBtn.getAttribute('data-category');
+        
+        if (!window.TabTalkStorage) return;
+        
+        const isSaved = await window.TabTalkStorage.isContentSaved(category, contentId);
+        
+        if (isSaved) {
+          // Remove from saved
+          await window.TabTalkStorage.deleteSavedContent(category, contentId);
+          saveBtn.classList.remove('saved');
+          saveBtn.querySelector('svg').setAttribute('fill', 'none');
+          this.showToast('Removed from saved content');
+        } else {
+          // Add to saved
+          // Get content from card
+          const content = contentData.content || cardElement.querySelector('.content-text')?.textContent || '';
+          const metadata = {
+            source: this.currentTab?.url || window.location.href,
+            title: this.currentTab?.title || document.title
+          };
+          
+          await window.TabTalkStorage.saveContent(category, {
+            id: contentId,
+            content,
+            metadata,
+            ...contentData
+          });
+          
+          saveBtn.classList.add('saved');
+          saveBtn.querySelector('svg').setAttribute('fill', 'currentColor');
+          this.showToast('Saved to history');
+        }
+      });
+      
+      // Add to card
+      cardElement.appendChild(saveBtn);
+    },
+    
+    // Show toast notification
+    showToast: function(message, duration = 2000) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.add('visible');
+      }, 10);
+      
+      setTimeout(() => {
+        toast.classList.remove('visible');
+        setTimeout(() => toast.remove(), 300);
+      }, duration);
+    },
   };
   window.TabTalkUI = UI;
 })();

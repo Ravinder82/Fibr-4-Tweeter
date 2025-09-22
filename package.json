@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "npm run build:extension && npm run build:web",
-    "build:extension": "npx esbuild src/extension/popup.js --bundle --outfile=dist/extension/popup.js --minify && cp -r icons dist/extension/ && cp src/extension/manifest.json dist/extension/manifest.json && cp src/extension/content.js dist/extension/ && cp src/extension/background.js dist/extension/ && cp popup.css dist/extension/ && cp src/extension/modules/*.js dist/extension/ && cp src/extension/modules/*.css dist/extension/ && cp src/extension/modules/html2pdf.bundle.min.js dist/extension/ && cp src/extension/modules/marked.min.js dist/extension/ && cp src/extension/popup.html dist/extension/",
+    "build:extension": "npx esbuild src/extension/popup.js --bundle --outfile=dist/extension/popup.js --minify && cp -r icons dist/extension/ && cp src/extension/manifest.json dist/extension/manifest.json && cp src/extension/content.js dist/extension/ && cp src/extension/background.js dist/extension/ && cp popup.css dist/extension/ && cp src/extension/modules/*.js dist/extension/ && cp src/extension/modules/*.css dist/extension/ && cp src/extension/modules/html2pdf.bundle.min.js dist/extension/ && cp src/extension/modules/marked.min.js dist/extension/ && cp src/extension/modules/history.js dist/extension/ && cp src/extension/popup.html dist/extension/",
     "build:web": "esbuild src/web-app/app.js --bundle --outfile=dist/web/app.js --minify && cp index.html dist/web/ && cp styles.css dist/web/ && cp sw.js dist/web/ && cp manifest.webmanifest dist/web/ && cp manifest.json dist/web/",
     "dev": "npm run dev:extension & npm run dev:web",
     "dev:extension": "esbuild src/extension/popup.js --bundle --outfile=dist/extension/popup.js --watch",

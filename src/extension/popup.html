@@ -200,7 +200,30 @@
                 </div>
             </div>
 
-            <!-- VIEW 4: STATUS (For loading or critical errors) -->
+            <!-- VIEW 4: HISTORY (Saved Content) -->
+            <div id="history-view" class="view hidden">
+                <div class="history-header">
+                    <button class="back-btn" id="history-back-btn">← Back</button>
+                    <h2>Saved Content</h2>
+                </div>
+                
+                <div class="category-tabs">
+                    <button class="tab active" data-category="all">All</button>
+                    <button class="tab" data-category="twitter">Twitter</button>
+                    <button class="tab" data-category="thread">Threads</button>
+                    <button class="tab" data-category="summary">Summary</button>
+                    <button class="tab" data-category="analysis">Analysis</button>
+                    <button class="tab" data-category="blog">Blog</button>
+                    <button class="tab" data-category="faq">FAQ</button>
+                    <button class="tab" data-category="factcheck">Fact Check</button>
+                </div>
+                
+                <div id="history-list" class="history-list">
+                    <!-- History items rendered here -->
+                </div>
+            </div>
+
+            <!-- VIEW 5: STATUS (For loading or critical errors) -->
             <div id="status-view" class="view hidden">
                 <div class="spinner"></div>
                 <p id="status-text">Initializing...</p>
@@ -217,7 +240,9 @@
     <script src="ui-render.js"></script>
     <script src="scroll.js"></script>
     <script src="navigation.js"></script>
+    <script src="history.js"></script>
     <script src="popup.js"></script>
+    <script src="debug-history.js"></script>
     <div id="aria-status" class="visually-hidden" aria-live="polite"></div>
 </body>
 </html>

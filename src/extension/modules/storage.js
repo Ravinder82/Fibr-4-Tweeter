@@ -99,6 +99,49 @@
         console.error('Error deleting API key:', error);
         alert('Error deleting API key. Please try again.');
       }
+    },
+    
+    // NEW: Saved Content Methods
+    async getSavedContent() {
+      const result = await this.getStorageItem('savedContent');
+      return result || {};
+    },
+    
+    async saveContent(category, contentData) {
+      const savedContent = await this.getSavedContent();
+      if (!savedContent[category]) savedContent[category] = [];
+      
+      const item = {
+        id: Date.now().toString(),
+        ...contentData,
+        timestamp: Date.now()
+      };
+      
+      // Add to beginning of array (most recent first)
+      savedContent[category].unshift(item);
+      
+      // Limit to 50 items per category to prevent storage issues
+      if (savedContent[category].length > 50) {
+        savedContent[category] = savedContent[category].slice(0, 50);
+      }
+      
+      await this.setStorageItem('savedContent', savedContent);
+      console.log(`TabTalk AI: Content saved to ${category} category`);
+      return item.id;
+    },
+    
+    async deleteSavedContent(category, itemId) {
+      const savedContent = await this.getSavedContent();
+      if (savedContent[category]) {
+        savedContent[category] = savedContent[category].filter(item => item.id !== itemId);
+        await this.setStorageItem('savedContent', savedContent);
+        console.log(`TabTalk AI: Content deleted from ${category} category`);
+      }
+    },
+    
+    async isContentSaved(category, contentId) {
+      const savedContent = await this.getSavedContent();
+      return savedContent[category]?.some(item => item.id === contentId) || false;
     }
   };
   window.TabTalkStorage = Storage;

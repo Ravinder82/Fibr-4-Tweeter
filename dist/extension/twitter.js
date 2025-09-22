@@ -229,6 +229,21 @@ n/n: [Clean conclusion with CTA]`;
           </div>
         </div>
       `;
+      
+      // Add save button to Twitter card header
+      if (window.TabTalkUI && window.TabTalkUI.addSaveButtonToCard) {
+        const contentData = {
+          id: Date.now().toString(),
+          content: tweetContent,
+          title: cardTitle
+        };
+        const contentType = cardTitle.toLowerCase().includes('thread') ? 'thread' : 'twitter';
+        const cardHeader = card.querySelector('.twitter-card-header');
+        if (cardHeader) {
+          window.TabTalkUI.addSaveButtonToCard(cardHeader, contentType, contentData);
+        }
+      }
+      
       const copyBtn = card.querySelector('.twitter-copy-btn');
       const textArea = card.querySelector('.twitter-text');
       const autoResizeTextarea = () => {
