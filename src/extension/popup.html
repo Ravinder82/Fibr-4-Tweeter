@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TabTalk AI</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER: Always visible -->
+        <header class="header">
+            <div class="logo">
+                <img src="icons/icon48.png" alt="logo" class="logo-icon">
+                <h1>TabTalk AI</h1>
+            </div>
+            <div class="header-controls">
+                <label class="dark-mode-label" title="Toggle Dark Mode">
+                    <input type="checkbox" id="dark-mode-toggle">
+                    <span class="dark-mode-icon">🌓</span>
+                </label>
+                <button id="menu-button" class="menu-button" title="Menu">☰</button>
+            </div>
+        </header>
+
+        <!-- QUICK ACTIONS: Horizontal Scrolling Content Creation -->
+        <div id="quick-actions" class="quick-actions-container hidden" aria-label="Quick actions">
+            <button class="scroll-arrow scroll-arrow-left" id="scroll-left" title="Scroll left">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M11 2L5 8l6 6V2z"/>
+                </svg>
+            </button>
+            <div class="scroll-container">
+                <div class="action-buttons-wrapper">
+                    <button id="quick-twitter" class="action-btn" title="Generate Twitter/X post">
+                        <span class="btn-text">Twitter Post</span>
+                    </button>
+                    <button id="quick-thread" class="action-btn" title="Generate Twitter thread">
+                        <span class="btn-text">Twitter Thread</span>
+                    </button>
+                    <button id="quick-blog" class="action-btn" title="Generate blog post">
+                        <span class="btn-text">Blog Post</span>
+                    </button>
+                    <button id="quick-summary" class="action-btn" title="Generate summary">
+                        <span class="btn-text">Summary</span>
+                    </button>
+                    <button id="quick-keypoints" class="action-btn" title="Extract key points">
+                        <span class="btn-text">Key Points</span>
+                    </button>
+                    <button id="quick-factcheck" class="action-btn" title="Fact check content">
+                        <span class="btn-text">Fact Check</span>
+                    </button>
+                    <button id="quick-analysis" class="action-btn" title="Generate analysis report">
+                        <span class="btn-text">Analysis Report</span>
+                    </button>
+                    <!-- Duplicate buttons for infinite scroll effect -->
+                    <button class="action-btn duplicate" title="Generate Twitter/X post">
+                        <span class="btn-text">Twitter Post</span>
+                    </button>
+                    <button class="action-btn duplicate" title="Generate Twitter thread">
+                        <span class="btn-text">Twitter Thread</span>
+                    </button>
+                    <button class="action-btn duplicate" title="Generate blog post">
+                        <span class="btn-text">Blog Post</span>
+                    </button>
+                </div>
+            </div>
+            <button class="scroll-arrow scroll-arrow-right" id="scroll-right" title="Scroll right">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M5 2l6 6-6 6V2z"/>
+                </svg>
+            </button>
+        </div>
+
+            <!-- SIDEBAR: Hidden by default -->
+        <div id="sidebar" class="sidebar hidden">
+            <a href="#" id="menu-faq-link">FAQ Generator</a>
+            <div class="sidebar-divider"></div>
+            <a href="#" id="menu-settings-link">Gemini API Setup</a>
+            <a href="#" id="menu-refresh-link">Clear Chat</a>
+        </div>
+
+        <!-- MAIN CONTENT: This holds all our different views -->
+        <main id="main-content">
+
+            <!-- VIEW 1: WELCOME ONBOARDING (Minimal) -->
+            <div id="welcome-view" class="view hidden">
+                <div class="onboarding-container">
+                    <div class="welcome-hero">
+    <img src="icons/icon128.png" alt="TabTalk AI" class="welcome-logo">
+    <h1 class="welcome-title">Welcome to TabTalk AI</h1>
+    <p class="welcome-subtitle">Transform any webpage into intelligent conversations</p>
+                        <!-- Coming Soon Alert -->
+                        <div class="coming-soon-alert">
+                            <div class="alert-icon">🚀</div>
+                            <h3 class="alert-title">New Features Coming Soon</h3>
+                            <p class="alert-message">Enhanced AI capabilities and exciting tools are on the way!</p>
+                        </div>
+    </div>
+                    <div class="onboarding-actions" style="margin-top: 12px;">
+                        <button id="welcome-start" class="button-primary" aria-label="Start onboarding and go to API setup">Start</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 2: API KEY SETUP -->
+            <div id="api-setup-view" class="view hidden">
+                <div class="setup-header-with-nav">
+                    <button id="api-setup-back-arrow" class="header-back-btn" title="Back to Welcome" aria-label="Back to Welcome">← Back</button>
+                </div>
+                <div class="onboarding-container">
+                    <div class="setup-header">
+                        <h2>Setup Your AI Assistant</h2>
+                        <p>Connect your Google Gemini API to unlock TabTalk AI</p>
+                    </div>
+                    <div class="tutorial-steps">
+                        <div class="step-item">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h3>Get Your API Key</h3>
+                                <p>Visit Google AI Studio to create your free API key</p>
+                                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="tutorial-link">Open AI Studio →</a>
+                            </div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h3>Copy Your Key</h3>
+                                <p>Create a new API key and copy it to your clipboard</p>
+                            </div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h3>Paste Below</h3>
+                                <div class="api-input-group">
+                                    <input type="password" id="onboarding-api-key" placeholder="Paste your API key here...">
+                                    <button id="test-api-key" class="button-secondary">Test</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="onboarding-actions">
+                        <button id="api-setup-back" class="button-secondary">Back</button>
+                        <button id="api-setup-continue" class="button-primary" disabled>Continue</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 3: SETTINGS (Legacy) -->
+            <div id="settings-view" class="view hidden">
+                <h2>Gemini API Setup</h2>
+                <div class="settings-container">
+                    <div class="form-group api-key">
+                        <label for="api-key-input">Gemini API Key</label>
+                        <input type="password" id="api-key-input" placeholder="Paste your key here">
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="help-link">Get key</a>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button id="settings-cancel-button" class="button-secondary">Cancel</button>
+                    <button id="settings-save-button" class="button-primary">Save</button>
+                    <button id="delete-api-key-button" class="button-secondary">Delete API Key</button>
+                </div>
+                <div class="onboarding-info">
+                    <h3>Need help?</h3>
+                    <p>Visit our tutorial for step-by-step guidance</p>
+                </div>
+            </div>
+            
+            <!-- VIEW 3: CHAT (The main interface) -->
+            <div id="chat-view" class="view hidden">
+                <div class="page-info">
+                    <p id="page-title">Loading page...</p>
+                    <div id="page-status" class="page-status"></div>
+                </div>
+                <div id="messages-container" class="messages-container">
+                    <!-- Chat messages will be added here by JavaScript -->
+                </div>
+                <div id="empty-state" class="empty-state hidden" aria-hidden="true">
+                    <img src="icons/icon128.png" alt="TabTalk AI logo" class="hero">
+                    <h2>Get started in 3 quick steps</h2>
+                    <ol>
+                        <li>Visit <strong>ai.google.com/studio</strong></li>
+                        <li>Create an API key &amp; enable <strong>Gemini API</strong></li>
+                        <li>Paste the key into TabTalk AI</li>
+                    </ol>
+                </div>
+                <div class="input-area">
+                    <div class="input-bar">
+                        <textarea id="message-input" placeholder="Ask about this page..." rows="1" aria-label="Message input"></textarea>
+                        <button id="send-button" title="Send message" aria-label="Send message" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855a.5.5 0 0 0-.09.89l4.736 3.14L13 5.5V9l2.25-3.25L13 2.5v3.75L4.159 9.25l4.776 3.175a.5.5 0 0 0 .75-.225l6.229-10.889a.5.5 0 0 0 .25-.625Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="input-footer">
+                        <span class="char-count" aria-live="polite">0/2000</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 4: STATUS (For loading or critical errors) -->
+            <div id="status-view" class="view hidden">
+                <div class="spinner"></div>
+                <p id="status-text">Initializing...</p>
+            </div>
+            
+        </main>
+    </div>
+    <!-- Scripts -->
+    <script src="html2pdf.bundle.min.js"></script>
+    <script src="api.js"></script>
+    <script src="twitter.js"></script>
+    <script src="export.js"></script>
+    <script src="storage.js"></script>
+    <script src="ui-render.js"></script>
+    <script src="scroll.js"></script>
+    <script src="navigation.js"></script>
+    <script src="popup.js"></script>
+    <div id="aria-status" class="visually-hidden" aria-live="polite"></div>
+</body>
+</html>
