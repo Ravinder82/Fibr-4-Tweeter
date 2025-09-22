@@ -5,7 +5,6 @@ const urlsToCache = [
     '/index.html',
     '/styles.css',
     '/app.js',
-    'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
     'https://cdn.jsdelivr.net/npm/marked/marked.min.js'
 ];
 
