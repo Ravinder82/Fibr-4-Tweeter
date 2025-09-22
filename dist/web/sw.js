@@ -4,8 +4,8 @@ const urlsToCache = [
     '/',
     '/index.html',
     '/styles.css',
-    '/app.js',
-    'https://cdn.jsdelivr.net/npm/marked/marked.min.js'
+    '/app.js'
+    // Removed external CDN dependency to comply with Chrome Web Store policies
 ];
 
 // Install event

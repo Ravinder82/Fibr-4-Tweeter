@@ -2,7 +2,7 @@
     "name": "TabTalk AI - Conversational Web Assistant",
     "short_name": "TabTalk AI",
     "description": "Chat with any webpage using AI - powered by Google Gemini",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "manifest_version": 3,
     "background": {
         "service_worker": "background.js"
