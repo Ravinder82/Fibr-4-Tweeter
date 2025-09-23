@@ -276,41 +276,41 @@
           const parts = cleaned.split(/\n\n(?=(?:Claim\s*\d+|CLAIM\s*\d+|\d+[\.)]\s))/).filter(Boolean);
           if (parts.length > 1) {
             parts.forEach((p, idx) => {
-              const title = `✅ Fact Check — Claim ${idx + 1}`;
+              const title = `Fact Check — Claim ${idx + 1}`;
               const segment = p.trim();
               this.renderCard(title, renderMarkdown(segment), { 
                 markdown: segment, 
                 contentType: 'factcheck', 
-                contentId: `${contentId}-${idx}` 
+                contentId: `${contentId}-${idx}`, 
               });
             });
           } else {
-            this.renderCard('✅ Fact Check', renderMarkdown(cleaned), { 
+            this.renderCard('Fact Check', renderMarkdown(cleaned), { 
               markdown: cleaned, 
               contentType: 'factcheck', 
-              contentId: contentId 
+              contentId: contentId, 
             });
           }
           break;
         }
         case 'summary':
         case 'blog': {
-          const titleMap = { summary: '📝 Summary', blog: '✍️ Blog Post' };
+          const titleMap = { summary: 'Summary', blog: 'Blog Post' };
           const card = this.renderCard(titleMap[contentType], renderMarkdown(cleaned), { 
             markdown: cleaned, 
             contentType: contentType,
-            contentId: contentId 
+            contentId: contentId, 
           });
           this.attachStructuredRegenerateControls(card, contentType);
           break;
         }
         default: {
-          const titleMap = { keypoints: '🔑 Key Points', analysis: '📊 Analysis Report', faq: '❓ FAQ' };
+          const titleMap = { keypoints: 'Key Points', analysis: 'Analysis Report', faq: 'FAQ' };
           const title = titleMap[contentType] || '✨ Generated Content';
           this.renderCard(title, renderMarkdown(cleaned), { 
             markdown: cleaned, 
             contentType: contentType,
-            contentId: contentId 
+            contentId: contentId, 
           });
         }
       }
