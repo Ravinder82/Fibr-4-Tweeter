@@ -1162,26 +1162,144 @@ body.dark-mode .sidebar a {
     font-size: 16px;
 }
 
-.twitter-copy-btn {
-    background: linear-gradient(135deg, 
-        rgba(255, 255, 255, 0.2) 0%, 
-        rgba(255, 255, 255, 0.1) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    padding: 6px 10px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 14px;
-    color: var(--text-primary);
-    backdrop-filter: blur(5px);
+
+/* Twitter Header Actions Container */
+.twitter-header-actions {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 4px;
+    z-index: 5;
 }
 
-.twitter-copy-btn:hover {
-    background: linear-gradient(135deg, 
-        rgba(255, 255, 255, 0.3) 0%, 
-        rgba(255, 255, 255, 0.2) 100%);
+/* Unified Twitter Action Button Styling */
+.twitter-action-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(108, 92, 231, 0.3);
+    border-radius: 6px;
+    padding: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6C5CE7;
+}
+
+.twitter-action-btn:hover {
+    background: rgba(108, 92, 231, 0.1);
+    border-color: rgba(108, 92, 231, 0.5);
     transform: scale(1.05);
-    border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Copy Button Specific States */
+.twitter-action-btn.copy-btn.success {
+    background: rgba(34, 197, 94, 0.2);
+    border-color: #22c55e;
+    color: #22c55e;
+}
+
+/* Save Button Specific States */
+.twitter-action-btn.save-btn.saved {
+    background: rgba(108, 92, 231, 0.2);
+    border-color: #6C5CE7;
+    color: #6C5CE7;
+}
+
+.twitter-action-btn.save-btn.saved svg {
+    fill: currentColor;
+}
+
+/* Dark Mode Support */
+body.dark-mode .twitter-action-btn {
+    background: rgba(45, 55, 72, 0.9);
+    border-color: rgba(108, 92, 231, 0.3);
+}
+
+body.dark-mode .twitter-action-btn:hover {
+    background: rgba(108, 92, 231, 0.2);
+    border-color: rgba(108, 92, 231, 0.5);
+}
+
+body.dark-mode .twitter-action-btn.copy-btn.success {
+    background: rgba(34, 197, 94, 0.3);
+    border-color: #22c55e;
+}
+
+body.dark-mode .twitter-action-btn.save-btn.saved {
+    background: rgba(108, 92, 231, 0.3);
+    border-color: #6C5CE7;
+}
+
+/* Analytics Card Specific Styling */
+.analytics-card .twitter-card-title::before {
+    content: none; /* Remove the default Twitter bird emoji */
+}
+
+.analytics-card .structured-html {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-primary);
+}
+
+.analytics-card .structured-html h1,
+.analytics-card .structured-html h2,
+.analytics-card .structured-html h3 {
+    margin: 16px 0 8px 0;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.analytics-card .structured-html p {
+    margin: 8px 0;
+}
+
+.analytics-card .structured-html ul,
+.analytics-card .structured-html ol {
+    margin: 8px 0;
+    padding-left: 20px;
+}
+
+.analytics-card .structured-html li {
+    margin: 4px 0;
+}
+
+.analytics-card .structured-html code {
+    background: rgba(108, 92, 231, 0.1);
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 13px;
+}
+
+.analytics-card .structured-html pre {
+    background: rgba(108, 92, 231, 0.1);
+    padding: 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 12px 0;
+}
+
+.analytics-card .structured-html blockquote {
+    border-left: 3px solid var(--accent-color);
+    padding-left: 16px;
+    margin: 12px 0;
+    font-style: italic;
+    color: var(--text-secondary);
+}
+
+/* Dark mode for analytics content */
+body.dark-mode .analytics-card .structured-html code {
+    background: rgba(108, 92, 231, 0.2);
+}
+
+body.dark-mode .analytics-card .structured-html pre {
+    background: rgba(108, 92, 231, 0.2);
 }
 
 .twitter-card-content {
@@ -1677,8 +1795,8 @@ body.dark-mode .button-secondary {
   border-color: rgba(108, 92, 231, 0.4);
 }
 
-/* Save Button */
-.save-btn {
+/* Save Button - Legacy styling for analytics cards only */
+.save-btn:not(.twitter-action-btn) {
   position: absolute;
   top: 50%;
   right: 8px;
@@ -1693,17 +1811,17 @@ body.dark-mode .button-secondary {
   z-index: 5;
 }
 
-.save-btn:hover {
+.save-btn:not(.twitter-action-btn):hover {
   background: rgba(108, 92, 231, 0.1);
   border-color: rgba(108, 92, 231, 0.5);
 }
 
-.save-btn.saved {
+.save-btn:not(.twitter-action-btn).saved {
   background: rgba(108, 92, 231, 0.2);
   border-color: #6C5CE7;
 }
 
-.save-btn.saved svg {
+.save-btn:not(.twitter-action-btn).saved svg {
   fill: #6C5CE7;
 }
 
@@ -1729,11 +1847,19 @@ body.dark-mode .button-secondary {
 }
 
 /* History View */
+#history-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .history-header {
   display: flex;
   align-items: center;
-  padding: 16px;
+  padding: 8px 16px;
   border-bottom: 1px solid var(--border-color);
+  min-height: 48px;
+  flex-shrink: 0;
 }
 
 .history-header h2 {
@@ -1754,19 +1880,26 @@ body.dark-mode .button-secondary {
 .category-tabs {
   display: flex;
   overflow-x: auto;
-  padding: 8px 16px;
-  gap: 8px;
+  padding: 6px 12px;
+  gap: 4px;
   border-bottom: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.02);
+  flex-shrink: 0;
 }
 
 .tab {
-  padding: 8px 12px;
+  padding: 4px 10px;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 16px;
   background: var(--secondary-bg);
   cursor: pointer;
   white-space: nowrap;
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 500;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
 }
 
 .tab.active {
@@ -1776,9 +1909,10 @@ body.dark-mode .button-secondary {
 }
 
 .history-list {
-  padding: 16px;
-  max-height: 400px;
+  padding: 12px;
+  max-height: calc(100vh - 200px);
   overflow-y: auto;
+  flex: 1;
 }
 
 .history-item {
@@ -1839,16 +1973,16 @@ body.dark-mode .history-actions button {
   border-color: #4a5568;
 }
 
-body.dark-mode .save-btn {
+body.dark-mode .save-btn:not(.twitter-action-btn) {
   background: rgba(45, 55, 72, 0.9);
   border-color: rgba(108, 92, 231, 0.5);
 }
 
-body.dark-mode .save-btn:hover {
+body.dark-mode .save-btn:not(.twitter-action-btn):hover {
   background: rgba(108, 92, 231, 0.2);
 }
 
-body.dark-mode .save-btn.saved {
+body.dark-mode .save-btn:not(.twitter-action-btn).saved {
   background: rgba(108, 92, 231, 0.3);
 }
 
@@ -1882,11 +2016,19 @@ body.dark-mode .twitter-card-header .copy-button:hover {
   }
   
   /* History View */
+  #history-view {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
   .history-header {
     display: flex;
     align-items: center;
-    padding: 16px;
+    padding: 8px 16px;
     border-bottom: 1px solid var(--border-color);
+    min-height: 48px;
+    flex-shrink: 0;
   }
   
   .history-header h2 {
@@ -1929,9 +2071,10 @@ body.dark-mode .twitter-card-header .copy-button:hover {
   }
   
   .history-list {
-    padding: 16px;
-    max-height: 400px;
+    padding: 12px;
+    max-height: calc(100vh - 200px);
     overflow-y: auto;
+    flex: 1;
   }
   
   .history-item {
@@ -1992,15 +2135,15 @@ body.dark-mode .twitter-card-header .copy-button:hover {
     border-color: #4a5568;
   }
   
-  body.dark-mode .save-btn {
+  body.dark-mode .save-btn:not(.twitter-action-btn) {
     background: rgba(45, 55, 72, 0.9);
     border-color: rgba(108, 92, 231, 0.5);
   }
   
-  body.dark-mode .save-btn:hover {
+  body.dark-mode .save-btn:not(.twitter-action-btn):hover {
     background: rgba(108, 92, 231, 0.2);
   }
   
-  body.dark-mode .save-btn.saved {
+  body.dark-mode .save-btn:not(.twitter-action-btn).saved {
     background: rgba(108, 92, 231, 0.3);
   }

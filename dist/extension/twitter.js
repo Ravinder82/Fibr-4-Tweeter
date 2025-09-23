@@ -155,11 +155,13 @@ n/n: [Clean conclusion with CTA]`;
         const tweets = this.parseTwitterThread(content);
         tweets.forEach((tweet, index) => {
           const cardTitle = `Thread ${index + 1}/${tweets.length}`;
+          // DISABLED: Universal cards system - using legacy system for stability
           const card = this.createTwitterCard(tweet, cardTitle);
           card.dataset.platform = platform;
           contentContainer.appendChild(card);
         });
       } else {
+        // DISABLED: Universal cards system - using legacy system for stability
         const card = this.createTwitterCard(content, 'Twitter Post');
         card.dataset.platform = platform;
         contentContainer.appendChild(card);
@@ -214,7 +216,14 @@ n/n: [Clean conclusion with CTA]`;
       card.innerHTML = `
         <div class="twitter-card-header">
           <span class="twitter-card-title">${cardTitle}</span>
-          <button class="twitter-copy-btn" title="Copy tweet">📋</button>
+          <div class="twitter-header-actions">
+            <button class="twitter-action-btn copy-btn" title="Copy tweet" aria-label="Copy tweet content">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </button>
+          </div>
         </div>
         <div class="twitter-card-content">
           <textarea class="twitter-text" placeholder="Edit your tweet content...">${tweetContent}</textarea>
@@ -230,7 +239,7 @@ n/n: [Clean conclusion with CTA]`;
         </div>
       `;
       
-      // Add save button to Twitter card header
+      // Add save button to Twitter card header actions container
       if (window.TabTalkUI && window.TabTalkUI.addSaveButtonToCard) {
         const contentData = {
           id: Date.now().toString(),
@@ -238,29 +247,48 @@ n/n: [Clean conclusion with CTA]`;
           title: cardTitle
         };
         const contentType = cardTitle.toLowerCase().includes('thread') ? 'thread' : 'twitter';
-        const cardHeader = card.querySelector('.twitter-card-header');
-        if (cardHeader) {
-          window.TabTalkUI.addSaveButtonToCard(cardHeader, contentType, contentData);
+        const actionsContainer = card.querySelector('.twitter-header-actions');
+        if (actionsContainer) {
+          window.TabTalkUI.addSaveButtonToCard(actionsContainer, contentType, contentData);
         }
       }
       
-      const copyBtn = card.querySelector('.twitter-copy-btn');
+      // Copy button functionality
+      const copyBtn = card.querySelector('.copy-btn');
       const textArea = card.querySelector('.twitter-text');
+      
+      // Store original copy icon for reset
+      const originalCopyIcon = copyBtn.innerHTML;
+      
+      copyBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        try {
+          await navigator.clipboard.writeText(textArea.value);
+          
+          // Success state
+          copyBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20,6 9,17 4,12"></polyline>
+          </svg>`;
+          copyBtn.classList.add('success');
+          
+          // Reset after 2 seconds
+          setTimeout(() => {
+            copyBtn.innerHTML = originalCopyIcon;
+            copyBtn.classList.remove('success');
+          }, 2000);
+          
+        } catch (err) {
+          console.error('Copy failed:', err);
+          // Could add error state here if needed
+        }
+      });
+      
+      // Auto-resize textarea functionality
       const autoResizeTextarea = () => {
         textArea.style.height = 'auto';
         textArea.style.height = Math.max(80, textArea.scrollHeight) + 'px';
       };
       setTimeout(autoResizeTextarea, 0);
-      copyBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(textArea.value).then(() => {
-          copyBtn.textContent = '✅';
-          copyBtn.title = 'Copied!';
-          setTimeout(() => {
-            copyBtn.textContent = '📋';
-            copyBtn.title = 'Copy tweet';
-          }, 2000);
-        });
-      });
       textArea.addEventListener('input', () => {
         const charCount = card.querySelector('.twitter-char-count');
         const length = this.getAccurateCharacterCount(textArea.value);

@@ -176,23 +176,44 @@
       const container = document.createElement('div');
       container.className = 'twitter-content-container';
       const card = document.createElement('div');
-      card.className = 'twitter-card';
+      card.className = 'twitter-card analytics-card';
       card.dataset.contentType = options.contentType || 'content';
       card.dataset.contentId = options.contentId || Date.now().toString();
       
-      const content = document.createElement('div');
-      content.className = 'twitter-card-content';
-      const markdownAttr = options.markdown ? `data-markdown="${encodeURIComponent(options.markdown)}"` : '';
-      content.innerHTML = `
-        <div class="twitter-card-header">
-          <h3 class="twitter-username">${title}</h3>
-          <button class="copy-button" title="Copy">📋</button>
-        </div>
-        <div class="structured-html content-text" ${markdownAttr}>${bodyHtml}</div>
-      `;
-      card.appendChild(content);
+      // Get emoji for content type
+      const emojiMap = {
+        summary: '📝',
+        keypoints: '🔑', 
+        analysis: '📊',
+        faq: '❓',
+        factcheck: '✅',
+        blog: '📰',
+        proscons: '⚖️',
+        timeline: '📅',
+        quotes: '💬'
+      };
+      const contentType = options.contentType || 'content';
+      const emoji = emojiMap[contentType] || '📄';
       
-      // Add save button to card header
+      const markdownAttr = options.markdown ? `data-markdown="${encodeURIComponent(options.markdown)}"` : '';
+      card.innerHTML = `
+        <div class="twitter-card-header">
+          <span class="twitter-card-title">${emoji} ${title}</span>
+          <div class="twitter-header-actions">
+            <button class="twitter-action-btn copy-btn" title="Copy content" aria-label="Copy content">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="twitter-card-content">
+          <div class="structured-html content-text" ${markdownAttr}>${bodyHtml}</div>
+        </div>
+      `;
+      
+      // Add save button to analytics card header actions container
       if (window.TabTalkUI && window.TabTalkUI.addSaveButtonToCard) {
         const contentType = options.contentType || 'content';
         const contentData = {
@@ -200,21 +221,40 @@
           content: options.markdown || bodyHtml,
           title: title
         };
-        const cardHeader = card.querySelector('.twitter-card-header');
-        if (cardHeader) {
-          window.TabTalkUI.addSaveButtonToCard(cardHeader, contentType, contentData);
+        const actionsContainer = card.querySelector('.twitter-header-actions');
+        if (actionsContainer) {
+          window.TabTalkUI.addSaveButtonToCard(actionsContainer, contentType, contentData);
         }
       }
       
-      const copyBtn = card.querySelector('.copy-button');
-      copyBtn.addEventListener('click', () => {
-        const structured = card.querySelector('.structured-html');
-        const md = structured?.getAttribute('data-markdown');
-        const textToCopy = md ? decodeURIComponent(md) : (structured?.innerText || '');
-        navigator.clipboard.writeText(textToCopy).then(() => {
-          copyBtn.textContent = '✅';
-          setTimeout(() => { copyBtn.textContent = '📋'; }, 1500);
-        });
+      // Copy button functionality for analytics cards
+      const copyBtn = card.querySelector('.copy-btn');
+      const originalCopyIcon = copyBtn.innerHTML;
+      
+      copyBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        try {
+          const structured = card.querySelector('.structured-html');
+          const md = structured?.getAttribute('data-markdown');
+          const textToCopy = md ? decodeURIComponent(md) : (structured?.innerText || '');
+          
+          await navigator.clipboard.writeText(textToCopy);
+          
+          // Success state
+          copyBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20,6 9,17 4,12"></polyline>
+          </svg>`;
+          copyBtn.classList.add('success');
+          
+          // Reset after 2 seconds
+          setTimeout(() => {
+            copyBtn.innerHTML = originalCopyIcon;
+            copyBtn.classList.remove('success');
+          }, 2000);
+          
+        } catch (err) {
+          console.error('Copy failed:', err);
+        }
       });
       container.appendChild(card);
       const target = options.container || this.messagesContainer;
@@ -226,6 +266,7 @@
     },
 
     renderStructuredContent: function(contentType, rawContent) {
+      // DISABLED: Universal cards system - using legacy system for stability
       const renderMarkdown = (text) => this.marked ? this.marked.parse(text) : (text || '').replace(/\n/g, '<br>');
       const cleaned = this.sanitizeStructuredOutput(contentType, rawContent);
       const contentId = Date.now().toString();
@@ -358,15 +399,30 @@
     addSaveButtonToCard: function(cardElement, category, contentData) {
       if (!cardElement || !category || !contentData) return;
       
-      // Create save button
+      // Create save button with unified styling
       const saveBtn = document.createElement('button');
-      saveBtn.className = 'save-btn';
+      
+      // Check if this is a Twitter card (has twitter-header-actions container)
+      const isTwitterCard = cardElement.classList.contains('twitter-header-actions');
+      
+      if (isTwitterCard) {
+        // Use unified Twitter action button styling
+        saveBtn.className = 'twitter-action-btn save-btn';
+        saveBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+        </svg>`;
+      } else {
+        // Use legacy styling for analytics cards
+        saveBtn.className = 'save-btn';
+        saveBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+        </svg>`;
+      }
+      
       saveBtn.setAttribute('aria-label', 'Save to history');
       saveBtn.setAttribute('data-category', category);
       saveBtn.setAttribute('data-content-id', contentData.id || Date.now().toString());
-      saveBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-      </svg>`;
+      saveBtn.title = 'Save to history';
       
       // Check if already saved
       if (window.TabTalkStorage) {
