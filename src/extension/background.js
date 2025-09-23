@@ -21,6 +21,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         })();
             
         return true;
+    } else if (request.action === 'validateApiKey') {
+        const { apiKey } = request;
+        
+        console.log("Background: Validating API key:", apiKey ? "Key provided" : "No key");
+        
+        if (!apiKey) {
+            sendResponse({ success: false, error: 'No API key provided' });
+            return true;
+        }
+        
+        (async () => {
+            const response = await validateApiKey(apiKey);
+            sendResponse(response);
+        })();
+        
+        return true;
     }
 });
 
@@ -49,5 +65,26 @@ async function callGeminiApi(apiKey, payload) {
         return { success: true, data: JSON.parse(responseText) };
     } catch (error) {
         return { success: false, error: `A network error occurred: ${error.message}` };
+    }
+}
+
+async function validateApiKey(apiKey) {
+    // Use a minimal test payload to validate the API key
+    const testPayload = {
+        contents: [{
+            parts: [{ text: "Hello" }]
+        }]
+    };
+    
+    try {
+        const response = await callGeminiApi(apiKey, testPayload);
+        // Check if the API call was successful
+        if (response.success) {
+            return { success: true };
+        } else {
+            return { success: false, error: response.error || 'Invalid API key' };
+        }
+    } catch (error) {
+        return { success: false, error: error.message || 'Network error occurred' };
     }
 }
