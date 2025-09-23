@@ -11,7 +11,6 @@ export class StateManager {
       apiKey: null,
       chatHistory: [],
       currentDomain: null,
-      isDarkMode: false,
       isLoading: false
     };
   }
@@ -20,8 +19,6 @@ export class StateManager {
     // Load API key
     this.state.apiKey = await this.storage.loadApiKey();
     
-    // Load dark mode setting
-    this.state.isDarkMode = await this.storage.loadSetting('darkMode', false);
     
     // Load current domain if available
     if (this.environment === 'extension') {
@@ -45,8 +42,6 @@ export class StateManager {
       await this.storage.saveApiKey(this.state.apiKey);
     }
     
-    // Save dark mode setting
-    await this.storage.saveSetting('darkMode', this.state.isDarkMode);
     
     // Save chat history for current domain
     if (this.state.currentDomain && this.state.chatHistory.length > 0) {
@@ -71,9 +66,6 @@ export class StateManager {
     this.state.currentDomain = domain;
   }
 
-  toggleDarkMode() {
-    this.state.isDarkMode = !this.state.isDarkMode;
-  }
 
   setLoading(isLoading) {
     this.state.isLoading = isLoading;

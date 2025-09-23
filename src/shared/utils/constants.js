@@ -18,7 +18,6 @@ export const CONTENT_TYPES = {
 
 export const STORAGE_KEYS = {
   API_KEY: 'geminiApiKey',
-  DARK_MODE: 'darkMode',
   CHAT_HISTORY: 'chatHistory',
   API_KEY_SET: 'apiKeySet'
 };

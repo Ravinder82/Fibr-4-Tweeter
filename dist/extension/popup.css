@@ -45,9 +45,6 @@
     padding: 2px 6px;
     border-radius: 6px;
 }
-body.dark-mode .structured-html code {
-    background: rgba(255,255,255,0.08);
-}
 .structured-html blockquote {
     border-left: 3px solid var(--accent-color);
     padding-left: 10px;
@@ -121,35 +118,6 @@ body {
     overflow: hidden;
 }
 
-/* Dark Mode */
-body.dark-mode {
-    --primary-bg: #0f172a;
-    --secondary-bg: #1e293b;
-    --border-color: #334155;
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --accent-color: #8b5cf6;
-    --message-bg: #1e293b;
-    --user-message-bg: linear-gradient(135deg, #312e81 0%, #3730a3 100%);
-    --assistant-message-bg: linear-gradient(135deg, #334155 0%, #475569 100%);
-}
-
-/* Dark Mode Message Content Fix */
-body.dark-mode .assistant-message .content {
-    background: linear-gradient(135deg, #334155 0%, #475569 100%);
-    color: #f1f5f9 !important;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-body.dark-mode .user-message .content {
-    background: var(--user-message-bg);
-    color: #ffffff !important;
-}
-
-body.dark-mode .content {
-    color: #f1f5f9 !important;
-}
-
 /* Container */
 .container {
     width: 400px;
@@ -208,28 +176,6 @@ body.dark-mode .content {
     gap: 12px;
 }
 
-.dark-mode-label {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    user-select: none;
-}
-
-.dark-mode-label input {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.dark-mode-icon {
-    font-size: 20px;
-    transition: transform 0.3s ease;
-}
-
-.dark-mode-label input:checked + .dark-mode-icon {
-    transform: rotate(180deg);
-}
 
 .menu-button {
     background: rgba(99, 102, 241, 0.1);
@@ -490,50 +436,6 @@ main {
     transform: none;
 }
 
-/* Dark Mode Adjustments */
-body.dark-mode .quick-actions-container {
-    background: linear-gradient(135deg, 
-        rgba(99, 102, 241, 0.12) 0%, 
-        rgba(139, 92, 246, 0.08) 100%);
-}
-
-body.dark-mode .action-btn {
-    background: linear-gradient(135deg, 
-        rgba(30, 41, 59, 0.9) 0%, 
-        rgba(51, 65, 85, 0.75) 100%);
-    border-color: rgba(99, 102, 241, 0.2);
-    box-shadow: 
-        0 2px 8px rgba(0, 0, 0, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-
-body.dark-mode .action-btn:hover {
-    background: linear-gradient(135deg, 
-        rgba(99, 102, 241, 0.15) 0%, 
-        rgba(139, 92, 246, 0.12) 100%);
-    box-shadow: 
-        0 4px 12px rgba(99, 102, 241, 0.25),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-body.dark-mode .btn-text {
-    color: var(--text-primary);
-}
-
-body.dark-mode .action-btn:hover .btn-text {
-    color: #ffffff;
-}
-
-body.dark-mode .scroll-arrow {
-    background: rgba(30, 41, 59, 0.85);
-    border-color: rgba(99, 102, 241, 0.2);
-}
-
-body.dark-mode .scroll-arrow:hover {
-    background: var(--accent-color);
-    color: white;
-}
-
 /* Hide scrollbar */
 .scroll-container::-webkit-scrollbar {
     display: none;
@@ -668,9 +570,6 @@ body.dark-mode .scroll-arrow:hover {
     margin: 0 6px;
 }
 
-body.dark-mode .input-bar {
-    background: rgba(30, 41, 59, 0.8);
-}
 
 .input-bar:focus-within {
     border-color: var(--accent-color);
@@ -794,21 +693,6 @@ body.dark-mode .input-bar {
     box-shadow: var(--shadow-md);
 }
 
-body.dark-mode .setup-header-with-nav {
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(99, 102, 241, 0.08) 100%);
-    border-bottom-color: rgba(99, 102, 241, 0.2);
-}
-
-body.dark-mode .header-back-btn {
-    background: rgba(30, 41, 59, 0.8);
-    border-color: rgba(99, 102, 241, 0.3);
-}
-
-body.dark-mode .header-back-btn:hover,
-body.dark-mode .header-back-btn:focus {
-    background: var(--accent-color);
-    color: white;
-}
 
 .welcome-hero {
 margin-bottom: 24px;
@@ -1054,9 +938,6 @@ box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
     overflow-y: auto;
 }
 
-body.dark-mode .sidebar {
-    background: rgba(15, 23, 42, 0.95);
-}
 
 .sidebar:not(.hidden) {
     transform: translateX(0);
@@ -1077,9 +958,6 @@ body.dark-mode .sidebar {
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-body.dark-mode .sidebar a {
-    border-bottom-color: rgba(255, 255, 255, 0.05);
-}
 
 .sidebar a:hover {
     background: rgba(99, 102, 241, 0.1);
@@ -1215,26 +1093,6 @@ body.dark-mode .sidebar a {
     fill: currentColor;
 }
 
-/* Dark Mode Support */
-body.dark-mode .twitter-action-btn {
-    background: rgba(45, 55, 72, 0.9);
-    border-color: rgba(108, 92, 231, 0.3);
-}
-
-body.dark-mode .twitter-action-btn:hover {
-    background: rgba(108, 92, 231, 0.2);
-    border-color: rgba(108, 92, 231, 0.5);
-}
-
-body.dark-mode .twitter-action-btn.copy-btn.success {
-    background: rgba(34, 197, 94, 0.3);
-    border-color: #22c55e;
-}
-
-body.dark-mode .twitter-action-btn.save-btn.saved {
-    background: rgba(108, 92, 231, 0.3);
-    border-color: #6C5CE7;
-}
 
 /* Analytics Card Specific Styling */
 .analytics-card .twitter-card-title::before {
@@ -1293,14 +1151,6 @@ body.dark-mode .twitter-action-btn.save-btn.saved {
     color: var(--text-secondary);
 }
 
-/* Dark mode for analytics content */
-body.dark-mode .analytics-card .structured-html code {
-    background: rgba(108, 92, 231, 0.2);
-}
-
-body.dark-mode .analytics-card .structured-html pre {
-    background: rgba(108, 92, 231, 0.2);
-}
 
 .twitter-card-content {
     padding: 16px;
@@ -1496,26 +1346,7 @@ body.dark-mode .analytics-card .structured-html pre {
     100% { transform: translateX(100%); }
 }
 
-/* Dark mode progress bar */
-.dark-mode .progress-container {
-    background: linear-gradient(135deg, rgba(29, 155, 240, 0.08) 0%, rgba(120, 119, 198, 0.08) 100%);
-    border-color: rgba(29, 155, 240, 0.2);
-}
 
-/* Dark mode adjustments for Twitter cards */
-.dark-mode .twitter-card {
-    background: linear-gradient(135deg, rgba(29, 155, 240, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
-    border-color: rgba(29, 155, 240, 0.3);
-}
-
-.dark-mode .twitter-card-header {
-    background: linear-gradient(90deg, rgba(29, 155, 240, 0.12) 0%, rgba(120, 119, 198, 0.08) 100%);
-    border-bottom-color: rgba(29, 155, 240, 0.2);
-}
-
-.dark-mode .twitter-text:focus {
-    background: rgba(29, 155, 240, 0.08);
-}
 
 /* Settings View */
 #settings-view {
@@ -1563,9 +1394,6 @@ body.dark-mode .analytics-card .structured-html pre {
     transition: all 0.2s ease;
 }
 
-body.dark-mode #api-key-input {
-    background: rgba(30, 41, 59, 0.8);
-}
 
 #api-key-input:focus {
     outline: none;
@@ -1623,9 +1451,6 @@ body.dark-mode #api-key-input {
     -webkit-backdrop-filter: blur(10px);
 }
 
-body.dark-mode .button-secondary {
-    background: rgba(30, 41, 59, 0.8);
-}
 
 .button-secondary:hover {
     background: var(--secondary-bg);
@@ -1967,34 +1792,6 @@ body.dark-mode .button-secondary {
   color: var(--text-secondary);
 }
 
-body.dark-mode .history-actions button {
-  background: #2d3748;
-  color: white;
-  border-color: #4a5568;
-}
-
-body.dark-mode .save-btn:not(.twitter-action-btn) {
-  background: rgba(45, 55, 72, 0.9);
-  border-color: rgba(108, 92, 231, 0.5);
-}
-
-body.dark-mode .save-btn:not(.twitter-action-btn):hover {
-  background: rgba(108, 92, 231, 0.2);
-}
-
-body.dark-mode .save-btn:not(.twitter-action-btn).saved {
-  background: rgba(108, 92, 231, 0.3);
-}
-
-body.dark-mode .twitter-card-header .copy-button {
-  background: rgba(45, 55, 72, 0.9);
-  border-color: rgba(108, 92, 231, 0.3);
-}
-
-body.dark-mode .twitter-card-header .copy-button:hover {
-  background: rgba(108, 92, 231, 0.2);
-  border-color: rgba(108, 92, 231, 0.5);
-}
   .toast {
     position: fixed;
     bottom: 20px;
@@ -2129,21 +1926,3 @@ body.dark-mode .twitter-card-header .copy-button:hover {
     color: var(--text-secondary);
   }
   
-  body.dark-mode .history-actions button {
-    background: #2d3748;
-    color: white;
-    border-color: #4a5568;
-  }
-  
-  body.dark-mode .save-btn:not(.twitter-action-btn) {
-    background: rgba(45, 55, 72, 0.9);
-    border-color: rgba(108, 92, 231, 0.5);
-  }
-  
-  body.dark-mode .save-btn:not(.twitter-action-btn):hover {
-    background: rgba(108, 92, 231, 0.2);
-  }
-  
-  body.dark-mode .save-btn:not(.twitter-action-btn).saved {
-    background: rgba(108, 92, 231, 0.3);
-  }

@@ -22,7 +22,6 @@ class TabTalkAI {
   init() {
     this.cacheDOMElements();
     this.setupEventListeners();
-    this.applyTheme();
     this.determineInitialView();
     this.setupAutoResize();
   }
@@ -47,17 +46,11 @@ class TabTalkAI {
       sidebar: document.getElementById('sidebar'),
       exportChatButton: document.getElementById('export-chat-button'),
       quickActions: document.getElementById('quick-actions'),
-      darkModeToggle: document.getElementById('dark-mode-toggle'),
       urlInput: document.getElementById('url-input')
     };
   }
 
   setupEventListeners() {
-    // Theme toggle
-    if (this.domElements.darkModeToggle) {
-      this.domElements.darkModeToggle.checked = this.stateManager.getState().isDarkMode;
-      this.domElements.darkModeToggle.addEventListener('change', () => this.toggleTheme());
-    }
 
     // Menu button
     if (this.domElements.menuButton) {
@@ -204,20 +197,7 @@ class TabTalkAI {
     this.showView('settings');
   }
 
-  toggleTheme() {
-    this.stateManager.toggleDarkMode();
-    this.applyTheme();
-    this.stateManager.saveState();
-  }
 
-  applyTheme() {
-    const state = this.stateManager.getState();
-    if (state.isDarkMode) {
-      document.body.classList.add('dark-mode');
-    } else {
-      document.body.classList.remove('dark-mode');
-    }
-  }
 
   toggleSidebar() {
     if (this.domElements.sidebar) {
@@ -379,7 +359,11 @@ class TabTalkAI {
 
       // Generate response based on content availability
       if (this.currentContent) {
-        const prompt = `Content:\n${this.currentContent}\n\nUser Question:\n${message}`;
+        const prompt = `Content:
+${this.currentContent}
+
+User Question:
+${message}`;
         response = await this.apiClient.generateContent(prompt);
       } else {
         // If no content, treat as general chat

@@ -22,17 +22,12 @@
 
     async loadState() {
       try {
-        const data = await chrome.storage.local.get(['geminiApiKey', 'apiKey', 'darkMode', 'chatHistory']);
+        const data = await chrome.storage.local.get(['geminiApiKey', 'apiKey', 'chatHistory']);
         console.log('TabTalk AI: Loading state, API key exists:', !!data.geminiApiKey);
         if (data.geminiApiKey || data.apiKey) {
           this.apiKey = data.geminiApiKey || data.apiKey;
           console.log('TabTalk AI: API key loaded successfully');
           if (this.apiKeyInput) this.apiKeyInput.value = this.apiKey;
-        }
-        if (data.darkMode !== undefined) {
-          this.isDarkMode = data.darkMode;
-          if (this.darkModeToggle) this.darkModeToggle.checked = this.isDarkMode;
-          document.body.classList.toggle('dark-mode', this.isDarkMode);
         }
         if (this.currentTab) {
           const url = new URL(this.currentTab.url);
@@ -58,7 +53,6 @@
       if (this.apiKey) {
         data.geminiApiKey = this.apiKey;
       }
-      data.darkMode = this.isDarkMode;
       const chatHistoryObj = {};
       chatHistoryObj[this.currentDomain] = this.chatHistory;
       data.chatHistory = chatHistoryObj;
