@@ -2,6 +2,13 @@
   const UI = {
     // Save button states
     saveButtonStates: {},
+    maxUnsavedMessages: 2,
+
+    generateMessageId: function() {
+      const base = Date.now().toString(36);
+      const suffix = Math.random().toString(36).slice(2, 8);
+      return `msg_${base}_${suffix}`;
+    },
     ensureMarked: function() {
       if (this.marked) return Promise.resolve(true);
       if (document.querySelector('script[data-loader="marked"]')) {
@@ -56,17 +63,58 @@
       return t.trim();
     },
 
-    addMessage: function(role, content) {
-      const timestamp = new Date().toISOString();
-      this.chatHistory.push({ role, content, timestamp });
+    addMessage: function(role, content, options = {}) {
+      if (!Array.isArray(this.chatHistory)) {
+        this.chatHistory = [];
+      }
+
+      const timestampOverride = options.timestamp;
+      const timestamp = timestampOverride || new Date().toISOString();
+      const messageIdOverride = options.id;
+      const message = {
+        id: messageIdOverride || this.generateMessageId(),
+        role,
+        content,
+        timestamp,
+        saved: Boolean(options.saved)
+      };
+
+      if (options.contentType) {
+        message.contentType = options.contentType;
+      }
+
+      this.chatHistory.push(message);
+      this.trimUnsavedMessages();
       this.renderMessages();
+      if (typeof this.saveState === 'function') {
+        this.saveState();
+      }
+    },
+
+    trimUnsavedMessages: function(maxUnsaved = this.maxUnsavedMessages) {
+      if (!Array.isArray(this.chatHistory)) return;
+      const unsavedIndices = [];
+      this.chatHistory.forEach((message, index) => {
+        if (!message.saved) unsavedIndices.push(index);
+      });
+      if (unsavedIndices.length <= maxUnsaved) return;
+      const keepIndices = new Set(unsavedIndices.slice(-maxUnsaved));
+      this.chatHistory = this.chatHistory.filter((message, index) => message.saved || keepIndices.has(index));
     },
 
     renderMessages: function() {
       this.messagesContainer.innerHTML = '';
+      if (!Array.isArray(this.chatHistory)) {
+        this.chatHistory = [];
+      }
       this.chatHistory.forEach((message, index) => {
         const messageEl = document.createElement('div');
         messageEl.classList.add('message', message.role === 'user' ? 'user-message' : 'assistant-message');
+        if (message.saved) {
+          messageEl.classList.add('saved-message');
+        }
+        const messageId = message.id || message.timestamp || `msg_${index}`;
+        messageEl.dataset.messageId = messageId;
         if (message.contentType) {
           messageEl.classList.add(`${message.contentType}-message`);
         }
@@ -97,6 +145,28 @@
         } else {
             contentEl.textContent = message.content;
         }
+
+        const actionsEl = document.createElement('div');
+        actionsEl.classList.add('message-header-actions');
+
+        const saveToggle = document.createElement('button');
+        saveToggle.classList.add('message-save-toggle');
+        if (message.saved) {
+          saveToggle.classList.add('saved');
+        }
+        saveToggle.type = 'button';
+        saveToggle.setAttribute('aria-pressed', message.saved ? 'true' : 'false');
+        saveToggle.setAttribute('aria-label', message.saved ? 'Remove saved message' : 'Save this message');
+        saveToggle.title = message.saved ? 'Remove from saved' : 'Save message';
+        saveToggle.textContent = message.saved ? '★' : '☆';
+        saveToggle.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          this.toggleMessageSaved(messageId);
+        });
+
+        actionsEl.appendChild(saveToggle);
+        headerEl.appendChild(actionsEl);
         messageEl.append(headerEl, contentEl);
         this.messagesContainer.appendChild(messageEl);
         setTimeout(() => messageEl.classList.add('visible'), index * 100);
@@ -107,6 +177,38 @@
       }
       this.messagesContainer.scrollTo({ top: this.messagesContainer.scrollHeight, behavior: 'smooth' });
       this.updateQuickActionsVisibility();
+    },
+
+    toggleMessageSaved: function(messageId) {
+      if (!messageId || !Array.isArray(this.chatHistory)) return;
+      const index = this.chatHistory.findIndex(msg => (msg.id || msg.timestamp) === messageId);
+      if (index === -1) return;
+
+      const message = this.chatHistory[index];
+      const nextSaved = !message.saved;
+
+      this.chatHistory[index] = {
+        ...message,
+        saved: nextSaved
+      };
+
+      if (nextSaved) {
+        this.trimUnsavedMessages();
+      } else {
+        const maxUnsaved = this.maxUnsavedMessages;
+        const unsavedIndices = [];
+        this.chatHistory.forEach((msg, idx) => {
+          if (!msg.saved) unsavedIndices.push(idx);
+        });
+        if (unsavedIndices.length > maxUnsaved) {
+          const keep = new Set(unsavedIndices.slice(-maxUnsaved));
+          this.chatHistory = this.chatHistory.filter((msg, idx) => msg.saved || keep.has(idx));
+        }
+      }
+      this.renderMessages();
+      if (typeof this.saveState === 'function') {
+        this.saveState();
+      }
     },
 
     setLoading: function(isLoading, statusMessage = '...') {

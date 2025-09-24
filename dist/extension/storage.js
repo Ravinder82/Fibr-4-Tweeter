@@ -36,8 +36,15 @@
             this.pageTitle.textContent = this.currentTab.title || 'Untitled Page';
             console.log('TabTalk AI: Page title set to:', this.pageTitle.textContent);
           }
-          if (data.chatHistory && data.chatHistory[this.currentDomain]) {
-            this.chatHistory = data.chatHistory[this.currentDomain];
+        if (data.chatHistory && data.chatHistory[this.currentDomain]) {
+          const savedMessages = Array.isArray(data.chatHistory[this.currentDomain])
+            ? data.chatHistory[this.currentDomain]
+            : [];
+          this.chatHistory = savedMessages.map((message, index) => ({
+            ...message,
+            saved: true,
+            id: message.id || `saved_${Date.now()}_${index}`
+          }));
           }
         }
         return data;
@@ -49,12 +56,19 @@
 
     async saveState() {
       if (!this.currentDomain) return;
+
+      if (!Array.isArray(this.chatHistory)) {
+        this.chatHistory = [];
+      }
+
+      const savedMessages = this.chatHistory.filter(message => message && message.saved);
+
       const data = {};
       if (this.apiKey) {
         data.geminiApiKey = this.apiKey;
       }
       const chatHistoryObj = {};
-      chatHistoryObj[this.currentDomain] = this.chatHistory;
+      chatHistoryObj[this.currentDomain] = savedMessages;
       data.chatHistory = chatHistoryObj;
       await chrome.storage.local.set(data);
     },
