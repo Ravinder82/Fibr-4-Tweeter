@@ -1,6 +1,7 @@
 // background.js - FINAL VERSION with KEY TRACING
 
 const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_FALLBACK_MODEL = 'gemini-1.5-flash';
 const GEMINI_API_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/';
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -41,31 +42,66 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 async function callGeminiApi(apiKey, payload) {
-    const fullUrl = `${GEMINI_API_BASE_URL}${GEMINI_MODEL}:generateContent?key=${apiKey}`;
-    try {
-        console.log(`TabTalk AI (background): Using model: ${GEMINI_MODEL}`);
-        
-        const response = await fetch(fullUrl, {
+    const attemptModel = async (model) => {
+        const url = `${GEMINI_API_BASE_URL}${model}:generateContent?key=${apiKey}`;
+        const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-        const responseText = await response.text();
-        if (!response.ok) {
-            let errorMessage = `API request failed (Status: ${response.status}).`;
-            try {
-                const errorJson = JSON.parse(responseText);
-                if (errorJson?.error?.message) errorMessage = `API Error: ${errorJson.error.message}`;
-            } catch (e) {
-                errorMessage += ` Details: ${responseText.substring(0, 150)}...`;
+        const text = await response.text();
+        return { response, text };
+    };
+
+    const shouldRetry = (status, errorJson) => {
+        if (status === 429 || status === 503) return true;
+        // UNAVAILABLE can also show via status 503
+        if (errorJson?.error?.status === 'UNAVAILABLE') return true;
+        return false;
+    };
+
+    const maxAttempts = 4;
+    let attempt = 0;
+    let lastError = 'Service temporarily unavailable. Please try again later.';
+    let model = GEMINI_MODEL;
+
+    while (attempt < maxAttempts) {
+        try {
+            console.log(`TabTalk AI (background): Using model: ${model}, attempt ${attempt + 1}/${maxAttempts}`);
+            const { response, text } = await attemptModel(model);
+            if (!response.ok) {
+                let errorMessage = `API request failed (Status: ${response.status}).`;
+                let errorJson = null;
+                try {
+                    errorJson = JSON.parse(text);
+                    if (errorJson?.error?.message) errorMessage = `API Error: ${errorJson.error.message}`;
+                } catch (e) {
+                    errorMessage += ` Details: ${text.substring(0, 150)}...`;
+                }
+                console.error(`TabTalk AI (background): API Error Details: ${text}`);
+
+                if (shouldRetry(response.status, errorJson)) {
+                    attempt++;
+                    // On last attempt before exit, try fallback model once if still primary
+                    if (attempt === maxAttempts - 1 && model !== GEMINI_FALLBACK_MODEL) {
+                        model = GEMINI_FALLBACK_MODEL;
+                    }
+                    const delay = Math.min(16000, 1000 * Math.pow(2, attempt - 1));
+                    await new Promise(r => setTimeout(r, delay));
+                    lastError = errorMessage;
+                    continue;
+                }
+                return { success: false, error: errorMessage };
             }
-            console.error(`TabTalk AI (background): API Error Details: ${responseText}`);
-            return { success: false, error: errorMessage };
+            return { success: true, data: JSON.parse(text) };
+        } catch (err) {
+            lastError = `A network error occurred: ${err.message}`;
+            attempt++;
+            const delay = Math.min(16000, 1000 * Math.pow(2, attempt - 1));
+            await new Promise(r => setTimeout(r, delay));
         }
-        return { success: true, data: JSON.parse(responseText) };
-    } catch (error) {
-        return { success: false, error: `A network error occurred: ${error.message}` };
     }
+    return { success: false, error: lastError };
 }
 
 async function validateApiKey(apiKey) {
