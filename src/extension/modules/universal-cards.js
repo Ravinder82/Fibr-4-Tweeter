@@ -24,6 +24,7 @@
         showCharCount = type === 'twitter' || type === 'thread',
         showLengthControl = type === 'twitter' || type === 'thread',
         markdown = type !== 'twitter' && type !== 'thread',
+        maxCharLimit = type === 'twitter' ? 280 : type === 'thread' ? 4000 : 1200,
         originalData = null
       } = options;
 
@@ -110,10 +111,13 @@
           const lengthSlider = document.createElement('input');
           lengthSlider.type = 'range';
           lengthSlider.className = 'length-slider';
-          lengthSlider.min = '50';
-          lengthSlider.max = '2000';
-          lengthSlider.step = '50';
-          lengthSlider.value = Math.max(50, this.getAccurateCharacterCount(content));
+          const sliderMin = type === 'twitter' ? 40 : type === 'thread' ? 200 : 100;
+          const sliderMax = Math.max(sliderMin, maxCharLimit);
+          lengthSlider.min = String(sliderMin);
+          lengthSlider.max = String(sliderMax);
+          lengthSlider.step = '10';
+          const initialLength = Math.min(maxCharLimit, Math.max(sliderMin, this.getAccurateCharacterCount(content, type)));
+          lengthSlider.value = String(initialLength);
           
           const lengthDisplay = document.createElement('span');
           lengthDisplay.className = 'length-display';
@@ -133,32 +137,42 @@
           // Length slider event listener
           lengthSlider.addEventListener('input', () => {
             lengthDisplay.textContent = lengthSlider.value;
+            const target = parseInt(lengthSlider.value, 10);
+            this.updateProgressMetrics(card, target, type, maxCharLimit);
           });
 
           // Regenerate button event listener
           regenerateBtn.addEventListener('click', async () => {
             const targetLength = parseInt(lengthSlider.value);
-            await this.handleRegenerate(card, targetLength, type, originalData);
+            await this.handleRegenerate(card, targetLength, type, originalData, maxCharLimit);
           });
         }
 
         if (showCharCount) {
           const charCount = document.createElement('div');
           charCount.className = 'char-count';
-          charCount.textContent = `${this.getAccurateCharacterCount(content)} characters`;
+          charCount.textContent = `${this.getAccurateCharacterCount(content, type)} characters`;
           controlsArea.appendChild(charCount);
+
+          const progressWrapper = document.createElement('div');
+          progressWrapper.className = 'char-progress-bar';
+          const progressFill = document.createElement('div');
+          progressFill.className = 'char-progress-fill';
+          progressWrapper.appendChild(progressFill);
+          controlsArea.appendChild(progressWrapper);
 
           // Update character count on input
           if (editable && contentElement) {
             contentElement.addEventListener('input', () => {
-              const length = this.getAccurateCharacterCount(contentElement.value);
+              const length = this.getAccurateCharacterCount(contentElement.value, type);
               charCount.textContent = `${length} characters`;
-              charCount.style.color = 'var(--text-secondary)';
+              this.updateProgressMetrics(card, length, type, maxCharLimit);
             });
           }
         }
 
         contentArea.appendChild(controlsArea);
+        this.updateProgressMetrics(card, this.getAccurateCharacterCount(content, type), type, maxCharLimit);
       }
 
       // Assemble the card
@@ -197,20 +211,50 @@
     /**
      * Accurate character counting that handles Unicode properly
      */
-    getAccurateCharacterCount: function(text) {
-      if (!text) return 0;
-      if (typeof Intl !== 'undefined' && Intl.Segmenter) {
-        const segmenter = new Intl.Segmenter('en', { granularity: 'grapheme' });
-        return Array.from(segmenter.segment(text)).length;
+    getAccurateCharacterCount: function(text, type = 'generic') {
+      if (typeof window.calculatePlatformCharacterCount === 'function') {
+        const platform = type === 'thread' ? 'twitter' : type;
+        return window.calculatePlatformCharacterCount(text, platform);
       }
-      // Fallback for older browsers
-      return Array.from(text).length;
+      return (text || '').length;
+    },
+
+    updateProgressMetrics: function(card, currentLength, type, maxCharLimit = 280) {
+      if (!card) return;
+      const charCount = card.querySelector('.char-count');
+      const progressFill = card.querySelector('.char-progress-fill');
+      const lengthSlider = card.querySelector('.length-slider');
+      const platformLimit = type === 'thread' ? maxCharLimit : Math.min(maxCharLimit, type === 'twitter' ? 280 : maxCharLimit);
+      const target = lengthSlider ? parseInt(lengthSlider.value, 10) : platformLimit;
+      const effectiveMax = type === 'twitter' ? 280 : type === 'thread' ? maxCharLimit : platformLimit;
+
+      const percentage = Math.max(0, Math.min(100, (currentLength / effectiveMax) * 100));
+      if (progressFill) {
+        progressFill.style.width = `${percentage}%`;
+        if (percentage < 70) {
+          progressFill.dataset.zone = 'safe';
+        } else if (percentage < 90) {
+          progressFill.dataset.zone = 'warning';
+        } else {
+          progressFill.dataset.zone = 'danger';
+        }
+      }
+
+      if (charCount) {
+        charCount.textContent = `${currentLength} / ${effectiveMax} characters`;
+        charCount.dataset.zone = percentage >= 100 ? 'danger' : percentage >= 90 ? 'warning' : 'safe';
+      }
+
+      if (lengthSlider) {
+        const targetPercentage = Math.max(0, Math.min(100, (target / effectiveMax) * 100));
+        lengthSlider.dataset.targetPercent = String(targetPercentage);
+      }
     },
 
     /**
      * Handle regeneration for Twitter content
      */
-    handleRegenerate: async function(card, targetLength, type, originalData) {
+    handleRegenerate: async function(card, targetLength, type, originalData, maxCharLimit = 280) {
       if (!window.TabTalkAI || !originalData) {
         console.warn('Cannot regenerate: missing TabTalkAI instance or original data');
         return;
@@ -225,7 +269,9 @@
 
         // Call the appropriate regeneration method
         if (type === 'twitter' || type === 'thread') {
-          await window.TabTalkAI.regenerateWithLength(card, targetLength, type);
+          await window.TabTalkAI.regenerateWithLength(card, targetLength, type, maxCharLimit);
+        } else if (window.TabTalkAI?.regenerateAnalyticsWithLength) {
+          await window.TabTalkAI.regenerateAnalyticsWithLength(card, targetLength, type, maxCharLimit);
         }
 
         // Restore button state
@@ -254,6 +300,7 @@
         showCharCount: true,
         showLengthControl: true,
         markdown: false,
+        maxCharLimit: isThread ? 4000 : 280,
         originalData: {
           content: window.TabTalkAI?.pageContent || content,
           platform: isThread ? 'thread' : 'twitter'
@@ -277,14 +324,27 @@
         quotes: '💬'
       };
 
+      const analyticsLimitMap = {
+        summary: 400,
+        keypoints: 600,
+        analysis: 1200,
+        faq: 1200,
+        factcheck: 1500,
+        blog: 1800,
+        proscons: 800,
+        timeline: 1000,
+        quotes: 600
+      };
+
       return this.createUniversalCard(content, {
         type: type,
         title: title || type.charAt(0).toUpperCase() + type.slice(1),
         emoji: emojiMap[type] || '📄',
         editable: false,
-        showCharCount: false,
-        showLengthControl: false,
+        showCharCount: true,
+        showLengthControl: true,
         markdown: true,
+        maxCharLimit: analyticsLimitMap[type] || 1200,
         originalData: {
           content: window.TabTalkAI?.pageContent || content,
           type: type
