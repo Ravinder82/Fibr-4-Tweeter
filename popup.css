@@ -486,6 +486,7 @@ main {
     font-size: 11px;
     color: var(--text-secondary);
     font-weight: 500;
+    justify-content: space-between;
 }
 
 .user-message {
@@ -495,6 +496,39 @@ main {
 .user-message .message-header {
     flex-direction: row-reverse;
     text-align: right;
+}
+.message-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.message-save-toggle {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.message-save-toggle:hover {
+    transform: scale(1.1);
+    color: var(--accent-color);
+}
+
+.message-save-toggle.saved {
+    color: var(--accent-color);
+}
+
+.message-save-toggle:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+
+.saved-message .content {
+    border: 1px solid rgba(99, 102, 241, 0.25);
 }
 
 .assistant-message {
