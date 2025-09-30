@@ -9,19 +9,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const { apiKey, payload } = request;
 
         // --- KEY TRACING LOG 4 ---
-        console.log("Background: Received this key from popup:", apiKey);
+        console.log("Background: Received this key from popup:", apiKey ? "Present" : "Missing");
 
         if (!apiKey) {
             sendResponse({ success: false, error: 'API Key was missing in the message to the background script.' });
-            return true;
+            return false;
         }
 
-        (async () => {
-            const response = await callGeminiApi(apiKey, payload);
-            sendResponse(response);
-        })();
+        // Clean the API key (remove any extra whitespace)
+        const cleanedKey = apiKey.trim().replace(/\s+/g, '');
+
+        // Properly handle async response
+        callGeminiApi(cleanedKey, payload)
+            .then(response => sendResponse(response))
+            .catch(error => sendResponse({ success: false, error: error.message }));
             
-        return true;
+        return true; // Keep message channel open for async response
     } else if (request.action === 'validateApiKey') {
         const { apiKey } = request;
         
@@ -29,16 +32,27 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         
         if (!apiKey) {
             sendResponse({ success: false, error: 'No API key provided' });
-            return true;
+            return false;
         }
         
-        (async () => {
-            const response = await validateApiKey(apiKey);
-            sendResponse(response);
-        })();
+        // Clean the API key (remove any extra whitespace)
+        const cleanedKey = apiKey.trim().replace(/\s+/g, '');
         
-        return true;
+        // Properly handle async response
+        validateApiKey(cleanedKey)
+            .then(response => {
+                console.log("Background: Validation result:", response);
+                sendResponse(response);
+            })
+            .catch(error => {
+                console.error("Background: Validation error:", error);
+                sendResponse({ success: false, error: error.message || 'Validation failed' });
+            });
+        
+        return true; // Keep message channel open for async response
     }
+    
+    return false; // No handler matched
 });
 
 async function callGeminiApi(apiKey, payload) {

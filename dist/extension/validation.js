@@ -5,10 +5,29 @@
         return { success: false, error: 'API key is required' };
       }
       
+      // Clean the API key (remove whitespace, newlines, etc.)
+      const cleanedKey = apiKey.trim().replace(/\s+/g, '');
+      
+      // Basic format validation for Gemini API keys
+      // Gemini API keys typically start with "AIza" and are 39 characters long
+      if (!cleanedKey.startsWith('AIza')) {
+        return { 
+          success: false, 
+          error: 'Invalid API key format. Gemini API keys should start with "AIza"' 
+        };
+      }
+      
+      if (cleanedKey.length < 30) {
+        return { 
+          success: false, 
+          error: 'API key appears too short. Please check and try again.' 
+        };
+      }
+      
       try {
         const response = await chrome.runtime.sendMessage({
           action: 'validateApiKey',
-          apiKey: apiKey.trim()
+          apiKey: cleanedKey
         });
         
         return response;
@@ -129,14 +148,17 @@
     },
     
     async saveApiKey(apiKey) {
+      // Clean the API key before saving
+      const cleanedKey = apiKey.trim().replace(/\s+/g, '');
+      
       // Use the existing storage functionality
       if (window.TabTalkStorage && window.TabTalkStorage.saveApiKey) {
-        await window.TabTalkStorage.saveApiKey(apiKey);
+        await window.TabTalkStorage.saveApiKey(cleanedKey);
       } else {
         // Fallback to direct storage
         await chrome.storage.local.set({ 
-          geminiApiKey: apiKey, 
-          apiKey: apiKey, 
+          geminiApiKey: cleanedKey, 
+          apiKey: cleanedKey, 
           hasSeenWelcome: true 
         });
       }

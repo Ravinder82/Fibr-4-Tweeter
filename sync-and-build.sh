@@ -1,10 +1,11 @@
 #!/bin/bash
 
-echo "🔄 Syncing module files from dist to src..."
-./sync-modules.sh
-
-echo "🔨 Building extension..."
+echo "🔨 Building extension from src to dist..."
 npm run build:extension
 
-echo "✅ Done! Your src and dist directories are now in sync."
-echo "📝 Remember to always run this script after making changes to ensure everything stays in sync."
+echo "✅ Done! Your dist directory has been rebuilt from src."
+echo ""
+echo "Remember:"
+echo "  - Edit files in: src/extension/"
+echo "  - Build with: npm run build:extension"
+echo "  - Output goes to: dist/extension/"
