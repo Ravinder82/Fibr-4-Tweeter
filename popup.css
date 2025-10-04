@@ -1017,6 +1017,277 @@ box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
     margin: 4px 0;
 }
 
+/* Gallery Styles */
+.gallery-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.gallery-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 10px; /* sleeker height */
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(99, 102, 241, 0.06) 100%);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.12);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.gallery-header h2 {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gallery-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Compact back arrow button */
+.gallery-header .back-btn {
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    color: var(--accent-color);
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.gallery-header .back-btn:hover {
+    background: rgba(99, 102, 241, 0.15);
+}
+
+.gallery-search {
+    height: 26px; /* compact */
+    min-width: 120px;
+    max-width: 160px;
+    padding: 0 8px;
+    font-size: 12px;
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+.gallery-search::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.gallery-sort {
+    height: 26px; /* compact */
+    padding: 0 8px;
+    font-size: 12px;
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+.gallery-count {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.gallery-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.gallery-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 40px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.gallery-empty img {
+    width: 72px;
+    height: 72px;
+    border-radius: 16px;
+    opacity: 0.85;
+}
+
+.gallery-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 14px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 8px 24px rgba(31, 38, 135, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+}
+
+.gallery-card-header {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.gallery-card-header .title-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: flex-start;
+}
+
+.gallery-card-header .title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gallery-card-header .badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--accent-color);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.gallery-card-header .badge.platform {
+    background: rgba(29, 155, 240, 0.1);
+    color: #1d9bf0;
+    border-color: rgba(29, 155, 240, 0.2);
+}
+
+.gallery-card-header .meta-row {
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    color: var(--text-secondary);
+}
+
+.gallery-card-content {
+    padding: 12px;
+}
+
+.gallery-text {
+    width: 100%;
+    min-height: 80px;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.4;
+    resize: none;
+}
+
+.gallery-text:disabled {
+    opacity: 0.95;
+}
+
+.gallery-text-wrap {
+    position: relative;
+}
+
+/* Collapsed preview state */
+.gallery-card.collapsed .gallery-text-wrap {
+    max-height: 88px; /* ~4-5 lines */
+    overflow: hidden;
+}
+
+.gallery-card .fade-mask {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 40px;
+    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.9) 60%, rgba(255,255,255,1) 100%);
+    pointer-events: none;
+}
+
+.gallery-card:not(.collapsed) .fade-mask { display: none; }
+
+/* Toggle chevron */
+.gallery-card .toggle-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    width: 22px;
+    height: 22px;
+    line-height: 1;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+
+.gallery-card .toggle-btn:hover {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+.gallery-card[aria-expanded="true"] .toggle-btn {
+    transform: rotate(180deg);
+}
+
+/* Focus ring for cards */
+.gallery-card:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+    border-radius: 12px;
+}
+
+.gallery-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.gallery-controls .btn {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-decoration: none;
+}
+
+.gallery-controls .btn:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.gallery-controls .btn.hidden { display: none; }
+.gallery-controls .btn.success { color: #16a34a; border-color: #16a34a; }
+
 /* Twitter Content Cards */
 .twitter-content-container {
     margin: 15px 0;

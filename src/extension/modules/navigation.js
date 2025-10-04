@@ -9,6 +9,7 @@
       if (viewName === 'welcome') targetId = 'welcome-view';
       if (viewName === 'api-setup') targetId = 'api-setup-view';
       if (viewName === 'history') targetId = 'history-view';
+      if (viewName === 'gallery') targetId = 'gallery-view';
       const target = document.getElementById(targetId);
       if (target) {
         target.classList.remove('hidden');
@@ -16,6 +17,14 @@
         // Special handling for history view
         if (viewName === 'history' && window.historyManager) {
           this.loadHistoryView();
+        }
+        // Special handling for gallery view
+        if (viewName === 'gallery' && window.galleryManager) {
+          const container = document.getElementById('gallery-container');
+          if (container) {
+            // Default category: twitter
+            window.galleryManager.render(container, 'twitter');
+          }
         }
       } else {
         console.warn(`showView: target view not found for "${viewName}" (id "${targetId}")`);

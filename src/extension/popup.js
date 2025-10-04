@@ -106,6 +106,17 @@
               this.updateViewState("settings"),
               this.sidebar && this.sidebar.classList.add("hidden"));
           });
+        // New: Gallery link
+        let ig = document.getElementById("menu-gallery-link");
+        ig &&
+          ig.addEventListener("click", (s) => {
+            s.preventDefault();
+            this.showView("gallery");
+            if (this.sidebar) {
+              this.sidebar.classList.add("hidden");
+              this.sidebar.style.display = "none";
+            }
+          });
         let a = document.getElementById("menu-refresh-link");
         a &&
           a.addEventListener("click", async (s) => {

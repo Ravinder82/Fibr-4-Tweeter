@@ -33,6 +33,7 @@
         <div id="sidebar" class="sidebar hidden">
             <a href="#" id="menu-settings-link">Gemini API Setup</a>
             <a href="#" id="menu-refresh-link">Clear Chat</a>
+            <a href="#" id="menu-gallery-link">Gallery</a>
         </div>
 
         <!-- MAIN CONTENT: This holds all our different views -->
@@ -173,6 +174,11 @@
                 </div>
             </div>
 
+            <!-- VIEW 4b: GALLERY (Saved Twitter Posts) -->
+            <div id="gallery-view" class="view hidden">
+                <div id="gallery-container" class="gallery-container"></div>
+            </div>
+
             <!-- VIEW 5: STATUS (For loading or critical errors) -->
             <div id="status-view" class="view hidden">
                 <div class="spinner"></div>
@@ -188,6 +194,7 @@
     <script src="storage.js"></script>
     <script src="ui-render.js"></script>
     <script src="scroll.js"></script>
+    <script src="gallery.js"></script>
     <script src="navigation.js"></script>
     <script src="validation.js"></script>
     <script src="validation-handlers.js"></script>
