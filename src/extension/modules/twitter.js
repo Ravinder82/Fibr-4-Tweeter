@@ -227,6 +227,13 @@ n/n: [Clean conclusion with CTA]`;
         <div class="twitter-card-content">
           <textarea class="twitter-text" placeholder="Edit your tweet content...">${tweetContent}</textarea>
           <div class="twitter-controls">
+            <div class="twitter-tone-control">
+              <label class="tone-label" for="tone-select">Tone:</label>
+              <select id="tone-select" class="tone-select" aria-label="Tone">
+                <option value="supportive">Supportive with facts</option>
+                <option value="critical">Critical with facts</option>
+              </select>
+            </div>
             <div class="twitter-length-control">
               <label class="length-label">Target Length:</label>
               <input type="range" class="length-slider" min="50" max="2000" value="${Math.max(50, this.getAccurateCharacterCount(tweetContent))}" step="50">
@@ -298,6 +305,7 @@ n/n: [Clean conclusion with CTA]`;
       const lengthSlider = card.querySelector('.length-slider');
       const lengthDisplay = card.querySelector('.length-display');
       const regenerateBtn = card.querySelector('.regenerate-btn');
+      const toneSelect = card.querySelector('.tone-select');
       lengthSlider.addEventListener('input', () => {
         lengthDisplay.textContent = lengthSlider.value;
       });
@@ -306,7 +314,8 @@ n/n: [Clean conclusion with CTA]`;
       regenerateBtn.addEventListener('click', async () => {
         const targetLength = parseInt(lengthSlider.value);
         const platform = card.dataset.platform;
-        await this.regenerateWithLength(card, targetLength, platform);
+        const tone = toneSelect ? toneSelect.value : 'supportive';
+        await this.regenerateWithLength(card, targetLength, platform, { tone });
       });
       return card;
     },
@@ -369,7 +378,7 @@ n/n: [Clean conclusion with CTA]`;
       );
     },
 
-    regenerateWithLength: async function(card, targetLength, platform) {
+    regenerateWithLength: async function(card, targetLength, platform, opts) {
       const textArea = card.querySelector('.twitter-text');
       const regenerateBtn = card.querySelector('.regenerate-btn');
       const originalContent = card.dataset.originalContent;
@@ -378,6 +387,27 @@ n/n: [Clean conclusion with CTA]`;
       try {
         let systemPrompt = '';
         let userPrompt = '';
+        const tone = (opts && opts.tone) || 'supportive';
+        const buildToneDelta = (t) => {
+          if (t === 'critical') {
+            return (
+              'TONE RULES (Critical with Facts):\n' +
+              '- You may use your internal general knowledge where appropriate.\n' +
+              '- Identify 1–2 weaknesses, gaps, or contradictions grounded in the provided content.\n' +
+              '- Keep professional, evidence-based wording. No ad hominem.\n' +
+              '- If evidence is limited, hedge (e.g., "may", "appears").\n' +
+              'Preserve ALL formatting constraints above. Do NOT include links or hashtags.'
+            );
+          }
+          // default supportive
+          return (
+            'TONE RULES (Supportive with Facts):\n' +
+            '- You may use your internal general knowledge where appropriate.\n' +
+            '- Highlight 1–2 verifiable points that support the content.\n' +
+            '- Keep professional, concise, and evidence-based.\n' +
+            'Preserve ALL formatting constraints above. Do NOT include links or hashtags.'
+          );
+        };
         if (platform === 'twitter') {
           systemPrompt = `You are a Twitter/X Premium content creation expert. Create engaging, viral-worthy tweets that drive maximum engagement. Focus on detailed storytelling and valuable insights. NEVER use hashtags in your output.`;
           userPrompt = `Create a Twitter/X post with EXACTLY ${targetLength} characters (±10 characters acceptable):
@@ -394,7 +424,9 @@ STRICT REQUIREMENTS:
 CONTENT TO TRANSFORM:
 ${originalContent}
 
-OUTPUT FORMAT: Tweet content exactly around ${targetLength} characters WITHOUT hashtags.`;
+OUTPUT FORMAT: Tweet content exactly around ${targetLength} characters WITHOUT hashtags.
+
+${buildToneDelta(tone)}`;
         } else if (platform === 'thread') {
           const tweetsNeeded = Math.ceil(targetLength / 400);
           systemPrompt = `You are a Twitter Premium thread specialist. Create compelling multi-tweet threads that tell detailed stories and provide valuable insights. NEVER use hashtags in your output.`;
@@ -415,7 +447,9 @@ OUTPUT FORMAT:
 1/n: [Tweet content]
 2/n: [Tweet content]
 ...
-n/n: [Conclusion]`;
+n/n: [Conclusion]
+
+${buildToneDelta(tone)}`;
         }
         const response = await this.callGeminiAPIWithSystemPrompt(systemPrompt, userPrompt);
         if (response) {
