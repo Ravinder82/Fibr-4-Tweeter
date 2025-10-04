@@ -10,22 +10,12 @@
       return `msg_${base}_${suffix}`;
     },
     ensureMarked: function() {
-      if (this.marked) return Promise.resolve(true);
-      if (document.querySelector('script[data-loader="marked"]')) {
-        return new Promise(resolve => {
-          const check = () => { if (window.marked) { this.marked = window.marked; resolve(true); } else setTimeout(check, 50); };
-          check();
-        });
+      // Marked.js is now loaded statically in popup.html
+      // This ensures Manifest V3 compliance (no dynamic script injection)
+      if (!this.marked && window.marked) {
+        this.marked = window.marked;
       }
-      return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = 'marked.min.js';
-        script.async = true;
-        script.dataset.loader = 'marked';
-        script.onload = () => { this.marked = window.marked; resolve(true); };
-        script.onerror = () => { console.error('Failed to load marked.min.js'); resolve(false); };
-        document.body.appendChild(script);
-      });
+      return this.marked ? true : false;
     },
     setAriaStatus: function(msg) {
       const ariaStatus = document.getElementById('aria-status');
@@ -136,11 +126,13 @@
         const contentEl = document.createElement('div');
         contentEl.classList.add('content');
         if (message.role === 'assistant') {
+            // Ensure marked is available (loaded statically in popup.html)
+            this.ensureMarked();
             if (this.marked) {
                 contentEl.innerHTML = this.marked.parse(message.content);
             } else {
+                // Fallback if marked is not available
                 contentEl.textContent = message.content;
-                this.ensureMarked().then(ok => ok && this.renderMessages());
             }
         } else {
             contentEl.textContent = message.content;
