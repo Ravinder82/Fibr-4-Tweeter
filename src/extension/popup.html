@@ -20,57 +20,17 @@
 
         <!-- QUICK ACTIONS: Horizontal Scrolling Content Creation -->
         <div id="quick-actions" class="quick-actions-container hidden" aria-label="Quick actions">
-            <button class="scroll-arrow scroll-arrow-left" id="scroll-left" title="Scroll left">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M11 2L5 8l6 6V2z"/>
-                </svg>
-            </button>
             <div class="scroll-container">
-                <div class="action-buttons-wrapper">
+                <div class="action-buttons-wrapper single-action">
                     <button id="quick-twitter" class="action-btn" title="Generate Twitter/X post">
                         <span class="btn-text">Twitter Post</span>
                     </button>
-                    <button id="quick-thread" class="action-btn" title="Generate Twitter thread">
-                        <span class="btn-text">Twitter Thread</span>
-                    </button>
-                    <button id="quick-blog" class="action-btn" title="Generate blog post">
-                        <span class="btn-text">Blog Post</span>
-                    </button>
-                    <button id="quick-summary" class="action-btn" title="Generate summary">
-                        <span class="btn-text">Summary</span>
-                    </button>
-                    <button id="quick-keypoints" class="action-btn" title="Extract key points">
-                        <span class="btn-text">Key Points</span>
-                    </button>
-                    <button id="quick-factcheck" class="action-btn" title="Fact check content">
-                        <span class="btn-text">Fact Check</span>
-                    </button>
-                    <button id="quick-analysis" class="action-btn" title="Generate analysis report">
-                        <span class="btn-text">Analysis Report</span>
-                    </button>
-                    <!-- Duplicate buttons for infinite scroll effect -->
-                    <button class="action-btn duplicate" title="Generate Twitter/X post">
-                        <span class="btn-text">Twitter Post</span>
-                    </button>
-                    <button class="action-btn duplicate" title="Generate Twitter thread">
-                        <span class="btn-text">Twitter Thread</span>
-                    </button>
-                    <button class="action-btn duplicate" title="Generate blog post">
-                        <span class="btn-text">Blog Post</span>
-                    </button>
                 </div>
             </div>
-            <button class="scroll-arrow scroll-arrow-right" id="scroll-right" title="Scroll right">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M5 2l6 6-6 6V2z"/>
-                </svg>
-            </button>
         </div>
 
             <!-- SIDEBAR: Hidden by default -->
         <div id="sidebar" class="sidebar hidden">
-            <a href="#" id="menu-faq-link">FAQ Generator</a>
-            <div class="sidebar-divider"></div>
             <a href="#" id="menu-settings-link">Gemini API Setup</a>
             <a href="#" id="menu-refresh-link">Clear Chat</a>
         </div>
@@ -206,12 +166,6 @@
                 <div class="category-tabs">
                     <button class="tab active" data-category="all">All</button>
                     <button class="tab" data-category="twitter">Twitter</button>
-                    <button class="tab" data-category="thread">Threads</button>
-                    <button class="tab" data-category="summary">Summary</button>
-                    <button class="tab" data-category="analysis">Analysis</button>
-                    <button class="tab" data-category="blog">Blog</button>
-                    <button class="tab" data-category="faq">FAQ</button>
-                    <button class="tab" data-category="factcheck">Fact Check</button>
                 </div>
                 
                 <div id="history-list" class="history-list">

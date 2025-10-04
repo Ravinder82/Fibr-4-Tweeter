@@ -359,113 +359,11 @@
       return card;
     },
 
-    renderStructuredContent: function(contentType, rawContent) {
-      // DISABLED: Universal cards system - using legacy system for stability
-      const renderMarkdown = (text) => this.marked ? this.marked.parse(text) : (text || '').replace(/\n/g, '<br>');
-      const cleaned = this.sanitizeStructuredOutput(contentType, rawContent);
-      const contentId = Date.now().toString();
+    // Structured content rendering removed - Twitter-only mode
 
-      switch (contentType) {
-        case 'factcheck': {
-          const parts = cleaned.split(/\n\n(?=(?:Claim\s*\d+|CLAIM\s*\d+|\d+[\.)]\s))/).filter(Boolean);
-          if (parts.length > 1) {
-            parts.forEach((p, idx) => {
-              const title = `Fact Check — Claim ${idx + 1}`;
-              const segment = p.trim();
-              this.renderCard(title, renderMarkdown(segment), { 
-                markdown: segment, 
-                contentType: 'factcheck', 
-                contentId: `${contentId}-${idx}`, 
-              });
-            });
-          } else {
-            this.renderCard('Fact Check', renderMarkdown(cleaned), { 
-              markdown: cleaned, 
-              contentType: 'factcheck', 
-              contentId: contentId, 
-            });
-          }
-          break;
-        }
-        case 'summary':
-        case 'blog': {
-          const titleMap = { summary: 'Summary', blog: 'Blog Post' };
-          const card = this.renderCard(titleMap[contentType], renderMarkdown(cleaned), { 
-            markdown: cleaned, 
-            contentType: contentType,
-            contentId: contentId, 
-          });
-          this.attachStructuredRegenerateControls(card, contentType);
-          break;
-        }
-        default: {
-          const titleMap = { keypoints: 'Key Points', analysis: 'Analysis Report', faq: 'FAQ' };
-          const title = titleMap[contentType] || '✨ Generated Content';
-          this.renderCard(title, renderMarkdown(cleaned), { 
-            markdown: cleaned, 
-            contentType: contentType,
-            contentId: contentId, 
-          });
-        }
-      }
-    },
+    // Structured regenerate controls removed - Twitter-only mode
 
-    attachStructuredRegenerateControls: function(card, contentType) {
-      try {
-        const contentEl = card.querySelector('.twitter-card-content');
-        const controls = document.createElement('div');
-        controls.className = 'twitter-controls';
-        controls.innerHTML = `
-          <div class="twitter-length-control">
-            <label class="length-label">Target Length:</label>
-            <input type="range" class="length-slider" min="100" max="1200" value="400" step="50">
-            <span class="length-display">400</span>
-            <button class="regenerate-btn" title="Regenerate with new length">🔄</button>
-          </div>
-        `;
-        contentEl.appendChild(controls);
-        const slider = controls.querySelector('.length-slider');
-        const display = controls.querySelector('.length-display');
-        const button = controls.querySelector('.regenerate-btn');
-        slider.addEventListener('input', () => { display.textContent = slider.value; });
-        button.addEventListener('click', () => this.regenerateStructuredWithLength(card, contentType, parseInt(slider.value, 10)));
-      } catch (e) {
-        console.warn('attachStructuredRegenerateControls failed:', e);
-      }
-    },
-
-    regenerateStructuredWithLength: async function(card, contentType, targetLength) {
-      const btn = card.querySelector('.regenerate-btn');
-      if (btn) { btn.disabled = true; btn.textContent = '⏳'; }
-      try {
-        let systemPrompt = '';
-        let userPrompt = '';
-        if (contentType === 'blog') {
-          systemPrompt = `You are an expert blog content creator. Rewrite the content as a well-structured blog post with H1/H2 headings and paragraphs. Match the requested length.`;
-          userPrompt = `Create a blog post of approximately ${targetLength} words (±15%). Use markdown headings (H1/H2), short paragraphs, and a clear flow. Source content:\n\n${this.pageContent}`;
-        } else if (contentType === 'summary') {
-          systemPrompt = `You are an expert summarizer. Produce a concise, clear summary with strong structure.`;
-          userPrompt = `Create a summary of approximately ${Math.max(100, Math.min(400, targetLength))} words. Use a short intro and 1-2 concise paragraphs. Source content:\n\n${this.pageContent}`;
-        } else {
-          return;
-        }
-        if (this.showProgressBar) this.showProgressBar('Regenerating...');
-        const response = await this.callGeminiAPIWithSystemPrompt(systemPrompt, userPrompt);
-        if (response) {
-          const structured = card.querySelector('.structured-html');
-          if (structured) {
-            structured.innerHTML = this.marked ? this.marked.parse(response) : response.replace(/\n/g, '<br>');
-            structured.setAttribute('data-markdown', encodeURIComponent(response));
-          }
-        }
-      } catch (err) {
-        console.error('regenerateStructuredWithLength error:', err);
-        alert('Failed to regenerate. Please try again.');
-      } finally {
-        if (btn) { btn.disabled = false; btn.textContent = '🔄'; }
-        if (this.hideProgressBar) this.hideProgressBar();
-      }
-    },
+    // Structured regeneration removed - Twitter-only mode
 
     showProgressBar: function(message) {
       this.hideProgressBar();
