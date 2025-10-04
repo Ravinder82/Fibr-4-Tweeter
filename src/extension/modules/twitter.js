@@ -24,7 +24,7 @@ STRICT FORMATTING REQUIREMENTS:
 - NO asterisks (*) for emphasis - use natural language instead
 - NO "(line break)" text - use actual line breaks
 - NO markdown formatting or special characters
-- Use clean paragraph structure with proper spacing
+- Do NOT include URLs or links of any kind
 - Include relevant emojis naturally in the text
 - Use bullet points (•) or numbers for lists if needed
 - Keep it conversational and engaging
@@ -34,7 +34,6 @@ CONTENT STRUCTURE:
 - Start with an engaging hook
 - Use natural line breaks for readability  
 - Include 1-2 relevant emojis per paragraph
-- End with a compelling call-to-action
 - Focus on value and insights
 
 CONTENT TO TRANSFORM:
@@ -329,6 +328,12 @@ n/n: [Clean conclusion with CTA]`;
       cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
       cleaned = cleaned.replace(/[ \t]+/g, ' ');
       cleaned = cleaned.trim();
+      // Strip URLs and markdown-style links to avoid shadow bans
+      cleaned = cleaned.replace(/https?:\/\/\S+/gi, '');
+      // Remove bare parentheses URL forms like (http...) or duplicated link artifacts
+      cleaned = cleaned.replace(/\((https?:\/\/[^)]+)\)/gi, '');
+      // Collapse leftover empty lines after removing URLs
+      cleaned = cleaned.replace(/(^|\n)\s*$/g, '').replace(/\n{3,}/g, '\n\n');
       cleaned = cleaned.replace(/\[([^\]]+)\]/g, '$1');
       cleaned = cleaned.replace(/\(([^)]+)\)/g, (match, p1) => {
         if (p1.includes('emphasis') || p1.includes('bold') || p1.includes('italic')) {
@@ -383,7 +388,7 @@ STRICT REQUIREMENTS:
 - Make it highly engaging and shareable
 - Use conversational, compelling tone
 - Include emoji strategically to enhance readability
-- Add call-to-action if space allows
+- Do NOT include URLs or links of any kind
 - Focus on delivering maximum value
 
 CONTENT TO TRANSFORM:
@@ -401,7 +406,7 @@ STRICT REQUIREMENTS:
 - NO HASHTAGS ALLOWED anywhere in the thread
 - Each tweet should be comprehensive and valuable
 - Build compelling narrative throughout
-- End with strong call-to-action
+- Do NOT include URLs or links of any kind
 
 CONTENT TO TRANSFORM:
 ${originalContent}
@@ -410,7 +415,7 @@ OUTPUT FORMAT:
 1/n: [Tweet content]
 2/n: [Tweet content]
 ...
-n/n: [Conclusion with CTA]`;
+n/n: [Conclusion]`;
         }
         const response = await this.callGeminiAPIWithSystemPrompt(systemPrompt, userPrompt);
         if (response) {

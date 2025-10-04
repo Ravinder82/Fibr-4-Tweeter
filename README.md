@@ -13,10 +13,8 @@ TabTalk AI is a sophisticated Chrome extension that enables intelligent conversa
 
 ### 🐦 **Twitter Content Generation**
 - **Twitter/X Posts**: Generate single tweets (50-2000 characters) optimized for engagement
-- **Twitter Threads**: Create multi-tweet threads (3-8 tweets) with proper flow
-- **Individual Cards**: Each thread tweet displayed in separate, copyable cards
-- **Zero Hashtag Policy**: Clean, professional content that protects your Twitter account
-- **Copy-Paste Ready**: No formatting noise, asterisks, or markdown artifacts
+- **No Hashtags, No URLs, No CTAs**: Strictly prevents hashtags, links, and call-to-actions to avoid shadow bans
+- **Copy-Paste Ready**: Clean output without formatting noise, asterisks, or markdown artifacts
 
 ### 🎨 **Beautiful Glassmorphism Design**
 - **Modern UI**: Stunning glassmorphism effects with backdrop blur
@@ -28,23 +26,14 @@ TabTalk AI is a sophisticated Chrome extension that enables intelligent conversa
 - **Animated Progress Bars**: Beautiful gradient progress with shimmer effects
 - **Character Count Management**: Accurate Unicode and emoji character counting
 - **Auto-Resize Text Areas**: Content-fitted containers with no scrollbars
-- **Smart Content Cleaning**: Removes formatting noise automatically
+- **Smart Content Cleaning**: Removes formatting noise and strips URLs automatically
 - **Target Length Control**: Interactive slider to adjust content length (50-2000 characters)
 
 ## 🎉 Recent Updates
 
-**v1.2.0 - Complete UI Overhaul & Feature Enhancement**
-
-- **Glassmorphism Design System**: Implemented a stunning modern UI with frosted glass effects, backdrop blur, and smooth animations throughout the extension
-- **Dark/Light Mode**: Added full theme support with automatic system preference detection and manual toggle
-- **Horizontal Action Bar**: New scrollable quick action buttons for Twitter Post, Twitter Thread, Blog Post, Summary, Key Points, Fact Check, and Analysis Report
-- **Enhanced Twitter Generation**: Improved Twitter post and thread generation with character counting, target length control, and copy functionality
-- **Multi-View Architecture**: Implemented welcome screen, API setup guide, chat interface, and settings views with smooth transitions
-- **Interactive Content Cards**: Beautiful content cards for different content types with copy-to-clipboard functionality
-- **Improved Onboarding**: Step-by-step API key setup process with direct link to Google AI Studio
-- **Accessibility Improvements**: Added ARIA attributes, keyboard navigation, and screen reader support
-- **Performance Optimization**: Reduced bundle size, improved rendering performance, and optimized API calls
-- **Responsive Design**: Fully responsive layout optimized for Chrome extension popup dimensions
+- **Twitter-Only Quick Action**: Focused on high-quality single tweets; removed deprecated quick actions
+- **Anti-Shadowban Guardrails**: No hashtags, no URLs, and no CTA lines in generation and regeneration flows
+- **Cleaner UI**: Glassmorphism retained; simplified navigation and history
 
 ## 🚀 Installation
 
@@ -55,7 +44,7 @@ TabTalk AI is a sophisticated Chrome extension that enables intelligent conversa
 
 1. **Download the Extension**
    ```bash
-   git clone https://github.com/your-username/TabTalkAI.git
+   git clone https://github.com/Ravinder82/TabTalkAI.git
    cd TabTalkAI
    ```
 
@@ -97,23 +86,13 @@ TabTalk AI is a sophisticated Chrome extension that enables intelligent conversa
 - Type your question in the input field and click the send button
 
 ### 3. **Generate Twitter Content**
-- Use the horizontal scrolling action bar at the top
-- **🐦 Twitter/X Post**: Creates single, engaging tweets (50-2000 characters)
-  - View your generated post in a beautiful card interface
+- Click the Twitter/X Post button to create a single tweet
+  - View your generated post in a clean card
   - Adjust length using the interactive slider
   - See real-time character count (e.g., "62 characters")
   - Click the copy icon to copy content to clipboard
-- **🧵 Twitter Thread**: Generates multi-tweet threads (3-8 tweets)
-  - Each tweet appears in a separate numbered card
-  - Copy individual tweets or the entire thread
 
-### 4. **Content Analysis Options**
-- Use the horizontal action bar to select analysis type:
-  - **Summary**: Concise overview of the page content
-  - **Blog Post**: Longer-form content based on the page
-  - **Key Points**: Bullet-point extraction of main ideas
-  - **Fact Check**: Verification of factual claims
-  - **Analysis Report**: Detailed breakdown of the content
+<!-- Content analysis quick actions removed in this streamlined release -->
 
 ### 5. **Smart Content Features**
 - **Target Length Control**: Adjust content length with the interactive slider
@@ -126,23 +105,12 @@ TabTalk AI is a sophisticated Chrome extension that enables intelligent conversa
 
 ### 6. **UI Navigation**
 - **Dark Mode Toggle**: Click the moon/sun icon in the header to switch themes
-- **Menu Button**: Access additional options via the hamburger menu
-  - FAQ Generator: Create frequently asked questions from the content
+- **Menu Button**: Access options via the hamburger menu
   - Gemini API Setup: Update your API key settings
   - Clear Chat: Reset the conversation history
 - **Back Button**: Return to previous screens when navigating
 
-## 💡 Demo Mode
-
-If you don't have an API key yet, you can try the demo mode to explore the interface with simulated responses:
-
-- **Realistic Simulations**: Experience the full UI with pre-generated responses
-- **All Features Available**: Test Twitter posts, threads, summaries, and more
-- **Interactive Tutorial**: Step-by-step guidance on how to use each feature
-- **No API Key Required**: Perfect for evaluating the extension before setup
-- **Easy Transition**: One-click switch to live mode when you're ready
-
-Demo mode provides a complete preview of the extension's capabilities without requiring any API credentials, giving you a feel for how the extension works before setting up your API key.
+<!-- Demo Mode section removed for this streamlined release -->
 
 ## 🔧 Technical Details
 
@@ -228,7 +196,7 @@ TabTalkAI/
 ### Local Development
 1. **Clone Repository**
    ```bash
-   git clone https://github.com/your-username/TabTalkAI.git
+   git clone https://github.com/Ravinder82/TabTalkAI.git
    cd TabTalkAI
    ```
 
@@ -239,9 +207,9 @@ TabTalkAI/
 
 3. **Development Workflow**
    ```bash
-   # Make changes to files in dist/extension/
+   # Edit files in src/extension/
+   npm run build:extension   # builds to dist/extension/
    # Reload extension in chrome://extensions/
-   # Test functionality on various websites
    ```
 
 ## ⚠️ Limitations
