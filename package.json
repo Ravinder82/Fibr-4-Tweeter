@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/package",
   "name": "tabtalk-ai",
   "version": "1.0.0",
   "description": "TabTalk AI - Chat with any webpage using Google Gemini",

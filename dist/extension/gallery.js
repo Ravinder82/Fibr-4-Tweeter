@@ -45,7 +45,7 @@
       container.appendChild(list);
 
       const items = await this.loadSaved(category);
-      this.renderList(list, items);
+      this.initVirtualList(list, items);
 
       // Wire header controls
       const backBtn = header.querySelector('#gallery-back-btn');
@@ -65,13 +65,13 @@
         let current = await this.loadSaved(category);
         if (q) {
           current = current.filter(i =>
-            (i.title || '').toLowerCase().includes(q) ||
             (i.content || '').toLowerCase().includes(q) ||
             (i.domain || '').toLowerCase().includes(q)
           );
         }
         current = this.sortItems(current, sort);
-        this.renderList(list, current);
+        this.initVirtualList(list, current);
+        this.renderList(list, current.slice(0, this._virtual.batch));
         countEl.textContent = `${current.length}/50`;
       };
 
@@ -107,6 +107,13 @@
         return;
       }
 
+      // If virtualization context exists, append only next batch
+      if (this._virtual && this._virtual.list === list) {
+        this.appendNextBatch();
+        return;
+      }
+
+      // Fallback full render
       list.innerHTML = '';
       const frag = document.createDocumentFragment();
       items.forEach(item => {
@@ -114,6 +121,51 @@
         frag.appendChild(card);
       });
       list.appendChild(frag);
+    },
+
+    initVirtualList(list, items) {
+      // Reset previous listeners by cloning element
+      const newList = list;
+      newList.innerHTML = '';
+      this._virtual = {
+        list: newList,
+        items: items || [],
+        index: 0,
+        batch: 20
+      };
+      // Initial paint: one or two batches depending on size
+      this.appendNextBatch();
+      if (this._virtual.items.length > this._virtual.batch) {
+        this.appendNextBatch();
+      }
+      const onScroll = () => {
+        const { list: el } = this._virtual || {};
+        if (!el) return;
+        // Near bottom: load next batch
+        if (el.scrollTop + el.clientHeight >= el.scrollHeight - 120) {
+          this.appendNextBatch();
+        }
+      };
+      // Remove previous handler if any
+      if (this._virtualScrollHandler) {
+        newList.removeEventListener('scroll', this._virtualScrollHandler);
+      }
+      this._virtualScrollHandler = onScroll;
+      newList.addEventListener('scroll', onScroll, { passive: true });
+    },
+
+    appendNextBatch() {
+      const v = this._virtual;
+      if (!v || !v.list) return;
+      if (v.index >= v.items.length) return;
+      const start = v.index;
+      const end = Math.min(v.index + v.batch, v.items.length);
+      const frag = document.createDocumentFragment();
+      for (let i = start; i < end; i++) {
+        frag.appendChild(this.renderCard(v.items[i]));
+      }
+      v.list.appendChild(frag);
+      v.index = end;
     },
 
     renderCard(item) {
