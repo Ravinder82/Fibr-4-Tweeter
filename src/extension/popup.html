@@ -185,7 +185,8 @@
             <div id="thread-generator-view" class="view hidden">
                 <div class="thread-generator-container">
                     <div class="generator-header">
-                        <h2>🧵 Thread Generator</h2>
+                        <div class="header-icon">🧵</div>
+                        <h2>Thread Generator</h2>
                         <p>Create engaging threads on any topic</p>
                     </div>
                     
@@ -212,7 +213,7 @@
                                 <input type="checkbox" id="use-knowledge-pack" checked />
                                 <span>Use AI Knowledge Base (Recommended)</span>
                             </label>
-                            <small class="form-hint">Includes curated facts and hooks for better content</small>
+                            <small class="form-hint">Includes curated facts and hooks</small>
                         </div>
                         
                         <div class="generator-actions">
@@ -223,13 +224,18 @@
                     </div>
                     
                     <div class="generator-info">
-                        <h3>How it works</h3>
-                        <ol>
-                            <li>Choose a category that fits your topic</li>
-                            <li>Enter your specific topic or idea</li>
-                            <li>AI creates an engaging 8-tweet thread</li>
-                            <li>Edit, copy, and post to Twitter/X</li>
-                        </ol>
+                        <button class="info-toggle" id="how-it-works-toggle" type="button">
+                            <span class="info-title">How it works</span>
+                            <span class="info-icon">▼</span>
+                        </button>
+                        <div class="info-content" id="how-it-works-content">
+                            <ol>
+                                <li>Choose a category that fits your topic</li>
+                                <li>Enter your specific topic or idea</li>
+                                <li>AI creates an engaging 8-tweet thread</li>
+                                <li>Edit, copy, and post to Twitter/X</li>
+                            </ol>
+                        </div>
                     </div>
                 </div>
             </div>

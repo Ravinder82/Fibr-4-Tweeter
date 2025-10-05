@@ -424,6 +424,30 @@ Craft your ${targetLength}-character thread now:`;
       }
     },
     
+    // Initialize collapsible "How it works" section
+    initializeHowItWorksToggle: function() {
+      const toggle = document.getElementById('how-it-works-toggle');
+      const content = document.getElementById('how-it-works-content');
+      
+      if (!toggle || !content) return;
+      
+      // Start collapsed
+      content.classList.remove('expanded');
+      toggle.classList.remove('expanded');
+      
+      toggle.addEventListener('click', () => {
+        const isExpanded = content.classList.contains('expanded');
+        
+        if (isExpanded) {
+          content.classList.remove('expanded');
+          toggle.classList.remove('expanded');
+        } else {
+          content.classList.add('expanded');
+          toggle.classList.add('expanded');
+        }
+      });
+    },
+    
     // Handle thread generator form submission
     handleThreadGeneratorSubmit: async function() {
       const categorySelect = document.getElementById('thread-category');

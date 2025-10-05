@@ -34,6 +34,10 @@
             window.TabTalkThreadLibrary.render(container);
           }
         }
+        // Special handling for thread-generator view
+        if (viewName === 'thread-generator' && this.initializeHowItWorksToggle) {
+          this.initializeHowItWorksToggle();
+        }
       } else {
         console.warn(`showView: target view not found for "${viewName}" (id "${targetId}")`);
       }
