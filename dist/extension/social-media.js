@@ -3,7 +3,7 @@
     /**
      * Generate LinkedIn Post - Professional engagement-optimized content
      */
-    generateLinkedInPost: async function() {
+    generateLinkedInPost: async function(targetLength = null) {
       if (!this.pageContent || !this.apiKey) {
         this.addMessage('assistant', '❌ Please set up your Gemini API key first and ensure page content is loaded.');
         return;
@@ -14,6 +14,13 @@
 
       try {
         this.showProgressBar('Crafting professional LinkedIn post...');
+
+        // Length constraint guidance
+        let lengthGuidance = '500-1500 characters optimal (you can go up to 3000)';
+        if (targetLength) {
+          const tolerance = Math.round(targetLength * 0.15); // 15% tolerance
+          lengthGuidance = `TARGET LENGTH: ${targetLength} characters (±${tolerance} is acceptable). Adjust content density to hit this target.`;
+        }
 
         const systemPrompt = `You are a LinkedIn content strategist specializing in professional posts that drive engagement. You understand LinkedIn's algorithm and what makes content perform well.
 
@@ -27,7 +34,7 @@ YOUR EXPERTISE:
 LINKEDIN BEST PRACTICES:
 - First 2 lines are critical (preview text)
 - Use line breaks every 1-2 sentences
-- 500-1500 characters optimal (you can go up to 3000)
+- ${lengthGuidance}
 - NO hashtags unless specifically requested
 - NO emojis unless they add professional value
 - End with a question or call-to-thought
@@ -84,7 +91,7 @@ TONE: Professional but conversational. Thought leadership. Authentic.`;
     /**
      * Generate Email Summary - Professional email draft for sharing content
      */
-    generateEmailSummary: async function(context = 'colleague') {
+    generateEmailSummary: async function(context = 'colleague', targetLength = null) {
       if (!this.pageContent || !this.apiKey) {
         this.addMessage('assistant', '❌ Please set up your Gemini API key first and ensure page content is loaded.');
         return;
@@ -129,6 +136,14 @@ TONE: Professional but conversational. Thought leadership. Authentic.`;
             closingStyle = 'Thought you might find this interesting.';
         }
 
+        // Length constraint guidance
+        let lengthGuidance = 'Keep total length 150-300 words';
+        if (targetLength) {
+          const wordEstimate = Math.round(targetLength / 5.5); // ~5.5 chars per word average
+          const tolerance = Math.round(wordEstimate * 0.15);
+          lengthGuidance = `TARGET LENGTH: approximately ${wordEstimate} words (${targetLength} characters, ±${tolerance} words acceptable)`;
+        }
+
         const systemPrompt = `You are a professional email writer specializing in clear, effective communication. You help people share valuable content efficiently.
 
 CONTEXT: You're ${contextGuidance}.
@@ -156,7 +171,7 @@ Hi [Name],
 
 REQUIREMENTS:
 - Subject line must be specific and actionable
-- Keep total length 150-300 words
+- ${lengthGuidance}
 - Use bullet points for scannability
 - Include estimated reading time for linked content
 - Make it immediately useful`;
@@ -533,10 +548,12 @@ REQUIREMENTS:
       regenerateBtn.textContent = '⏳';
       
       try {
+        console.log(`TabTalk AI: Regenerating ${platform} with target length: ${targetLength}`);
+        
         if (platform === 'linkedin') {
-          await this.generateLinkedInPost();
+          await this.generateLinkedInPost(targetLength);
         } else if (platform === 'email') {
-          await this.generateEmailSummary(context || 'colleague');
+          await this.generateEmailSummary(context || 'colleague', targetLength);
         }
       } catch (error) {
         console.error('Error regenerating content:', error);

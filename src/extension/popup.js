@@ -24,9 +24,7 @@
           (this.sidebar = document.getElementById("sidebar")),
           (this.quickTwitterBtn = document.getElementById("quick-twitter")),
           (this.quickTldrBtn = document.getElementById("quick-tldr")),
-          (this.quickInsightsBtn = document.getElementById("quick-insights")),
           (this.quickActionsBtn = document.getElementById("quick-actions-btn")),
-          (this.quickDiscussionBtn = document.getElementById("quick-discussion")),
           (this.quickLinkedInBtn = document.getElementById("quick-linkedin")),
           (this.quickEmailBtn = document.getElementById("quick-email")),
           (this.welcomeView = document.getElementById("welcome-view")),
@@ -267,20 +265,10 @@
               (this.resetScreenForGeneration && this.resetScreenForGeneration(),
                 await this.generateSmartTLDR());
             }),
-          this.quickInsightsBtn &&
-            this.quickInsightsBtn.addEventListener("click", async () => {
-              (this.resetScreenForGeneration && this.resetScreenForGeneration(),
-                await this.generateKeyInsights());
-            }),
           this.quickActionsBtn &&
             this.quickActionsBtn.addEventListener("click", async () => {
               (this.resetScreenForGeneration && this.resetScreenForGeneration(),
                 await this.generateActionItems());
-            }),
-          this.quickDiscussionBtn &&
-            this.quickDiscussionBtn.addEventListener("click", async () => {
-              (this.resetScreenForGeneration && this.resetScreenForGeneration(),
-                await this.generateDiscussionQuestions());
             }),
           this.quickLinkedInBtn &&
             this.quickLinkedInBtn.addEventListener("click", async () => {

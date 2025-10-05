@@ -1,8 +1,8 @@
 (function() {
   const ContentAnalysis = {
     /**
-     * Generate Smart TL;DR - Ultra-concise intelligent summary (50-150 words)
-     * Adapts based on site type for context-aware summaries
+     * Explain This - Clear explanation of the page content
+     * Adapts based on site type for context-aware explanations
      */
     generateSmartTLDR: async function() {
       if (!this.pageContent || !this.apiKey) {
@@ -10,8 +10,8 @@
         return;
       }
 
-      this.setLoading(true, 'Generating Smart TL;DR...');
-      console.log('TabTalk AI: Generating Smart TL;DR for page:', this.currentTab?.title);
+      this.setLoading(true, 'Explaining this page...');
+      console.log('TabTalk AI: Generating Explanation for page:', this.currentTab?.title);
 
       try {
         // Show progress bar
@@ -47,7 +47,7 @@
 
 CONTEXT: This is a ${siteType} page.
 
-YOUR TASK: Create a Smart TL;DR (50-150 words) that:
+YOUR TASK: Create a clear explanation (50-150 words) that:
 1. Captures the core message in the first sentence
 2. Highlights 2-3 most important insights
 3. Ends with an actionable takeaway
@@ -71,18 +71,18 @@ OUTPUT FORMAT:
 
 **Takeaway:** [Actionable conclusion]`;
 
-        const userPrompt = `Create a Smart TL;DR (50-150 words) from this content:\n\n${this.pageContent}`;
+        const userPrompt = `Create a clear explanation (50-150 words) from this content:\n\n${this.pageContent}`;
 
         const response = await this.callGeminiAPIWithSystemPrompt(systemPrompt, userPrompt);
         
         if (response) {
-          console.log('TabTalk AI: Smart TL;DR generated, length:', response.length);
+          console.log('TabTalk AI: Explanation generated, length:', response.length);
           const cleanedResponse = this.cleanStructuredContent(response, 'tldr');
           
           // Add to chat with special content type
           this.addStructuredMessage('assistant', cleanedResponse, 'tldr', {
-            title: '🎯 Smart TL;DR',
-            icon: '🎯',
+            title: 'Explain this!',
+            icon: '',
             category: 'analysis'
           });
 
@@ -102,8 +102,8 @@ OUTPUT FORMAT:
           this.hideProgressBar();
         }
       } catch (error) {
-        console.error('Error generating Smart TL;DR:', error);
-        this.addMessage('assistant', `❌ Error generating TL;DR: ${error.message}`);
+        console.error('Error generating explanation:', error);
+        this.addMessage('assistant', `❌ Error generating explanation: ${error.message}`);
         this.hideProgressBar();
       } finally {
         this.setLoading(false);
@@ -111,90 +111,7 @@ OUTPUT FORMAT:
     },
 
     /**
-     * Generate Key Insights - Non-obvious patterns and implications
-     */
-    generateKeyInsights: async function() {
-      if (!this.pageContent || !this.apiKey) {
-        this.addMessage('assistant', '❌ Please set up your Gemini API key first and ensure page content is loaded.');
-        return;
-      }
-
-      this.setLoading(true, 'Extracting key insights...');
-      console.log('TabTalk AI: Generating Key Insights for page:', this.currentTab?.title);
-
-      try {
-        this.showProgressBar('Analyzing patterns and implications...');
-
-        const systemPrompt = `You are a strategic analyst specializing in deep content analysis. You identify non-obvious insights, patterns, and implications that require careful reading to discover.
-
-YOUR TASK: Identify 3-5 KEY INSIGHTS that are:
-- Non-obvious (not surface-level facts)
-- Strategically important
-- Actionable or thought-provoking
-- Based on patterns, connections, or implications in the content
-
-For each insight, provide:
-1. The insight itself (clear, specific statement)
-2. Supporting evidence from the content
-3. "Why this matters" - practical significance
-4. Suggested action or consideration
-
-AVOID:
-- Obvious facts stated directly in the content
-- Generic observations
-- Restating the content without analysis
-
-OUTPUT FORMAT:
-**Insight 1: [Insight title]**
-[Detailed insight explanation]
-
-*Evidence:* [Supporting details from content]
-*Why this matters:* [Practical significance]
-*Action:* [What to do with this insight]
-
----
-
-[Repeat for insights 2-5]`;
-
-        const userPrompt = `Analyze this content for non-obvious insights, patterns, and strategic implications:\n\n${this.pageContent}`;
-
-        const response = await this.callGeminiAPIWithSystemPrompt(systemPrompt, userPrompt);
-        
-        if (response) {
-          console.log('TabTalk AI: Key Insights generated, length:', response.length);
-          const cleanedResponse = this.cleanStructuredContent(response, 'insights');
-          
-          this.addStructuredMessage('assistant', cleanedResponse, 'insights', {
-            title: '💡 Key Insights',
-            icon: '💡',
-            category: 'analysis'
-          });
-
-          if (this.addToHistory) {
-            const record = {
-              timestamp: new Date().toISOString(),
-              url: this.currentTab?.url || '',
-              title: this.currentTab?.title || '',
-              domain: this.currentDomain || '',
-              content: cleanedResponse,
-              type: 'insights'
-            };
-            await this.addToHistory('analysis', record);
-          }
-
-          this.hideProgressBar();
-        }
-      } catch (error) {
-        console.error('Error generating Key Insights:', error);
-        this.addMessage('assistant', `❌ Error generating insights: ${error.message}`);
-        this.hideProgressBar();
-      } finally {
-        this.setLoading(false);
-      }
-    },
-
-    /**
-     * Generate Action Items - Prioritized, actionable tasks with effort estimates
+     * Generate Tasks - Prioritized, actionable tasks with effort estimates
      */
     generateActionItems: async function() {
       if (!this.pageContent || !this.apiKey) {
@@ -202,8 +119,8 @@ OUTPUT FORMAT:
         return;
       }
 
-      this.setLoading(true, 'Identifying action items...');
-      console.log('TabTalk AI: Generating Action Items for page:', this.currentTab?.title);
+      this.setLoading(true, 'Identifying tasks...');
+      console.log('TabTalk AI: Generating Tasks for page:', this.currentTab?.title);
 
       try {
         this.showProgressBar('Creating actionable task list...');
@@ -243,12 +160,12 @@ Success: [How you'll know it's done]
         const response = await this.callGeminiAPIWithSystemPrompt(systemPrompt, userPrompt);
         
         if (response) {
-          console.log('TabTalk AI: Action Items generated, length:', response.length);
+          console.log('TabTalk AI: Tasks generated, length:', response.length);
           const cleanedResponse = this.cleanStructuredContent(response, 'actions');
           
           this.addStructuredMessage('assistant', cleanedResponse, 'actions', {
-            title: '✅ Action Items & Next Steps',
-            icon: '✅',
+            title: 'Tasks & Next Steps',
+            icon: '',
             category: 'productivity'
           });
 
@@ -267,92 +184,8 @@ Success: [How you'll know it's done]
           this.hideProgressBar();
         }
       } catch (error) {
-        console.error('Error generating Action Items:', error);
-        this.addMessage('assistant', `❌ Error generating action items: ${error.message}`);
-        this.hideProgressBar();
-      } finally {
-        this.setLoading(false);
-      }
-    },
-
-    /**
-     * Generate Discussion Questions - Thought-provoking questions for engagement
-     */
-    generateDiscussionQuestions: async function() {
-      if (!this.pageContent || !this.apiKey) {
-        this.addMessage('assistant', '❌ Please set up your Gemini API key first and ensure page content is loaded.');
-        return;
-      }
-
-      this.setLoading(true, 'Crafting discussion questions...');
-      console.log('TabTalk AI: Generating Discussion Questions for page:', this.currentTab?.title);
-
-      try {
-        this.showProgressBar('Creating thought-provoking questions...');
-
-        const systemPrompt = `You are an expert educator and facilitator specializing in creating thought-provoking discussion questions. Your questions encourage critical thinking, multiple perspectives, and meaningful dialogue.
-
-YOUR TASK: Generate 5-7 discussion questions about the content.
-
-QUESTION CATEGORIES:
-1. **Comprehension** (2 questions) - Test understanding of key concepts
-2. **Analysis** (2 questions) - Explore implications and connections
-3. **Application** (2 questions) - Real-world connections and use cases
-4. **Synthesis** (1 question) - Big picture and broader themes
-
-For each question:
-- Make it open-ended (no yes/no answers)
-- Encourage multiple perspectives
-- Connect to broader themes
-- Include difficulty level: 🟢 Easy | 🟡 Medium | 🔴 Advanced
-- Suggest discussion time: ⏱️ 5-10 min | ⏱️ 10-20 min | ⏱️ 20+ min
-
-OUTPUT FORMAT:
-## 📖 Comprehension Questions
-**Q1:** [Question]
-Difficulty: [emoji] | Time: [emoji estimate]
-*Why ask this:* [Purpose of question]
-
-## 🔍 Analysis Questions
-[Same format]
-
-## 🌍 Application Questions
-[Same format]
-
-## 🎯 Synthesis Question
-[Same format]`;
-
-        const userPrompt = `Generate thought-provoking discussion questions about this content:\n\n${this.pageContent}`;
-
-        const response = await this.callGeminiAPIWithSystemPrompt(systemPrompt, userPrompt);
-        
-        if (response) {
-          console.log('TabTalk AI: Discussion Questions generated, length:', response.length);
-          const cleanedResponse = this.cleanStructuredContent(response, 'discussion');
-          
-          this.addStructuredMessage('assistant', cleanedResponse, 'discussion', {
-            title: '💬 Discussion Starter Pack',
-            icon: '💬',
-            category: 'learning'
-          });
-
-          if (this.addToHistory) {
-            const record = {
-              timestamp: new Date().toISOString(),
-              url: this.currentTab?.url || '',
-              title: this.currentTab?.title || '',
-              domain: this.currentDomain || '',
-              content: cleanedResponse,
-              type: 'discussion'
-            };
-            await this.addToHistory('learning', record);
-          }
-
-          this.hideProgressBar();
-        }
-      } catch (error) {
-        console.error('Error generating Discussion Questions:', error);
-        this.addMessage('assistant', `❌ Error generating questions: ${error.message}`);
+        console.error('Error generating Tasks:', error);
+        this.addMessage('assistant', `❌ Error generating tasks: ${error.message}`);
         this.hideProgressBar();
       } finally {
         this.setLoading(false);
@@ -443,13 +276,13 @@ Difficulty: [emoji] | Time: [emoji estimate]
         const items = this.parseStructuredContent(content, contentType);
         
         items.forEach((item, index) => {
-          const cardTitle = `${metadata.icon || '📄'} ${metadata.title || contentType} ${index + 1}/${items.length}`;
+          const cardTitle = `${metadata.title || contentType} ${index + 1}/${items.length}`;
           const card = this.createAnalysisCard(item, cardTitle, contentType, '');
           contentContainer.appendChild(card);
         });
       } else {
         // Single card for TL;DR and other types
-        const card = this.createAnalysisCard(content, metadata.title || contentType, contentType, metadata.icon);
+        const card = this.createAnalysisCard(content, metadata.title || contentType, contentType, '');
         contentContainer.appendChild(card);
       }
       
@@ -464,63 +297,87 @@ Difficulty: [emoji] | Time: [emoji estimate]
 
     /**
      * Parse structured content into individual items (like Twitter threads)
+     * Improved with minimum item requirements and better fallback handling
      */
     parseStructuredContent: function(content, type) {
       const items = [];
+      const MIN_ITEMS = 2; // Require at least 2 items to consider parsing successful
+      const MIN_ITEM_LENGTH = 20; // Minimum characters per item to avoid fragments
       
       if (type === 'insights') {
         // Parse insights - look for numbered patterns or "Insight X:" patterns
         const insightPatterns = [
-          /(?:^|\n)(?:\*\*)?Insight\s+\d+[:\s]+(?:\*\*)?([^\n]+(?:\n(?!Insight\s+\d+)[^\n]+)*)/gi,
-          /(?:^|\n)(?:\d+[\.\)]\s+)([^\n]+(?:\n(?!\d+[\.\)])[^\n]+)*)/g,
-          /(?:^|\n)(?:•\s+)([^\n]+(?:\n(?!•)[^\n]+)*)/g
+          // Match "Insight 1:", "Insight 2:", etc. with multi-line content
+          /(?:^|\n)(?:\*\*)?Insight\s+\d+[:\s]+(?:\*\*)?([^\n]+(?:\n(?!(?:Insight\s+\d+|\n\n))[^\n]+)*)/gi,
+          // Match numbered lists: "1.", "2)", etc. with multi-line content
+          /(?:^|\n)(?:\d+[\.\)]\s+)([^\n]+(?:\n(?!(?:\d+[\.\)]|\n\n))[^\n]+)*)/g,
+          // Match bullet points with multi-line content
+          /(?:^|\n)(?:•\s+)([^\n]+(?:\n(?!(?:•|\n\n))[^\n]+)*)/g
         ];
         
         for (const pattern of insightPatterns) {
-          const matches = content.matchAll(pattern);
+          const matches = [...content.matchAll(pattern)];
           for (const match of matches) {
-            if (match[1] && match[1].trim()) {
-              items.push(match[1].trim());
+            const item = match[1]?.trim();
+            if (item && item.length >= MIN_ITEM_LENGTH) {
+              items.push(item);
             }
           }
-          if (items.length > 0) break;
+          // Only accept if we found enough substantial items
+          if (items.length >= MIN_ITEMS) break;
+          items.length = 0; // Reset if pattern didn't yield enough items
         }
       } else if (type === 'actions') {
         // Parse action items - look for numbered or bulleted items
         const actionPatterns = [
-          /(?:^|\n)(?:\*\*)?(?:\d+[\.\)]\s+|•\s+)([^\n]+(?:\n(?!\d+[\.\)]|•|\n)[^\n]+)*)/g,
-          /(?:^|\n)(?:Quick Wins?|Strategic Actions?|Optional)[^\n]*\n([^]+?)(?=\n(?:Quick Wins?|Strategic Actions?|Optional)|$)/gi
+          // Match section headers with content blocks
+          /(?:^|\n)(?:Quick Wins?|Strategic Actions?|Optional Enhancements?)[^\n]*\n([^]+?)(?=\n(?:Quick Wins?|Strategic Actions?|Optional Enhancements?)|$)/gi,
+          // Match numbered/bulleted items with multi-line content
+          /(?:^|\n)(?:\*\*)?(?:\d+[\.\)]\s+|•\s+)([^\n]+(?:\n(?!(?:\d+[\.\)]|•|\n\n))[^\n]+)*)/g
         ];
         
         for (const pattern of actionPatterns) {
-          const matches = content.matchAll(pattern);
+          const matches = [...content.matchAll(pattern)];
           for (const match of matches) {
-            if (match[1] && match[1].trim()) {
-              items.push(match[1].trim());
+            const item = match[1]?.trim();
+            if (item && item.length >= MIN_ITEM_LENGTH) {
+              items.push(item);
             }
           }
-          if (items.length > 0) break;
+          if (items.length >= MIN_ITEMS) break;
+          items.length = 0;
         }
       } else if (type === 'discussion') {
         // Parse discussion questions - look for Q1, Q2 or numbered patterns
         const questionPatterns = [
-          /(?:^|\n)(?:\*\*)?Q\d+[:\s]+(?:\*\*)?([^\n]+(?:\n(?!Q\d+)[^\n]+)*)/gi,
-          /(?:^|\n)(?:\d+[\.\)]\s+)([^\n]+(?:\n(?!\d+[\.\)])[^\n]+)*)/g
+          // Match "Q1:", "Q2:", etc. with multi-line content
+          /(?:^|\n)(?:\*\*)?Q\d+[:\s]+(?:\*\*)?([^\n]+(?:\n(?!(?:Q\d+|\n\n))[^\n]+)*)/gi,
+          // Match numbered questions with multi-line content
+          /(?:^|\n)(?:\d+[\.\)]\s+)([^\n]+(?:\n(?!(?:\d+[\.\)]|\n\n))[^\n]+)*)/g
         ];
         
         for (const pattern of questionPatterns) {
-          const matches = content.matchAll(pattern);
+          const matches = [...content.matchAll(pattern)];
           for (const match of matches) {
-            if (match[1] && match[1].trim()) {
-              items.push(match[1].trim());
+            const item = match[1]?.trim();
+            if (item && item.length >= MIN_ITEM_LENGTH) {
+              items.push(item);
             }
           }
-          if (items.length > 0) break;
+          if (items.length >= MIN_ITEMS) break;
+          items.length = 0;
         }
       }
       
-      // If no items found, return content as single item
-      return items.length > 0 ? items : [content];
+      // Fallback: If parsing didn't yield enough quality items, return content as single item
+      // This prevents fragmentation when AI format varies
+      if (items.length < MIN_ITEMS) {
+        console.log(`TabTalk AI: Parsing ${type} yielded only ${items.length} items, using single card fallback`);
+        return [content];
+      }
+      
+      console.log(`TabTalk AI: Successfully parsed ${type} into ${items.length} cards`);
+      return items;
     },
 
     /**
@@ -532,7 +389,7 @@ Difficulty: [emoji] | Time: [emoji estimate]
       
       card.innerHTML = `
         <div class="twitter-card-header">
-          <span class="twitter-card-title">${icon} ${cardTitle}</span>
+          <span class="twitter-card-title">${cardTitle}</span>
           <div class="twitter-header-actions">
             <button class="twitter-action-btn copy-btn" title="Copy content" aria-label="Copy content">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

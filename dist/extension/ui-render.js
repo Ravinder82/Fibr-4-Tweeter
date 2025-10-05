@@ -292,7 +292,7 @@
       const markdownAttr = options.markdown ? `data-markdown="${encodeURIComponent(options.markdown)}"` : '';
       card.innerHTML = `
         <div class="twitter-card-header">
-          <span class="twitter-card-title">${emoji} ${title}</span>
+          <span class="twitter-card-title">${title}</span>
           <div class="twitter-header-actions">
             <button class="twitter-action-btn copy-btn" title="Copy content" aria-label="Copy content">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

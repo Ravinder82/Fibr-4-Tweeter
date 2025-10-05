@@ -78,7 +78,7 @@ n/n: [Clean conclusion with CTA]`;
         }
 
         // Show progress bar instead of user message
-        this.showProgressBar(`Generating ${platform === 'twitter' ? 'Twitter/X Post' : 'Twitter Thread'}...`);
+        this.showProgressBar(`Generating ${platform === 'twitter' ? 'Post' : 'Thread'}...`);
 
         // Use the existing callGeminiAPIWithSystemPrompt method
         const response = await this.callGeminiAPIWithSystemPrompt(systemPrompt, userPrompt);
@@ -161,7 +161,7 @@ n/n: [Clean conclusion with CTA]`;
         });
       } else {
         // DISABLED: Universal cards system - using legacy system for stability
-        const card = this.createTwitterCard(content, 'Twitter Post');
+        const card = this.createTwitterCard(content, 'Post');
         card.dataset.platform = platform;
         contentContainer.appendChild(card);
       }
