@@ -23,6 +23,12 @@
           (this.quickActions = document.getElementById("quick-actions")),
           (this.sidebar = document.getElementById("sidebar")),
           (this.quickTwitterBtn = document.getElementById("quick-twitter")),
+          (this.quickTldrBtn = document.getElementById("quick-tldr")),
+          (this.quickInsightsBtn = document.getElementById("quick-insights")),
+          (this.quickActionsBtn = document.getElementById("quick-actions-btn")),
+          (this.quickDiscussionBtn = document.getElementById("quick-discussion")),
+          (this.quickLinkedInBtn = document.getElementById("quick-linkedin")),
+          (this.quickEmailBtn = document.getElementById("quick-email")),
           (this.welcomeView = document.getElementById("welcome-view")),
           (this.apiSetupView = document.getElementById("api-setup-view")),
           (this.chatView = document.getElementById("chat-view")),
@@ -256,6 +262,36 @@
               (this.resetScreenForGeneration && this.resetScreenForGeneration(),
                 await this.generateSocialContent("twitter"));
             }),
+          this.quickTldrBtn &&
+            this.quickTldrBtn.addEventListener("click", async () => {
+              (this.resetScreenForGeneration && this.resetScreenForGeneration(),
+                await this.generateSmartTLDR());
+            }),
+          this.quickInsightsBtn &&
+            this.quickInsightsBtn.addEventListener("click", async () => {
+              (this.resetScreenForGeneration && this.resetScreenForGeneration(),
+                await this.generateKeyInsights());
+            }),
+          this.quickActionsBtn &&
+            this.quickActionsBtn.addEventListener("click", async () => {
+              (this.resetScreenForGeneration && this.resetScreenForGeneration(),
+                await this.generateActionItems());
+            }),
+          this.quickDiscussionBtn &&
+            this.quickDiscussionBtn.addEventListener("click", async () => {
+              (this.resetScreenForGeneration && this.resetScreenForGeneration(),
+                await this.generateDiscussionQuestions());
+            }),
+          this.quickLinkedInBtn &&
+            this.quickLinkedInBtn.addEventListener("click", async () => {
+              (this.resetScreenForGeneration && this.resetScreenForGeneration(),
+                await this.generateLinkedInPost());
+            }),
+          this.quickEmailBtn &&
+            this.quickEmailBtn.addEventListener("click", async () => {
+              (this.resetScreenForGeneration && this.resetScreenForGeneration(),
+                await this.generateEmailSummary('colleague'));
+            }),
           this.initializeHorizontalScroll());
       }
       async testApiKey(t) {
@@ -408,6 +444,10 @@
       window.TabTalkExport && Object.assign(l.prototype, window.TabTalkExport),
       window.TabTalkTwitter &&
         Object.assign(l.prototype, window.TabTalkTwitter),
+      window.TabTalkContentAnalysis &&
+        Object.assign(l.prototype, window.TabTalkContentAnalysis),
+      window.TabTalkSocialMedia &&
+        Object.assign(l.prototype, window.TabTalkSocialMedia),
       window.TabTalkStorage &&
         Object.assign(l.prototype, window.TabTalkStorage),
       window.TabTalkUI && Object.assign(l.prototype, window.TabTalkUI),

@@ -3,7 +3,5 @@ node_modules/
 .env
 
 # Ignore all markdown files except README.md and compliance reports
-*.md
-!README.md
-!*COMPLIANCE*.md
-!*COMPLIANCE*.MD
+
+
