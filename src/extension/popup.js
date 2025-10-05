@@ -23,7 +23,10 @@
           (this.quickActions = document.getElementById("quick-actions")),
           (this.sidebar = document.getElementById("sidebar")),
           (this.quickTwitterBtn = document.getElementById("quick-twitter")),
-          (this.quickTwitterThreadBtn = document.getElementById("quick-twitter-thread")),
+          (this.quickTldrBtn = document.getElementById("quick-tldr")),
+          (this.quickActionsBtn = document.getElementById("quick-actions-btn")),
+          (this.quickLinkedInBtn = document.getElementById("quick-linkedin")),
+          (this.quickEmailBtn = document.getElementById("quick-email")),
           (this.welcomeView = document.getElementById("welcome-view")),
           (this.apiSetupView = document.getElementById("api-setup-view")),
           (this.chatView = document.getElementById("chat-view")),
@@ -113,17 +116,6 @@
           ig.addEventListener("click", (s) => {
             s.preventDefault();
             this.showView("gallery");
-            if (this.sidebar) {
-              this.sidebar.classList.add("hidden");
-              this.sidebar.style.display = "none";
-            }
-          });
-        // New: Thread Library link
-        let threadsLink = document.getElementById("menu-threads-link");
-        threadsLink &&
-          threadsLink.addEventListener("click", (s) => {
-            s.preventDefault();
-            this.showView("threads");
             if (this.sidebar) {
               this.sidebar.classList.add("hidden");
               this.sidebar.style.display = "none";
@@ -268,10 +260,25 @@
               (this.resetScreenForGeneration && this.resetScreenForGeneration(),
                 await this.generateSocialContent("twitter"));
             }),
-          this.quickTwitterThreadBtn &&
-            this.quickTwitterThreadBtn.addEventListener("click", async () => {
+          this.quickTldrBtn &&
+            this.quickTldrBtn.addEventListener("click", async () => {
               (this.resetScreenForGeneration && this.resetScreenForGeneration(),
-                await this.generateSocialContent("thread"));
+                await this.generateSmartTLDR());
+            }),
+          this.quickActionsBtn &&
+            this.quickActionsBtn.addEventListener("click", async () => {
+              (this.resetScreenForGeneration && this.resetScreenForGeneration(),
+                await this.generateActionItems());
+            }),
+          this.quickLinkedInBtn &&
+            this.quickLinkedInBtn.addEventListener("click", async () => {
+              (this.resetScreenForGeneration && this.resetScreenForGeneration(),
+                await this.generateLinkedInPost());
+            }),
+          this.quickEmailBtn &&
+            this.quickEmailBtn.addEventListener("click", async () => {
+              (this.resetScreenForGeneration && this.resetScreenForGeneration(),
+                await this.generateEmailSummary('colleague'));
             }),
           this.initializeHorizontalScroll());
       }
@@ -434,10 +441,80 @@
       window.TabTalkUI && Object.assign(l.prototype, window.TabTalkUI),
       window.TabTalkScroll && Object.assign(l.prototype, window.TabTalkScroll),
       window.TabTalkNavigation &&
-        Object.assign(l.prototype, window.TabTalkNavigation));
+        Object.assign(l.prototype, window.TabTalkNavigation),
+      (l.prototype.initHistoryManager = function () {
+        if (window.TabTalkStorage) {
+          window.historyManager = new HistoryManager(window.TabTalkStorage);
+          let t = document.getElementById("sidebar");
+          if (t) {
+            let i = document.createElement("a");
+            ((i.href = "#"),
+              (i.id = "menu-history-link"),
+              (i.textContent = "\u{1F4DA} Saved Content"),
+              i.addEventListener("click", () => {
+                (this.showView("history"),
+                  this.sidebar &&
+                    (this.sidebar.classList.add("hidden"),
+                    (this.sidebar.style.display = "none")));
+              }));
+            t.appendChild(i);
+          }
+          let e = document.getElementById("history-back-btn");
+          (e &&
+            e.addEventListener("click", () => {
+              this.showView("chat");
+            }),
+            document.querySelectorAll(".category-tabs .tab").forEach((i) => {
+              i.addEventListener("click", async () => {
+                let a = i.dataset.category;
+                (document
+                  .querySelectorAll(".tab")
+                  .forEach((o) => o.classList.remove("active")),
+                  i.classList.add("active"));
+                let r = document.getElementById("history-list");
+                if (r) {
+                  r.innerHTML = '<div class="loading-history">Loading...</div>';
+                  let o = await window.historyManager.loadHistory(a);
+                  window.historyManager.renderHistoryList(r, o, a);
+                }
+              });
+            }));
+          let n = document.getElementById("history-list");
+          n &&
+            n.addEventListener("click", async (i) => {
+              let a = i.target.closest(".history-item");
+              if (!a) return;
+              let r = a.dataset.category || "twitter",
+                o = a.dataset.id;
+              if (!o) return;
+              if (i.target.classList.contains("btn-delete")) {
+                await window.TabTalkStorage.deleteSavedContent(r, o);
+                a.remove();
+                window.TabTalkUI.showToast("Item deleted");
+                return;
+              }
+              const s = await window.TabTalkStorage.getSavedContent();
+              const d = (s[r] || []).find((c) => c.id === o);
+              if (!d) {
+                window.TabTalkUI.showToast("Content not found");
+                return;
+              }
+              if (i.target.classList.contains("btn-copy")) {
+                await navigator.clipboard.writeText(d.content || "");
+                window.TabTalkUI.showToast("Copied to clipboard");
+                return;
+              }
+              if (i.target.classList.contains("btn-view")) {
+                this.showView("chat");
+                const platform = r === "thread" ? "thread" : "twitter";
+                this.addTwitterMessage("assistant", d.content || "", platform);
+              }
+            });
+        }
+      }));
     let T = l.prototype.init;
     ((l.prototype.init = async function () {
-      return (await T.call(this), this);
+      return (await T.call(this), this.initHistoryManager(), this);
     }),
       document.addEventListener("DOMContentLoaded", () => {
         new l().init().catch((t) => console.error("Initialization error:", t));

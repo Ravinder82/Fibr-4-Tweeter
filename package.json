@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "build": "npm run clean && npm run build:extension && npm run build:web",
-    "build:extension": "npx esbuild src/extension/popup.js --bundle --outfile=dist/extension/popup.js --minify && cp -r icons dist/extension/ && cp src/extension/manifest.json dist/extension/manifest.json && cp src/extension/content.js dist/extension/ && cp src/extension/background.js dist/extension/ && cp popup.css dist/extension/ && cp src/extension/modules/*.js dist/extension/ && cp src/extension/modules/*.css dist/extension/ && cp src/extension/modules/marked.min.js dist/extension/ && cp src/extension/popup.html dist/extension/",
+    "build:extension": "npx esbuild src/extension/popup.js --bundle --outfile=dist/extension/popup.js --minify && cp -r icons dist/extension/ && cp src/extension/manifest.json dist/extension/manifest.json && cp src/extension/content.js dist/extension/ && cp src/extension/background.js dist/extension/ && cp popup.css dist/extension/ && cp src/extension/modules/*.js dist/extension/ && cp src/extension/modules/*.css dist/extension/ && cp src/extension/modules/marked.min.js dist/extension/ && cp src/extension/modules/history.js dist/extension/ && cp src/extension/popup.html dist/extension/",
     "build:web": "npx esbuild src/web-app/app.js --bundle --outfile=dist/web/app.js --minify && cp index.html dist/web/ && cp popup.css dist/web/styles.css && cp sw.js dist/web/ && cp manifest.json dist/web/ && cp src/web-app/marked.min.js dist/web/marked.min.js",
     "dev": "npm run dev:extension & npm run dev:web",
     "dev:extension": "esbuild src/extension/popup.js --bundle --outfile=dist/extension/popup.js --watch",
@@ -15,8 +15,7 @@
     "package:extension": "cd dist/extension && zip -r ../../tabtalk-ai-extension.zip .",
     "package:web": "cd dist/web && zip -r ../../tabtalk-ai-web.zip .",
     "test": "node tests/run-all.js",
-    "knip": "knip",
-    "generate:icons": "node scripts/generate-icons.js"
+    "knip": "knip"
   },
   "keywords": [
     "ai",
@@ -29,7 +28,6 @@
   "license": "MIT",
   "devDependencies": {
     "esbuild": "^0.19.12",
-    "knip": "^5.27.0",
-    "sharp": "^0.33.5"
+    "knip": "^5.27.0"
   }
 }

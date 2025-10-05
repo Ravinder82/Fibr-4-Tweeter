@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Fibr</title>
+    <title>TabTalk AI</title>
     <link rel="stylesheet" href="popup.css">
 </head>
 <body>
@@ -10,24 +10,33 @@
         <!-- HEADER: Always visible -->
         <header class="header">
             <div class="logo">
-                <img src="icons/icon48.png" alt="Fibr" class="logo-icon">
-                <h1>Fibr</h1>
+                <img src="icons/icon48.png" alt="logo" class="logo-icon">
+                <h1>TabTalk AI</h1>
             </div>
             <div class="header-controls">
                 <button id="menu-button" class="menu-button" title="Menu">☰</button>
             </div>
         </header>
 
-        <!-- QUICK ACTIONS: Twitter Content Generation -->
+        <!-- QUICK ACTIONS: Horizontal Scrolling Content Creation -->
         <div id="quick-actions" class="quick-actions-container hidden" aria-label="Quick actions">
             <div class="scroll-container">
                 <div class="action-buttons-wrapper">
-                    <!-- Twitter Post Generation -->
+                    <!-- Phase 1 Quick Actions -->
+                    <button id="quick-tldr" class="action-btn" title="Get a clear explanation of this page">
+                        <span class="btn-text">Explain this!</span>
+                    </button>
+                    <button id="quick-actions-btn" class="action-btn" title="Generate prioritized tasks">
+                        <span class="btn-text">Tasks</span>
+                    </button>
                     <button id="quick-twitter" class="action-btn" title="Generate Twitter/X post">
                         <span class="btn-text">Twitter Post</span>
                     </button>
-                    <button id="quick-twitter-thread" class="action-btn" title="Generate Twitter/X thread">
-                        <span class="btn-text">Thread</span>
+                    <button id="quick-linkedin" class="action-btn" title="Generate professional LinkedIn post">
+                        <span class="btn-text">LinkedIn Post</span>
+                    </button>
+                    <button id="quick-email" class="action-btn" title="Draft professional email summary">
+                        <span class="btn-text">Email Draft</span>
                     </button>
                 </div>
             </div>
@@ -36,7 +45,6 @@
             <!-- SIDEBAR: Hidden by default -->
         <div id="sidebar" class="sidebar hidden">
             <a href="#" id="menu-settings-link">Gemini API Setup</a>
-            <a href="#" id="menu-threads-link">🧵 My Threads</a>
             <a href="#" id="menu-refresh-link">Clear Chat</a>
             <a href="#" id="menu-gallery-link">Gallery</a>
         </div>
@@ -48,8 +56,8 @@
             <div id="welcome-view" class="view hidden">
                 <div class="onboarding-container">
                     <div class="welcome-hero">
-    <img src="icons/icon128.jpeg" alt="Fibr" class="welcome-logo">
-    <h1 class="welcome-title">Welcome to Fibr</h1>
+    <img src="icons/icon128.jpeg" alt="TabTalk AI" class="welcome-logo">
+    <h1 class="welcome-title">Welcome to TabTalk AI</h1>
     <p class="welcome-subtitle">Transform any webpage into intelligent conversations</p>
                         <!-- Coming Soon Alert -->
                         <div class="coming-soon-alert">
@@ -72,7 +80,7 @@
                 <div class="onboarding-container">
                     <div class="setup-header">
                         <h2>Setup Your AI Assistant</h2>
-                        <p>Connect your Google Gemini API to unlock Fibr</p>
+                        <p>Connect your Google Gemini API to unlock TabTalk AI</p>
                     </div>
                     <div class="tutorial-steps">
                         <div class="step-item">
@@ -139,12 +147,12 @@
                     <!-- Chat messages will be added here by JavaScript -->
                 </div>
                 <div id="empty-state" class="empty-state hidden" aria-hidden="true">
-                    <img src="icons/icon128.jpeg" alt="Fibr logo" class="hero">
+                    <img src="icons/icon128.jpeg" alt="TabTalk AI logo" class="hero">
                     <h2>Get started in 3 quick steps</h2>
                     <ol>
                         <li>Visit <strong>ai.google.com/studio</strong></li>
                         <li>Create an API key &amp; enable <strong>Gemini API</strong></li>
-                        <li>Paste the key into Fibr</li>
+                        <li>Paste the key into TabTalk AI</li>
                     </ol>
                 </div>
                 <div class="input-area">
@@ -162,7 +170,24 @@
                 </div>
             </div>
 
-            <!-- VIEW 4: GALLERY (Saved Twitter Posts) -->
+            <!-- VIEW 4: HISTORY (Saved Content) -->
+            <div id="history-view" class="view hidden">
+                <div class="history-header">
+                    <button class="back-btn" id="history-back-btn">← Back</button>
+                    <h2>Saved Content</h2>
+                </div>
+                
+                <div class="category-tabs">
+                    <button class="tab active" data-category="all">All</button>
+                    <button class="tab" data-category="twitter">Twitter</button>
+                </div>
+                
+                <div id="history-list" class="history-list">
+                    <!-- History items rendered here -->
+                </div>
+            </div>
+
+            <!-- VIEW 4b: GALLERY (Saved Twitter Posts) -->
             <div id="gallery-view" class="view hidden">
                 <div id="gallery-container" class="gallery-container"></div>
             </div>
@@ -172,11 +197,6 @@
                 <div class="spinner"></div>
                 <p id="status-text">Initializing...</p>
             </div>
-
-            <!-- VIEW 6: THREAD LIBRARY -->
-            <div id="threads-view" class="view hidden">
-                <div id="threads-container" class="threads-container"></div>
-            </div>
             
         </main>
     </div>
@@ -184,6 +204,8 @@
     <script src="marked.min.js"></script>
     <script src="api.js"></script>
     <script src="twitter.js"></script>
+    <script src="content-analysis.js"></script>
+    <script src="social-media.js"></script>
     <script src="storage.js"></script>
     <script src="ui-render.js"></script>
     <script src="scroll.js"></script>
@@ -191,7 +213,7 @@
     <script src="navigation.js"></script>
     <script src="validation.js"></script>
     <script src="validation-handlers.js"></script>
-    <script src="thread-library.js"></script>
+    <script src="history.js"></script>
     <script src="popup.js"></script>
     <div id="aria-status" class="visually-hidden" aria-live="polite"></div>
 </body>
