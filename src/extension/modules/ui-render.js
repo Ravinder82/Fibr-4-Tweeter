@@ -1,14 +1,5 @@
 (function() {
   const UI = {
-    // Save button states
-    saveButtonStates: {},
-    maxUnsavedMessages: 2,
-
-    generateMessageId: function() {
-      const base = Date.now().toString(36);
-      const suffix = Math.random().toString(36).slice(2, 8);
-      return `msg_${base}_${suffix}`;
-    },
     ensureMarked: function() {
       // Marked.js is now loaded statically in popup.html
       // This ensures Manifest V3 compliance (no dynamic script injection)
@@ -27,8 +18,8 @@
       if (!text) return '';
       let t = String(text);
       // 1) Remove typical AI prefaces
-      t = t.replace(/^(?:here\s*(?:is|are|\'s|’s)|below\s+is|certainly,|sure,|note:|here\'s a|here’s a)[^\n:]*:\s*/i, '');
-      t = t.replace(/^\s*(?:here\s*(?:is|are|\'s|’s)\s*(?:a|an)?\s*)/i, '');
+      t = t.replace(/^(?:here\s*(?:is|are|\'s|'s)|below\s+is|certainly,|sure,|note:|here\'s a|here's a)[^\n:]*:\s*/i, '');
+      t = t.replace(/^\s*(?:here\s*(?:is|are|\'s|'s)\s*(?:a|an)?\s*)/i, '');
       // 2) Convert inline star bullets to real lines
       t = t.replace(/\s*\*\s+(?=[^\n])/g, '\n- ');
       // 3) Normalize line-start bullets
@@ -53,197 +44,16 @@
       return t.trim();
     },
 
-    addMessage: function(role, content, options = {}) {
-      if (!Array.isArray(this.chatHistory)) {
-        this.chatHistory = [];
-      }
-
-      const timestampOverride = options.timestamp;
-      const timestamp = timestampOverride || new Date().toISOString();
-      const messageIdOverride = options.id;
-      const message = {
-        id: messageIdOverride || this.generateMessageId(),
-        role,
-        content,
-        timestamp,
-        saved: Boolean(options.saved)
-      };
-
-      if (options.contentType) {
-        message.contentType = options.contentType;
-      }
-
-      this.chatHistory.push(message);
-      this.trimUnsavedMessages();
-      this.renderMessages();
-      if (typeof this.saveState === 'function') {
-        this.saveState();
-      }
-    },
-
-    trimUnsavedMessages: function(maxUnsaved = this.maxUnsavedMessages) {
-      if (!Array.isArray(this.chatHistory)) return;
-      const unsavedIndices = [];
-      this.chatHistory.forEach((message, index) => {
-        if (!message.saved) unsavedIndices.push(index);
-      });
-      if (unsavedIndices.length <= maxUnsaved) return;
-      const keepIndices = new Set(unsavedIndices.slice(-maxUnsaved));
-      this.chatHistory = this.chatHistory.filter((message, index) => message.saved || keepIndices.has(index));
-    },
-
-    renderMessages: function() {
-      this.messagesContainer.innerHTML = '';
-      if (!Array.isArray(this.chatHistory)) {
-        this.chatHistory = [];
-      }
-      this.chatHistory.forEach((message, index) => {
-        const messageEl = document.createElement('div');
-        messageEl.classList.add('message', message.role === 'user' ? 'user-message' : 'assistant-message');
-        if (message.saved) {
-          messageEl.classList.add('saved-message');
-        }
-        const messageId = message.id || message.timestamp || `msg_${index}`;
-        messageEl.dataset.messageId = messageId;
-        if (message.contentType) {
-          messageEl.classList.add(`${message.contentType}-message`);
-        }
-        const headerEl = document.createElement('div');
-        headerEl.classList.add('message-header');
-        const avatarEl = document.createElement('div');
-        avatarEl.classList.add('avatar');
-        if (message.role === 'user') {
-          avatarEl.textContent = 'You';
-        } else {
-          const iconMap = { summary: '📝', keypoints: '🔑', analysis: '📊', faq: '❓', factcheck: '✅' };
-          avatarEl.textContent = iconMap[message.contentType] || 'AI';
-        }
-        const timestampEl = document.createElement('div');
-        timestampEl.classList.add('timestamp');
-        timestampEl.textContent = new Date(message.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        headerEl.append(message.role === 'user' ? timestampEl : avatarEl, message.role === 'user' ? avatarEl : timestampEl);
-        
-        const contentEl = document.createElement('div');
-        contentEl.classList.add('content');
-        if (message.role === 'assistant') {
-            // Ensure marked is available (loaded statically in popup.html)
-            this.ensureMarked();
-            if (this.marked) {
-                contentEl.innerHTML = this.marked.parse(message.content);
-            } else {
-                // Fallback if marked is not available
-                contentEl.textContent = message.content;
-            }
-        } else {
-            contentEl.textContent = message.content;
-        }
-
-        const actionsEl = document.createElement('div');
-        actionsEl.classList.add('message-header-actions');
-
-        const saveToggle = document.createElement('button');
-        saveToggle.classList.add('message-save-toggle');
-        if (message.saved) {
-          saveToggle.classList.add('saved');
-        }
-        saveToggle.type = 'button';
-        saveToggle.setAttribute('aria-pressed', message.saved ? 'true' : 'false');
-        saveToggle.setAttribute('aria-label', message.saved ? 'Remove saved message' : 'Save this message');
-        saveToggle.title = message.saved ? 'Remove from saved' : 'Save message';
-        saveToggle.textContent = message.saved ? '★' : '☆';
-        saveToggle.addEventListener('click', (event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          this.toggleMessageSaved(messageId);
-        });
-
-        actionsEl.appendChild(saveToggle);
-        headerEl.appendChild(actionsEl);
-        messageEl.append(headerEl, contentEl);
-        this.messagesContainer.appendChild(messageEl);
-        setTimeout(() => messageEl.classList.add('visible'), index * 100);
-      });
-      const emptyState = document.getElementById('empty-state');
-      if (emptyState) {
-        emptyState.classList.toggle('hidden', this.chatHistory.length > 0);
-      }
-      this.messagesContainer.scrollTo({ top: this.messagesContainer.scrollHeight, behavior: 'smooth' });
-      this.updateQuickActionsVisibility();
-    },
-
-    toggleMessageSaved: function(messageId) {
-      if (!messageId || !Array.isArray(this.chatHistory)) return;
-      const index = this.chatHistory.findIndex(msg => (msg.id || msg.timestamp) === messageId);
-      if (index === -1) return;
-
-      const message = this.chatHistory[index];
-      const nextSaved = !message.saved;
-
-      this.chatHistory[index] = {
-        ...message,
-        saved: nextSaved
-      };
-
-      if (nextSaved) {
-        this.trimUnsavedMessages();
-      } else {
-        const maxUnsaved = this.maxUnsavedMessages;
-        const unsavedIndices = [];
-        this.chatHistory.forEach((msg, idx) => {
-          if (!msg.saved) unsavedIndices.push(idx);
-        });
-        if (unsavedIndices.length > maxUnsaved) {
-          const keep = new Set(unsavedIndices.slice(-maxUnsaved));
-          this.chatHistory = this.chatHistory.filter((msg, idx) => msg.saved || keep.has(idx));
-        }
-      }
-      this.renderMessages();
-      if (typeof this.saveState === 'function') {
-        this.saveState();
-      }
-    },
-
     setLoading: function(isLoading, statusMessage = '...') {
       this.isLoading = isLoading;
-      this.sendButton.disabled = isLoading || this.messageInput.value.trim().length === 0;
-      this.messageInput.disabled = isLoading;
       if (isLoading) {
-        this.pageStatus.textContent = statusMessage;
+        if (this.pageStatus) this.pageStatus.textContent = statusMessage;
         this.setAriaStatus(statusMessage);
       } else {
-        if (!this.pageStatus.textContent.startsWith('✅')) {
+        if (this.pageStatus && !this.pageStatus.textContent.startsWith('✅')) {
           this.pageStatus.textContent = '✅ Done';
         }
         this.setAriaStatus('Ready');
-      }
-    },
-
-    handleInputChange: function() {
-      if (this.typingTimeout) clearTimeout(this.typingTimeout);
-      this.messageInput.style.height = 'auto';
-      const newHeight = Math.min(this.messageInput.scrollHeight, 150);
-      this.messageInput.style.height = `${newHeight}px`;
-      const isEmpty = this.messageInput.value.trim().length === 0;
-      this.sendButton.disabled = isEmpty || this.isLoading;
-      const currentLength = this.messageInput.value.length;
-      if (this.charCount) {
-        this.charCount.textContent = `${currentLength}/${this.maxCharCount}`;
-        this.charCount.style.color = currentLength >= this.maxCharCount ? '#ef4444' : 'var(--text-secondary)';
-      }
-      if (currentLength > this.maxCharCount) {
-        this.messageInput.value = this.messageInput.value.slice(0, this.maxCharCount);
-      }
-    },
-
-    handleInputKeydown: function(e) {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        if (!this.sendButton.disabled) this.sendMessage();
-      } else if (e.key === 'Escape') {
-        this.messageInput.blur();
-        this.setAriaStatus('Input cleared');
-        this.messageInput.value = '';
-        this.handleInputChange();
       }
     },
 
@@ -261,8 +71,6 @@
       if (this.messagesContainer) {
         this.messagesContainer.innerHTML = '';
       }
-      const emptyState = document.getElementById('empty-state');
-      if (emptyState) emptyState.classList.add('hidden');
       this.updateQuickActionsVisibility();
     },
 

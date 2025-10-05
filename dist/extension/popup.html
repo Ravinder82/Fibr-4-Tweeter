@@ -40,7 +40,6 @@
         <div id="sidebar" class="sidebar hidden">
             <a href="#" id="menu-settings-link">Gemini API Setup</a>
             <a href="#" id="menu-threads-link">📚 My Threads</a>
-            <a href="#" id="menu-refresh-link">Clear Chat</a>
             <a href="#" id="menu-gallery-link">Gallery</a>
         </div>
 
@@ -132,36 +131,14 @@
                 </div>
             </div>
             
-            <!-- VIEW 3: CHAT (The main interface) -->
+            <!-- VIEW 3: CONTENT GENERATION (Twitter/Thread cards display) -->
             <div id="chat-view" class="view hidden">
                 <div class="page-info">
                     <p id="page-title">Loading page...</p>
                     <div id="page-status" class="page-status"></div>
                 </div>
                 <div id="messages-container" class="messages-container">
-                    <!-- Chat messages will be added here by JavaScript -->
-                </div>
-                <div id="empty-state" class="empty-state hidden" aria-hidden="true">
-                    <img src="icons/icon128.jpeg" alt="Fibr logo" class="hero">
-                    <h2>Get started in 3 quick steps</h2>
-                    <ol>
-                        <li>Visit <strong>ai.google.com/studio</strong></li>
-                        <li>Create an API key &amp; enable <strong>Gemini API</strong></li>
-                        <li>Paste the key into Fibr</li>
-                    </ol>
-                </div>
-                <div class="input-area">
-                    <div class="input-bar">
-                        <textarea id="message-input" placeholder="Ask about this page..." rows="1" aria-label="Message input"></textarea>
-                        <button id="send-button" title="Send message" aria-label="Send message" disabled>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855a.5.5 0 0 0-.09.89l4.736 3.14L13 5.5V9l2.25-3.25L13 2.5v3.75L4.159 9.25l4.776 3.175a.5.5 0 0 0 .75-.225l6.229-10.889a.5.5 0 0 0 .25-.625Z"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <div class="input-footer">
-                        <span class="char-count" aria-live="polite">0/2000</span>
-                    </div>
+                    <!-- Generated content (Twitter cards, threads) will be added here by JavaScript -->
                 </div>
             </div>
 
@@ -185,7 +162,8 @@
             <div id="thread-generator-view" class="view hidden">
                 <div class="thread-generator-container">
                     <div class="generator-header">
-                        <h2>🧵 Thread Generator</h2>
+                        <div class="header-icon">🧵</div>
+                        <h2>Thread Generator</h2>
                         <p>Create engaging threads on any topic</p>
                     </div>
                     
@@ -212,7 +190,7 @@
                                 <input type="checkbox" id="use-knowledge-pack" checked />
                                 <span>Use AI Knowledge Base (Recommended)</span>
                             </label>
-                            <small class="form-hint">Includes curated facts and hooks for better content</small>
+                            <small class="form-hint">Includes curated facts and hooks</small>
                         </div>
                         
                         <div class="generator-actions">
@@ -223,13 +201,18 @@
                     </div>
                     
                     <div class="generator-info">
-                        <h3>How it works</h3>
-                        <ol>
-                            <li>Choose a category that fits your topic</li>
-                            <li>Enter your specific topic or idea</li>
-                            <li>AI creates an engaging 8-tweet thread</li>
-                            <li>Edit, copy, and post to Twitter/X</li>
-                        </ol>
+                        <button class="info-toggle" id="how-it-works-toggle" type="button">
+                            <span class="info-title">How it works</span>
+                            <span class="info-icon">▼</span>
+                        </button>
+                        <div class="info-content" id="how-it-works-content">
+                            <ol>
+                                <li>Choose a category that fits your topic</li>
+                                <li>Enter your specific topic or idea</li>
+                                <li>AI creates an engaging 8-tweet thread</li>
+                                <li>Edit, copy, and post to Twitter/X</li>
+                            </ol>
+                        </div>
                     </div>
                 </div>
             </div>

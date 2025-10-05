@@ -2,7 +2,11 @@
   const Twitter = {
     generateSocialContent: async function(platform) {
       if (!this.pageContent || !this.apiKey) {
-        this.addMessage('assistant', '❌ Please set up your Gemini API key first and ensure page content is loaded.');
+        if (this.showToast) {
+          this.showToast('❌ Please set up your Gemini API key first and ensure page content is loaded.', 3000);
+        } else {
+          alert('❌ Please set up your Gemini API key first and ensure page content is loaded.');
+        }
         return;
       }
 
@@ -92,7 +96,11 @@ OUTPUT EXAMPLE:
 
 Generate your thread now:`;
         } else {
-          this.addMessage('assistant', '❌ Only Twitter/X Post and Twitter Thread are supported.');
+          if (this.showToast) {
+            this.showToast('❌ Only Twitter/X Post and Twitter Thread are supported.', 3000);
+          } else {
+            alert('❌ Only Twitter/X Post and Twitter Thread are supported.');
+          }
           return;
         }
 
@@ -133,7 +141,11 @@ Generate your thread now:`;
           hasPageContent: !!this.pageContent,
           pageContentLength: this.pageContent?.length
         });
-        this.addMessage('assistant', `❌ Error generating social media content: ${error.message}. Please check your API key and try again.`);
+        if (this.showToast) {
+          this.showToast(`❌ Error: ${error.message}. Please check your API key and try again.`, 4000);
+        } else {
+          alert(`❌ Error generating social media content: ${error.message}. Please check your API key and try again.`);
+        }
       } finally {
         this.setLoading(false);
         this.hideProgressBar();
@@ -169,8 +181,7 @@ Generate your thread now:`;
     },
 
     addTwitterMessage: function(role, content, platform) {
-      const timestamp = new Date().toISOString();
-      this.chatHistory.push({ role, content, timestamp, platform });
+      // Directly render Twitter content (no chat history needed)
       this.renderTwitterContent(content, platform);
     },
 

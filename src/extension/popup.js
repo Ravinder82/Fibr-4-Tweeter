@@ -4,18 +4,9 @@
       constructor() {
         ((this.apiKey = null),
           (this.currentTab = null),
-          (this.chatHistory = []),
           (this.pageContent = null),
           (this.isLoading = !1),
           (this.currentDomain = null),
-          (this.maxCharCount = 2e3),
-          (this.charCount = document.querySelector(".char-count")),
-          (this.formatButtons = document.querySelectorAll(
-            ".format-button, .tool-button",
-          )),
-          (this.inputBar = document.querySelector(".input-bar")),
-          (this.messageInput = document.getElementById("message-input")),
-          (this.sendButton = document.getElementById("send-button")),
           (this.messagesContainer =
             document.getElementById("messages-container")),
           (this.pageStatus = document.getElementById("page-status")),
@@ -130,18 +121,6 @@
               this.sidebar.style.display = "none";
             }
           });
-        let a = document.getElementById("menu-refresh-link");
-        a &&
-          a.addEventListener("click", async (s) => {
-            (s.preventDefault(),
-              confirm("Clear all chat history for this page?") &&
-                ((this.chatHistory = []),
-                await this.saveState(),
-                this.renderMessages()),
-              this.sidebar &&
-                (this.sidebar.classList.add("hidden"),
-                (this.sidebar.style.display = "none")));
-          });
         let r = document.getElementById("welcome-get-started");
         r &&
           r.addEventListener("click", async () => {
@@ -202,68 +181,11 @@
             let s = document.getElementById("api-setup-continue");
             s.disabled = !y.value.trim();
           });
-        (this.sendButton &&
-          this.sendButton.addEventListener("click", () => this.sendMessage()),
-          this.messageInput &&
-            (this.messageInput.addEventListener("input", () =>
-              this.handleInputChange(),
-            ),
-            this.messageInput.addEventListener("keydown", (s) =>
-              this.handleInputKeydown(s),
-            ),
-            this.messageInput.addEventListener("focus", () => {
-              (this.inputBar.classList.add("focused"),
-                this.messageInput.setAttribute("aria-expanded", "true"));
-            }),
-            this.messageInput.addEventListener("blur", () => {
-              (this.inputBar.classList.remove("focused"),
-                this.messageInput.setAttribute("aria-expanded", "false"));
-            })));
-        let g = this.inputActions
-          ? this.inputActions.querySelector("#clear-chat-button")
-          : document.getElementById("clear-chat-button");
-        g &&
-          g.addEventListener("click", async () => {
-            confirm("Clear all chat history for this page?") &&
-              ((this.chatHistory = []),
-              await this.saveState(),
-              this.renderMessages());
-          });
-        let p = this.inputActions
-          ? this.inputActions.querySelector("#export-chat-button")
-          : document.getElementById("export-chat-button");
-        p && p.addEventListener("click", () => this.handleExportChat());
-        let m = this.inputActions
-          ? this.inputActions.querySelector("#export-format-select")
-          : document.getElementById("export-format-select");
-        (m && m.setAttribute("aria-label", "Export format"),
-          this.sendButton &&
-            this.sendButton.setAttribute("aria-label", "Send message"),
-          g && g.setAttribute("aria-label", "Clear chat history"),
-          p && p.setAttribute("aria-label", "Export chat"),
-          m && m.setAttribute("aria-label", "Export format"),
+        (
           this.menuButton &&
             this.menuButton.setAttribute("aria-label", "Open menu"),
           this.apiKeyInput &&
             this.apiKeyInput.setAttribute("aria-label", "Gemini API Key"),
-          document.addEventListener("keydown", (s) => {
-            (s.ctrlKey || s.metaKey) &&
-              s.key.toLowerCase() === "i" &&
-              (s.preventDefault(),
-              this.messageInput && this.messageInput.focus());
-          }),
-          this.formatButtons.forEach((s) => {
-            s.addEventListener("click", (d) => {
-              (d.preventDefault(),
-                s.id === "clear-chat-button"
-                  ? this.handleClearChat()
-                  : s.id === "export-chat-button"
-                    ? this.handleExportChat()
-                    : this.handleFormatting(
-                        s.getAttribute("title").toLowerCase(),
-                      ));
-            });
-          }),
           this.quickTwitterBtn &&
             this.quickTwitterBtn.addEventListener("click", async () => {
               (this.resetScreenForGeneration && this.resetScreenForGeneration(),
@@ -346,96 +268,9 @@
           }
         }
       }
-      async sendMessage() {
-        if (
-          !this.messageInput ||
-          this.isLoading ||
-          !this.messageInput.value.trim()
-        )
-          return;
-        let t = this.messageInput.value.trim();
-        ((this.messageInput.value = ""),
-          this.handleInputChange(),
-          this.messageInput.focus());
-        try {
-          (this.setLoading(!0, "Sending message..."),
-            this.addMessage("user", t),
-            this.messagesContainer.scrollTo({
-              top: this.messagesContainer.scrollHeight,
-              behavior: "smooth",
-            }));
-          let e = await this.callGeminiAPI(t);
-          e &&
-            (this.addMessage("assistant", e),
-            this.messagesContainer.scrollTo({
-              top: this.messagesContainer.scrollHeight,
-              behavior: "smooth",
-            }));
-        } catch (e) {
-          (console.error("Error sending message:", e),
-            this.setAriaStatus("Error sending message: " + e.message),
-            this.addMessage(
-              "assistant",
-              "Sorry, there was an error processing your message. Please try again.",
-            ));
-        } finally {
-          this.setLoading(!1);
-        }
-      }
-      async handleRefresh() {
-        (this.sidebar &&
-          (this.sidebar.classList.add("hidden"),
-          (this.sidebar.style.display = "none")),
-          (this.pageContent = null),
-          (this.chatHistory = []),
-          await this.saveState(),
-          this.updateViewState("status", "Refreshing..."),
-          await this.getAndCachePageContent(),
-          this.renderMessages());
-      }
-      handleFormatting(t) {
-        let e = this.messageInput,
-          n = e.selectionStart,
-          i = e.selectionEnd,
-          a = e.value,
-          r = "",
-          o = "";
-        switch (t) {
-          case "bold":
-            ((r = "**"), (o = "**"));
-            break;
-          case "italic":
-            ((r = "_"), (o = "_"));
-            break;
-          case "code":
-            a.substring(n, i).includes(`
-`)
-              ? ((r = "```\n"), (o = "\n```"))
-              : ((r = "`"), (o = "`"));
-            break;
-          case "link":
-            n === i
-              ? ((r = "["), (o = "](url)"))
-              : ((r = "["), (o = "](https://)"));
-            break;
-        }
-        let u = a.substring(0, n) + r + a.substring(n, i) + o + a.substring(i);
-        e.value = u;
-        let h = i + r.length;
-        (e.setSelectionRange(h, h + (n === i ? 0 : i - n)),
-          this.handleInputChange(),
-          e.focus());
-      }
-      async handleClearChat() {
-        confirm("Clear all chat history for this page?") &&
-          ((this.chatHistory = []),
-          await this.saveState(),
-          this.renderMessages());
-      }
       
     };
     (window.TabTalkAPI && Object.assign(l.prototype, window.TabTalkAPI),
-      window.TabTalkExport && Object.assign(l.prototype, window.TabTalkExport),
       window.TabTalkTwitter &&
         Object.assign(l.prototype, window.TabTalkTwitter),
       window.TabTalkThreadGenerator &&

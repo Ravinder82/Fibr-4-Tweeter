@@ -22,7 +22,7 @@
 
     async loadState() {
       try {
-        const data = await chrome.storage.local.get(['geminiApiKey', 'apiKey', 'chatHistory']);
+        const data = await chrome.storage.local.get(['geminiApiKey', 'apiKey']);
         console.log('TabTalk AI: Loading state, API key exists:', !!data.geminiApiKey);
         if (data.geminiApiKey || data.apiKey) {
           this.apiKey = data.geminiApiKey || data.apiKey;
@@ -36,16 +36,6 @@
             this.pageTitle.textContent = this.currentTab.title || 'Untitled Page';
             console.log('TabTalk AI: Page title set to:', this.pageTitle.textContent);
           }
-        if (data.chatHistory && data.chatHistory[this.currentDomain]) {
-          const savedMessages = Array.isArray(data.chatHistory[this.currentDomain])
-            ? data.chatHistory[this.currentDomain]
-            : [];
-          this.chatHistory = savedMessages.map((message, index) => ({
-            ...message,
-            saved: true,
-            id: message.id || `saved_${Date.now()}_${index}`
-          }));
-          }
         }
         return data;
       } catch (error) {
@@ -55,22 +45,10 @@
     },
 
     async saveState() {
-      if (!this.currentDomain) return;
-
-      if (!Array.isArray(this.chatHistory)) {
-        this.chatHistory = [];
-      }
-
-      const savedMessages = this.chatHistory.filter(message => message && message.saved);
-
-      const data = {};
+      // Minimal state save - only API key
       if (this.apiKey) {
-        data.geminiApiKey = this.apiKey;
+        await chrome.storage.local.set({ geminiApiKey: this.apiKey });
       }
-      const chatHistoryObj = {};
-      chatHistoryObj[this.currentDomain] = savedMessages;
-      data.chatHistory = chatHistoryObj;
-      await chrome.storage.local.set(data);
     },
 
     async saveApiKey(apiKey) {
@@ -91,11 +69,8 @@
         await chrome.storage.local.remove(['geminiApiKey', 'apiKey']);
         this.apiKey = null;
         if (this.apiKeyInput) this.apiKeyInput.value = '';
-        // Reset in-memory state and UI to avoid messy view
+        // Reset in-memory state and UI
         this.pageContent = null;
-        this.chatHistory = [];
-        // Persist cleared chat history object
-        await chrome.storage.local.set({ chatHistory: {} });
         // Hide quick actions and clear messages area
         if (this.updateQuickActionsVisibility) this.updateQuickActionsVisibility();
         if (this.messagesContainer) this.messagesContainer.innerHTML = '';
