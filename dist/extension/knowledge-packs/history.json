@@ -1,0 +1,22 @@
+{
+  "category": "history",
+  "facts": [
+    "The Library of Alexandria was one of the largest and most significant libraries of the ancient world, containing between 40,000 to 400,000 scrolls at its peak.",
+    "The Great Wall of China took over 2,000 years to build and stretches over 13,000 miles, making it visible from space is actually a myth.",
+    "Cleopatra lived closer in time to the Moon landing than to the construction of the Great Pyramid of Giza.",
+    "The shortest war in history was between Britain and Zanzibar on August 27, 1896, lasting only 38 minutes.",
+    "Ancient Romans used urine as mouthwash because it contains ammonia, which whitens teeth."
+  ],
+  "hooks": [
+    "What if I told you everything you know about [topic] is wrong?",
+    "This [number]-minute event changed history forever.",
+    "The untold story of [topic] that historians don't want you to know.",
+    "Before [event], the world was completely different. Here's how:",
+    "[Person] did something so shocking, it was erased from history books.",
+    "This historical fact sounds fake but is 100% true:",
+    "The real reason [event] happened will blow your mind.",
+    "History books got this wrong for [number] years.",
+    "What happened on [date] changed everything we know about [topic].",
+    "The forgotten hero who [action] and saved millions."
+  ]
+}

@@ -36,7 +36,8 @@
             <!-- SIDEBAR: Hidden by default -->
         <div id="sidebar" class="sidebar hidden">
             <a href="#" id="menu-settings-link">Gemini API Setup</a>
-            <a href="#" id="menu-threads-link">🧵 My Threads</a>
+            <a href="#" id="menu-thread-generator-link">🧵 Thread Generator</a>
+            <a href="#" id="menu-threads-link">📚 My Threads</a>
             <a href="#" id="menu-refresh-link">Clear Chat</a>
             <a href="#" id="menu-gallery-link">Gallery</a>
         </div>
@@ -177,6 +178,59 @@
             <div id="threads-view" class="view hidden">
                 <div id="threads-container" class="threads-container"></div>
             </div>
+
+            <!-- VIEW 7: THREAD GENERATOR MVP -->
+            <div id="thread-generator-view" class="view hidden">
+                <div class="thread-generator-container">
+                    <div class="generator-header">
+                        <h2>🧵 Thread Generator</h2>
+                        <p>Create engaging threads on any topic</p>
+                    </div>
+                    
+                    <div class="generator-form">
+                        <div class="form-group">
+                            <label for="thread-category">Category</label>
+                            <select id="thread-category" class="form-select">
+                                <option value="history">📜 History</option>
+                                <option value="sports">⚽ Sports</option>
+                                <option value="stories">📖 Stories</option>
+                                <option value="celebrity">⭐ Celebrity</option>
+                                <option value="news">📰 News</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="thread-topic">Topic</label>
+                            <input type="text" id="thread-topic" class="form-input" placeholder="e.g., The fall of the Roman Empire" />
+                            <small class="form-hint">Enter any topic you want to create a thread about</small>
+                        </div>
+                        
+                        <div class="form-group form-checkbox">
+                            <label>
+                                <input type="checkbox" id="use-knowledge-pack" checked />
+                                <span>Use AI Knowledge Base (Recommended)</span>
+                            </label>
+                            <small class="form-hint">Includes curated facts and hooks for better content</small>
+                        </div>
+                        
+                        <div class="generator-actions">
+                            <button id="generate-thread-btn" class="button-primary">
+                                🚀 Generate Thread
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="generator-info">
+                        <h3>How it works</h3>
+                        <ol>
+                            <li>Choose a category that fits your topic</li>
+                            <li>Enter your specific topic or idea</li>
+                            <li>AI creates an engaging 8-tweet thread</li>
+                            <li>Edit, copy, and post to Twitter/X</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
             
         </main>
     </div>
@@ -184,6 +238,7 @@
     <script src="marked.min.js"></script>
     <script src="api.js"></script>
     <script src="twitter.js"></script>
+    <script src="thread-generator.js"></script>
     <script src="storage.js"></script>
     <script src="ui-render.js"></script>
     <script src="scroll.js"></script>

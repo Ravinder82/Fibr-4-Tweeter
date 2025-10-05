@@ -1,19 +1,5 @@
 # Fibr - AI-Powered Twitter Content Generator
 
-<p align="center">
-  <img src="icons/fibr.svg" alt="Fibr Logo" width="120" height="120">
-</p>
-
-<p align="center">
-  <strong>Transform any webpage into professional Twitter content with AI assistance</strong>
-</p>
-
-<p align="center">
-  <img alt="Chrome Web Store Version" src="https://img.shields.io/badge/Chrome-88+-blue.svg">
-  <img alt="License" src="https://img.shields.io/badge/License-MIT-green.svg">
-  <img alt="Manifest" src="https://img.shields.io/badge/Manifest-V3-orange.svg">
-</p>
-
 ## ✨ What is Fibr?
 
 **Fibr** is a cutting-edge Chrome extension that revolutionizes how you create Twitter content. Using advanced AI powered by Google's Gemini 2.0 Flash API, Fibr automatically analyzes any webpage and generates:

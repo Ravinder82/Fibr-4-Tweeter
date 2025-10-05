@@ -118,6 +118,17 @@
               this.sidebar.style.display = "none";
             }
           });
+        // New: Thread Generator link
+        let threadGenLink = document.getElementById("menu-thread-generator-link");
+        threadGenLink &&
+          threadGenLink.addEventListener("click", (s) => {
+            s.preventDefault();
+            this.showView("thread-generator");
+            if (this.sidebar) {
+              this.sidebar.classList.add("hidden");
+              this.sidebar.style.display = "none";
+            }
+          });
         // New: Thread Library link
         let threadsLink = document.getElementById("menu-threads-link");
         threadsLink &&
@@ -272,8 +283,16 @@
             this.quickTwitterThreadBtn.addEventListener("click", async () => {
               (this.resetScreenForGeneration && this.resetScreenForGeneration(),
                 await this.generateSocialContent("thread"));
-            }),
-          this.initializeHorizontalScroll());
+            }));
+        // Thread Generator button
+        let generateThreadBtn = document.getElementById("generate-thread-btn");
+        generateThreadBtn &&
+          generateThreadBtn.addEventListener("click", async () => {
+            if (this.handleThreadGeneratorSubmit) {
+              await this.handleThreadGeneratorSubmit();
+            }
+          });
+        this.initializeHorizontalScroll();
       }
       async testApiKey(t) {
         try {
@@ -425,6 +444,8 @@
       window.TabTalkExport && Object.assign(l.prototype, window.TabTalkExport),
       window.TabTalkTwitter &&
         Object.assign(l.prototype, window.TabTalkTwitter),
+      window.TabTalkThreadGenerator &&
+        Object.assign(l.prototype, window.TabTalkThreadGenerator),
       window.TabTalkContentAnalysis &&
         Object.assign(l.prototype, window.TabTalkContentAnalysis),
       window.TabTalkSocialMedia &&
