@@ -8,6 +8,7 @@
 
       this.setLoading(true, `Generating ${platform} content...`);
       console.log(`TabTalk AI: Generating ${platform} content for page: ${this.currentTab?.title}`);
+      console.log(`Page content length: ${this.pageContent.length} characters`);
 
       try {
         let systemPrompt = '';
@@ -16,62 +17,80 @@
 
         if (platform === 'twitter') {
           emoji = '🐦';
-          systemPrompt = `You are a Twitter/X Premium content creation expert. Create clean, professional, copy-paste ready tweets. Focus on structured content with proper formatting. ABSOLUTELY NEVER include hashtags, asterisks for emphasis, or formatting noise. Output should be immediately usable on Twitter.`;
-          userPrompt = `Create a clean, professional Twitter/X post from this content:
+          systemPrompt = `You are a charismatic Twitter/X storyteller who writes content that stops people mid-scroll. Your posts are vibrant, human, and overflowing with personality. You write like you're sharing exciting news with a close friend - with genuine enthusiasm, natural emotion, and irresistible energy. Every word should spark curiosity and delight. Write in plain text only - no hashtags, no URLs, no formatting symbols. Just pure, engaging human expression with strategic emojis.`;
+          userPrompt = `Transform this webpage content into an electrifying Twitter/X post that feels authentically human.
 
-STRICT FORMATTING REQUIREMENTS:
-- NO hashtags, NO # symbols anywhere - this will destroy the account
-- NO asterisks (*) for emphasis - use natural language instead
-- NO "(line break)" text - use actual line breaks
-- NO markdown formatting or special characters
-- Do NOT include URLs or links of any kind
-- Include relevant emojis naturally in the text
-- Use bullet points (•) or numbers for lists if needed
-- Keep it conversational and engaging
-- Make it immediately copy-paste ready for Twitter
+YOUR WRITING STYLE:
+✓ Write with GENUINE excitement and energy
+✓ Use natural line breaks to create rhythm and pacing
+✓ Sprinkle 2-4 emojis throughout to amplify emotion
+✓ Start with a scroll-stopping hook that sparks curiosity
+✓ Use conversational language (contractions, casual tone)
+✓ Add personality - be bold, enthusiastic, delightfully human
+✓ Include punchy short sentences mixed with flowing longer ones
+✓ Make every word count - no fluff, pure value
+✓ Create visual breathing room with smart line breaks
+✓ End with intrigue or a thought-provoking insight
 
-CONTENT STRUCTURE:
-- Start with an engaging hook
-- Use natural line breaks for readability  
-- Include 1-2 relevant emojis per paragraph
-- Focus on value and insights
+STRUCTURE:
+[Attention-grabbing hook]
+
+[Core insight with excitement]
+
+[Supporting detail or surprising angle]
+
+[Memorable closer]
+
+KEEP IT CLEAN:
+✗ No hashtags or # symbols
+✗ No bold/italic markdown
+✗ No URLs
+✗ No meta-commentary
 
 CONTENT TO TRANSFORM:
 ${this.pageContent}
 
-OUTPUT: Clean, professional tweet ready to copy-paste to Twitter (no hashtags, no formatting noise).`;
+Write your captivating post now:`;
         } else if (platform === 'thread') {
           emoji = '🧵';
-          systemPrompt = `You are a Twitter Premium thread specialist. Create clean, professional, copy-paste ready thread content. Focus on structured, valuable content with proper formatting. ABSOLUTELY NEVER include hashtags, asterisks for emphasis, or formatting noise. Each tweet should be immediately usable on Twitter.`;
-          userPrompt = `Create a clean, professional Twitter thread from this content:
+          systemPrompt = `You are a masterful Twitter/X thread storyteller. You craft thread narratives that hook readers from tweet 1 and keep them glued until the final tweet. Each tweet pulses with energy, personality, and human warmth. You break down complex ideas into bite-sized revelations that feel like having an engaging conversation with a brilliant friend. Write in plain text with strategic emojis - no hashtags, no URLs, no formatting symbols. Just pure storytelling magic.`;
+          userPrompt = `Create a magnetic Twitter thread (3-8 tweets) from this content.
 
-STRICT FORMATTING REQUIREMENTS:
-- Create 3-8 tweets numbered (1/n, 2/n, etc.)
-- NO hashtags, NO # symbols anywhere - this will destroy the account
-- NO asterisks (*) for emphasis - use natural language instead
-- NO "(line break)" text - use actual line breaks
-- NO markdown formatting or special characters
-- Use clean paragraph structure with proper spacing
-- Include relevant emojis naturally in the text
-- Use bullet points (•) or numbers for lists if needed
-- Make each tweet immediately copy-paste ready for Twitter
+CRITICAL FORMAT REQUIREMENT:
+Start each tweet with: 1/n: 2/n: 3/n: etc.
 
 THREAD STRUCTURE:
-- 1/n: Engaging hook with natural formatting
-- 2/n-n/n: Value-packed content with proper spacing
-- Final tweet: Strong call-to-action
-- Use natural line breaks between ideas
-- Include 1-2 relevant emojis per tweet
+Tweet 1: Explosive hook - Stop the scroll immediately
+Tweet 2: Setup - Introduce core concept
+Middle Tweets: Value bombs - One powerful insight per tweet
+Final Tweet: Unforgettable closer - Leave them thinking
 
-CONTENT TO TRANSFORM:
+YOUR STYLE:
+- Enthusiastic and genuinely excited
+- Human and conversational (use contractions)
+- Bold and confident
+- Include 1-2 emojis per tweet naturally
+- Use line breaks for visual flow
+
+KEEP IT CLEAN:
+- No hashtags
+- No formatting symbols
+- No URLs
+
+CONTENT:
 ${this.pageContent}
 
-OUTPUT FORMAT:
-1/n: [Clean hook content]
-2/n: [Clean insight content]  
-3/n: [Clean analysis content]
-...
-n/n: [Clean conclusion with CTA]`;
+OUTPUT EXAMPLE:
+1/5:
+[Hook content]
+
+2/5:
+[Setup content]
+
+3/5:
+[Value content]
+
+Generate your thread now:`;
         } else {
           this.addMessage('assistant', '❌ Only Twitter/X Post and Twitter Thread are supported.');
           return;
@@ -106,7 +125,15 @@ n/n: [Clean conclusion with CTA]`;
 
       } catch (error) {
         console.error('Error generating social content:', error);
-        this.addMessage('assistant', '❌ Error generating social media content. Please check your API key and try again.');
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          platform: platform,
+          hasApiKey: !!this.apiKey,
+          hasPageContent: !!this.pageContent,
+          pageContentLength: this.pageContent?.length
+        });
+        this.addMessage('assistant', `❌ Error generating social media content: ${error.message}. Please check your API key and try again.`);
       } finally {
         this.setLoading(false);
         this.hideProgressBar();
@@ -152,11 +179,100 @@ n/n: [Clean conclusion with CTA]`;
       contentContainer.className = 'twitter-content-container';
       if (platform === 'thread') {
         const tweets = this.parseTwitterThread(content);
+        const threadId = `thread_${Date.now()}`;
+        
+        // AUTO-SAVE THREAD TO PERSISTENT STORAGE
+        this.autoSaveThread(threadId, tweets, content);
+        
+        // Add thread header with Copy All button and Master Control
+        const threadHeader = document.createElement('div');
+        threadHeader.className = 'thread-header';
+        const currentTotalChars = this.getTotalChars(tweets);
+        threadHeader.innerHTML = `
+          <div class="thread-info">
+            <span class="thread-icon">🧵</span>
+            <span class="thread-title">Thread Generated</span>
+            <span class="thread-meta">${tweets.length} tweets • ${currentTotalChars} chars</span>
+          </div>
+          <div class="thread-actions">
+            <button class="btn-copy-all-thread" data-thread-id="${threadId}" title="Copy all tweets">
+              📋 Copy All
+            </button>
+            <span class="copy-all-status hidden">✓ All Copied!</span>
+          </div>
+        `;
+        contentContainer.appendChild(threadHeader);
+        
+        // Add Master Thread Control
+        const masterControl = document.createElement('div');
+        masterControl.className = 'thread-master-control';
+        masterControl.innerHTML = `
+          <div class="master-control-header">
+            <span class="control-label">Thread Length Control</span>
+            <span class="control-hint">Adjust total thread length • Characters distributed proportionally</span>
+          </div>
+          <div class="master-control-slider">
+            <div class="slider-presets">
+              <button class="preset-btn" data-length="1000">Short (1K)</button>
+              <button class="preset-btn" data-length="2500">Medium (2.5K)</button>
+              <button class="preset-btn" data-length="5000">Long (5K)</button>
+            </div>
+            <div class="slider-container">
+              <span class="slider-min">500</span>
+              <input type="range" class="master-length-slider" min="500" max="5000" value="${currentTotalChars}" step="100" data-thread-id="${threadId}">
+              <span class="slider-max">5000</span>
+            </div>
+            <div class="slider-value">
+              <span class="current-length">${currentTotalChars}</span> characters total
+            </div>
+          </div>
+          <div class="master-control-actions">
+            <button class="btn-regenerate-thread" data-thread-id="${threadId}" title="Regenerate entire thread with new length">
+              🔄 Regenerate Thread
+            </button>
+          </div>
+        `;
+        contentContainer.appendChild(masterControl);
+        
+        // Bind Copy All button
+        const copyAllBtn = threadHeader.querySelector('.btn-copy-all-thread');
+        const copyAllStatus = threadHeader.querySelector('.copy-all-status');
+        copyAllBtn.addEventListener('click', async () => {
+          await this.copyAllTweets(tweets, copyAllBtn, copyAllStatus);
+        });
+        
+        // Bind Master Control events
+        const masterSlider = masterControl.querySelector('.master-length-slider');
+        const currentLengthSpan = masterControl.querySelector('.current-length');
+        const regenerateThreadBtn = masterControl.querySelector('.btn-regenerate-thread');
+        const presetBtns = masterControl.querySelectorAll('.preset-btn');
+        
+        // Update display when slider moves
+        masterSlider.addEventListener('input', (e) => {
+          currentLengthSpan.textContent = e.target.value;
+        });
+        
+        // Preset buttons
+        presetBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const length = btn.dataset.length;
+            masterSlider.value = length;
+            currentLengthSpan.textContent = length;
+          });
+        });
+        
+        // Regenerate thread with new length
+        regenerateThreadBtn.addEventListener('click', async () => {
+          const targetLength = parseInt(masterSlider.value);
+          await this.regenerateEntireThread(contentContainer, threadId, targetLength, content);
+        });
+        
         tweets.forEach((tweet, index) => {
           const cardTitle = `Thread ${index + 1}/${tweets.length}`;
           // DISABLED: Universal cards system - using legacy system for stability
-          const card = this.createTwitterCard(tweet, cardTitle);
+          const card = this.createTwitterCard(tweet, cardTitle, true); // true = isThreadCard
           card.dataset.platform = platform;
+          card.dataset.threadId = threadId;
           contentContainer.appendChild(card);
         });
       } else {
@@ -177,41 +293,77 @@ n/n: [Clean conclusion with CTA]`;
     parseTwitterThread: function(content) {
       const cleanedContent = this.cleanTwitterContent(content);
       let processedContent = cleanedContent.replace(/Here's your clean.*?content:\s*/gi, '').trim();
-      const tweetPattern = /(\d+\/\d+[\s:]*)/g;
-      const parts = processedContent.split(tweetPattern).filter(part => part.trim());
+      
+      // Enhanced parsing: Split by numbered tweet pattern
       const tweets = [];
+      const lines = processedContent.split('\n');
       let currentTweet = '';
-      for (let i = 0; i < parts.length; i++) {
-        const part = parts[i].trim();
-        if (part.match(/^\d+\/\d+[\s:]*$/)) {
-          if (currentTweet.trim()) tweets.push(currentTweet.trim());
-          currentTweet = '';
-        } else {
-          currentTweet += part + ' ';
-        }
-      }
-      if (currentTweet.trim()) tweets.push(currentTweet.trim());
-      if (tweets.length === 0) {
-        const lines = processedContent.split('\n').filter(line => line.trim());
-        let tempTweet = '';
-        for (const line of lines) {
-          if (line.match(/^\d+\/\d+/)) {
-            if (tempTweet.trim()) tweets.push(tempTweet.trim());
-            tempTweet = line.replace(/^\d+\/\d+[\s:]*/, '').trim();
-          } else if (tempTweet) {
-            tempTweet += '\n' + line;
-          } else {
-            tempTweet = line;
+      let currentNumber = null;
+      
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+        
+        // Check if line starts with tweet number (1/5:, 2/5:, etc.)
+        const numberMatch = trimmedLine.match(/^(\d+)\/(\d+)[\s:]*(.*)$/);
+        
+        if (numberMatch) {
+          // Save previous tweet if exists
+          if (currentTweet.trim()) {
+            tweets.push(currentTweet.trim());
           }
+          
+          // Start new tweet
+          currentNumber = numberMatch[1];
+          currentTweet = numberMatch[3] || ''; // Content after the number
+        } else if (currentNumber !== null && trimmedLine) {
+          // Continue current tweet
+          currentTweet += (currentTweet ? '\n' : '') + trimmedLine;
         }
-        if (tempTweet.trim()) tweets.push(tempTweet.trim());
       }
-      return tweets.length > 0 ? tweets : [processedContent || content];
+      
+      // Add last tweet
+      if (currentTweet.trim()) {
+        tweets.push(currentTweet.trim());
+      }
+      
+      // Fallback: if no tweets parsed, return entire content as single tweet
+      if (tweets.length === 0) {
+        console.warn('Thread parsing failed, returning full content as single tweet');
+        return [processedContent || content];
+      }
+      
+      console.log(`✅ Parsed ${tweets.length} tweets from thread`);
+      return tweets;
     },
 
-    createTwitterCard: function(tweetContent, cardTitle) {
+    createTwitterCard: function(tweetContent, cardTitle, isThreadCard = false) {
       const card = document.createElement('div');
       card.className = 'twitter-card';
+      
+      // For thread cards, show only character count (no tone, no length slider)
+      const controlsHTML = isThreadCard ? `
+        <div class="twitter-controls">
+          <div class="twitter-char-count">${this.getAccurateCharacterCount(tweetContent)} characters</div>
+        </div>
+      ` : `
+        <div class="twitter-controls">
+          <div class="twitter-tone-control">
+            <label class="tone-label" for="tone-select">Tone:</label>
+            <select id="tone-select" class="tone-select" aria-label="Tone">
+              <option value="supportive">Supportive with facts</option>
+              <option value="critical">Critical with facts</option>
+            </select>
+          </div>
+          <div class="twitter-length-control">
+            <label class="length-label">Target Length:</label>
+            <input type="range" class="length-slider" min="50" max="2000" value="${Math.max(50, this.getAccurateCharacterCount(tweetContent))}" step="50">
+            <span class="length-display">${Math.max(50, this.getAccurateCharacterCount(tweetContent))}</span>
+            <button class="regenerate-btn" title="Regenerate with new length">🔄</button>
+          </div>
+          <div class="twitter-char-count">${this.getAccurateCharacterCount(tweetContent)} characters</div>
+        </div>
+      `;
+      
       card.innerHTML = `
         <div class="twitter-card-header">
           <span class="twitter-card-title">${cardTitle}</span>
@@ -226,22 +378,7 @@ n/n: [Clean conclusion with CTA]`;
         </div>
         <div class="twitter-card-content">
           <textarea class="twitter-text" placeholder="Edit your tweet content...">${tweetContent}</textarea>
-          <div class="twitter-controls">
-            <div class="twitter-tone-control">
-              <label class="tone-label" for="tone-select">Tone:</label>
-              <select id="tone-select" class="tone-select" aria-label="Tone">
-                <option value="supportive">Supportive with facts</option>
-                <option value="critical">Critical with facts</option>
-              </select>
-            </div>
-            <div class="twitter-length-control">
-              <label class="length-label">Target Length:</label>
-              <input type="range" class="length-slider" min="50" max="2000" value="${Math.max(50, this.getAccurateCharacterCount(tweetContent))}" step="50">
-              <span class="length-display">${Math.max(50, this.getAccurateCharacterCount(tweetContent))}</span>
-              <button class="regenerate-btn" title="Regenerate with new length">🔄</button>
-            </div>
-            <div class="twitter-char-count">${this.getAccurateCharacterCount(tweetContent)} characters</div>
-          </div>
+          ${controlsHTML}
         </div>
       `;
       
@@ -302,54 +439,95 @@ n/n: [Clean conclusion with CTA]`;
         charCount.style.color = 'var(--text-secondary)';
         autoResizeTextarea();
       });
-      const lengthSlider = card.querySelector('.length-slider');
-      const lengthDisplay = card.querySelector('.length-display');
-      const regenerateBtn = card.querySelector('.regenerate-btn');
-      const toneSelect = card.querySelector('.tone-select');
-      lengthSlider.addEventListener('input', () => {
-        lengthDisplay.textContent = lengthSlider.value;
-      });
-      card.dataset.originalContent = this.pageContent;
-      card.dataset.platform = cardTitle.includes('Thread') ? 'thread' : 'twitter';
-      regenerateBtn.addEventListener('click', async () => {
-        const targetLength = parseInt(lengthSlider.value);
-        const platform = card.dataset.platform;
-        const tone = toneSelect ? toneSelect.value : 'supportive';
-        await this.regenerateWithLength(card, targetLength, platform, { tone });
-      });
+      
+      // Only bind length slider and regenerate for non-thread cards
+      if (!isThreadCard) {
+        const lengthSlider = card.querySelector('.length-slider');
+        const lengthDisplay = card.querySelector('.length-display');
+        const regenerateBtn = card.querySelector('.regenerate-btn');
+        const toneSelect = card.querySelector('.tone-select');
+        
+        if (lengthSlider && lengthDisplay) {
+          lengthSlider.addEventListener('input', () => {
+            lengthDisplay.textContent = lengthSlider.value;
+          });
+        }
+        
+        card.dataset.originalContent = this.pageContent;
+        card.dataset.platform = cardTitle.includes('Thread') ? 'thread' : 'twitter';
+        
+        if (regenerateBtn) {
+          regenerateBtn.addEventListener('click', async () => {
+            const targetLength = parseInt(lengthSlider.value);
+            const platform = card.dataset.platform;
+            const tone = toneSelect ? toneSelect.value : 'supportive';
+            await this.regenerateWithLength(card, targetLength, platform, { tone });
+          });
+        }
+      }
+      
       return card;
     },
 
     cleanTwitterContent: function(content) {
       if (!content) return content;
       let cleaned = content;
+      
+      // CRITICAL: Remove AI meta-commentary and warnings about formatting
+      // These patterns catch when AI responds about the rules instead of following them
+      cleaned = cleaned.replace(/^.*?Unacceptable.*?\n/gim, '');
+      cleaned = cleaned.replace(/^.*?critical failure.*?\n/gim, '');
+      cleaned = cleaned.replace(/^.*?forbidden.*?formatting.*?\n/gim, '');
+      cleaned = cleaned.replace(/^.*?breaks the instructions.*?\n/gim, '');
+      cleaned = cleaned.replace(/^.*?--[•\-]\s*Original Response:.*?\n/gim, '');
+      cleaned = cleaned.replace(/^.*?You have used.*?\n/gim, '');
+      cleaned = cleaned.replace(/^.*?This output is unusable.*?\n/gim, '');
+      cleaned = cleaned.replace(/^.*?Here's your.*?content:.*?\n/gim, '');
+      cleaned = cleaned.replace(/^.*?OUTPUT:.*?\n/gim, '');
+      
+      // Remove hashtags
       cleaned = cleaned.replace(/#\w+/g, '');
       cleaned = cleaned.replace(/#/g, '');
-      cleaned = cleaned.replace(/\*([^*]+)\*/g, '$1');
+      
+      // Remove markdown bold/italic
       cleaned = cleaned.replace(/\*\*([^*]+)\*\*/g, '$1');
-      cleaned = cleaned.replace(/\(line break\)/gi, '\n');
-      cleaned = cleaned.replace(/\[line break\]/gi, '\n');
+      cleaned = cleaned.replace(/\*([^*]+)\*/g, '$1');
       cleaned = cleaned.replace(/_{2,}([^_]+)_{2,}/g, '$1');
       cleaned = cleaned.replace(/_([^_]+)_/g, '$1');
       cleaned = cleaned.replace(/\*{2,}/g, '');
       cleaned = cleaned.replace(/_{2,}/g, '');
-      cleaned = cleaned.replace(/[-*]\s+/g, '• ');
+      
+      // Remove line break placeholders
+      cleaned = cleaned.replace(/\(line break\)/gi, '\n');
+      cleaned = cleaned.replace(/\[line break\]/gi, '\n');
+      
+      // Convert markdown lists to bullet points
+      cleaned = cleaned.replace(/^[-*]\s+/gm, '• ');
+      
+      // Strip URLs completely (critical for Twitter shadowban prevention)
+      cleaned = cleaned.replace(/https?:\/\/\S+/gi, '');
+      cleaned = cleaned.replace(/\((https?:\/\/[^)]+)\)/gi, '');
+      cleaned = cleaned.replace(/www\.\S+/gi, '');
+      
+      // Remove markdown-style links [text](url)
+      cleaned = cleaned.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+      
+      // Remove any remaining square brackets
+      cleaned = cleaned.replace(/\[([^\]]+)\]/g, '$1');
+      
+      // Remove meta-commentary parentheses like (emphasis), (bold), etc.
+      cleaned = cleaned.replace(/\(emphasis\)/gi, '');
+      cleaned = cleaned.replace(/\(bold\)/gi, '');
+      cleaned = cleaned.replace(/\(italic\)/gi, '');
+      
+      // Normalize whitespace
       cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
       cleaned = cleaned.replace(/[ \t]+/g, ' ');
+      cleaned = cleaned.replace(/(^|\n)\s*$/g, '');
+      
+      // Final trim
       cleaned = cleaned.trim();
-      // Strip URLs and markdown-style links to avoid shadow bans
-      cleaned = cleaned.replace(/https?:\/\/\S+/gi, '');
-      // Remove bare parentheses URL forms like (http...) or duplicated link artifacts
-      cleaned = cleaned.replace(/\((https?:\/\/[^)]+)\)/gi, '');
-      // Collapse leftover empty lines after removing URLs
-      cleaned = cleaned.replace(/(^|\n)\s*$/g, '').replace(/\n{3,}/g, '\n\n');
-      cleaned = cleaned.replace(/\[([^\]]+)\]/g, '$1');
-      cleaned = cleaned.replace(/\(([^)]+)\)/g, (match, p1) => {
-        if (p1.includes('emphasis') || p1.includes('bold') || p1.includes('italic')) {
-          return '';
-        }
-        return match;
-      });
+      
       return cleaned;
     },
 
@@ -409,47 +587,57 @@ n/n: [Clean conclusion with CTA]`;
           );
         };
         if (platform === 'twitter') {
-          systemPrompt = `You are a Twitter/X Premium content creation expert. Create engaging, viral-worthy tweets that drive maximum engagement. Focus on detailed storytelling and valuable insights. NEVER use hashtags in your output.`;
-          userPrompt = `Create a Twitter/X post with EXACTLY ${targetLength} characters (±10 characters acceptable):
+          systemPrompt = `You are a charismatic Twitter/X storyteller creating ${targetLength}-character posts that radiate personality and human warmth. Every word sparkles with energy and genuine enthusiasm. Write in plain text with strategic emojis - no hashtags, no URLs, no formatting symbols. Make people stop scrolling and feel something real.`;
+          userPrompt = `Recreate this as an electrifying ${targetLength}-character Twitter post that feels delightfully human.
 
-STRICT REQUIREMENTS:
-- Target character count: ${targetLength} characters
-- NO HASHTAGS ALLOWED - This rule cannot be broken
-- Make it highly engaging and shareable
-- Use conversational, compelling tone
-- Include emoji strategically to enhance readability
-- Do NOT include URLs or links of any kind
-- Focus on delivering maximum value
+YOUR APPROACH:
+✓ Target: ${targetLength} characters (±10 acceptable)
+✓ Write with GENUINE excitement and energy
+✓ Use natural line breaks for rhythm
+✓ Include 2-4 emojis strategically placed
+✓ Start with a scroll-stopping hook
+✓ Add punchy, conversational language
+✓ Mix short zingers with flowing sentences
+✓ ${tone === 'critical' ? 'Challenge with bold, evidence-based critique' : 'Amplify with enthusiastic support and facts'}
+✓ End with impact or intrigue
 
-CONTENT TO TRANSFORM:
+KEEP IT CLEAN:
+✗ No hashtags
+✗ No formatting symbols
+✗ No URLs
+✗ No meta-commentary
+
+ORIGINAL CONTENT:
 ${originalContent}
 
-OUTPUT FORMAT: Tweet content exactly around ${targetLength} characters WITHOUT hashtags.
-
-${buildToneDelta(tone)}`;
+Transform it now:`;
         } else if (platform === 'thread') {
           const tweetsNeeded = Math.ceil(targetLength / 400);
-          systemPrompt = `You are a Twitter Premium thread specialist. Create compelling multi-tweet threads that tell detailed stories and provide valuable insights. NEVER use hashtags in your output.`;
-          userPrompt = `Create a Twitter thread with approximately ${targetLength} total characters across ${tweetsNeeded} tweets:
+          systemPrompt = `You are a masterful Twitter/X thread storyteller crafting ${tweetsNeeded} tweets (${targetLength} total characters) that captivate from start to finish. Each tweet vibrates with personality, energy, and human warmth. You turn complex ideas into addictive narratives. Write in plain text with strategic emojis - no hashtags, no URLs, no formatting. Pure storytelling magic.`;
+          userPrompt = `Recreate this as a magnetic ${tweetsNeeded}-tweet thread (around ${targetLength} characters total).
 
-STRICT REQUIREMENTS:
-- Create ${tweetsNeeded} tweets numbered (1/n, 2/n, etc.)
-- Total thread length: approximately ${targetLength} characters
-- NO HASHTAGS ALLOWED anywhere in the thread
-- Each tweet should be comprehensive and valuable
-- Build compelling narrative throughout
-- Do NOT include URLs or links of any kind
+YOUR STORYTELLING APPROACH:
+✓ Create ${tweetsNeeded} numbered tweets (1/${tweetsNeeded}, 2/${tweetsNeeded}, etc.)
+✓ Total: approximately ${targetLength} characters
+✓ Write with genuine enthusiasm and energy
+✓ Use line breaks for visual breathing room
+✓ Include 1-2 emojis per tweet naturally
+✓ Each tweet delivers a powerful insight
+✓ Build narrative momentum throughout
+✓ Mix punchy short lines with flowing explanations
+✓ ${tone === 'critical' ? 'Challenge boldly with evidence-based critique' : 'Support enthusiastically with compelling facts'}
+✓ End with an unforgettable closer
 
-CONTENT TO TRANSFORM:
+KEEP IT CLEAN:
+✗ No hashtags
+✗ No formatting symbols
+✗ No URLs
+✗ No explanations about format
+
+ORIGINAL CONTENT:
 ${originalContent}
 
-OUTPUT FORMAT:
-1/n: [Tweet content]
-2/n: [Tweet content]
-...
-n/n: [Conclusion]
-
-${buildToneDelta(tone)}`;
+Craft your thread now:`;
         }
         const response = await this.callGeminiAPIWithSystemPrompt(systemPrompt, userPrompt);
         if (response) {
@@ -474,6 +662,221 @@ ${buildToneDelta(tone)}`;
         alert('Error regenerating content. Please try again.');
       } finally {
         regenerateBtn.textContent = '🔄';
+        regenerateBtn.disabled = false;
+      }
+    },
+    
+    // AUTO-SAVE THREAD TO PERSISTENT STORAGE
+    autoSaveThread: async function(threadId, tweets, rawContent) {
+      if (!window.TabTalkStorage || !window.TabTalkStorage.saveThread) {
+        console.warn('Storage module not available for thread persistence');
+        return;
+      }
+      
+      try {
+        // DELETE OLD AUTO-SAVED THREADS (keep only latest)
+        const allThreads = await window.TabTalkStorage.getAllThreads();
+        const autoSavedThreads = Object.values(allThreads).filter(t => t.isAutoSaved);
+        
+        // Delete all previous auto-saved threads
+        for (const oldThread of autoSavedThreads) {
+          await window.TabTalkStorage.deleteThread(oldThread.id);
+          console.log('🗑️ Deleted old auto-saved thread:', oldThread.id);
+        }
+        
+        const threadData = {
+          id: threadId,
+          title: this.currentTab?.title || 'Untitled Thread',
+          url: this.currentTab?.url || '',
+          domain: this.currentDomain || '',
+          platform: 'thread',
+          isAutoSaved: true, // Mark as auto-saved
+          tweets: tweets.map((tweet, index) => ({
+            id: `tweet_${index + 1}`,
+            number: `${index + 1}/${tweets.length}`,
+            content: tweet,
+            charCount: this.getAccurateCharacterCount(tweet)
+          })),
+          rawContent: rawContent,
+          totalTweets: tweets.length,
+          totalChars: this.getTotalChars(tweets),
+          createdAt: Date.now()
+        };
+        
+        await window.TabTalkStorage.saveThread(threadData);
+        console.log('✅ Thread auto-saved persistently:', threadId);
+        
+        // Show subtle notification
+        this.showAutoSaveNotification();
+      } catch (error) {
+        console.error('Error auto-saving thread:', error);
+      }
+    },
+    
+    // COPY ALL TWEETS FUNCTIONALITY
+    copyAllTweets: async function(tweets, button, statusElement) {
+      try {
+        // Join all tweets with double line breaks for easy pasting
+        const allTweetsText = tweets.map((tweet, index) => {
+          return `${index + 1}/${tweets.length}:\n${tweet}`;
+        }).join('\n\n---\n\n');
+        
+        await navigator.clipboard.writeText(allTweetsText);
+        
+        // Update UI
+        button.classList.add('hidden');
+        statusElement.classList.remove('hidden');
+        
+        // Reset after 3 seconds
+        setTimeout(() => {
+          button.classList.remove('hidden');
+          statusElement.classList.add('hidden');
+        }, 3000);
+        
+        console.log('✅ All tweets copied to clipboard');
+      } catch (error) {
+        console.error('Error copying all tweets:', error);
+        alert('Failed to copy tweets. Please try again.');
+      }
+    },
+    
+    // GET TOTAL CHARACTER COUNT FOR THREAD
+    getTotalChars: function(tweets) {
+      return tweets.reduce((total, tweet) => {
+        return total + this.getAccurateCharacterCount(tweet);
+      }, 0);
+    },
+    
+    // SHOW AUTO-SAVE NOTIFICATION
+    showAutoSaveNotification: function() {
+      const notification = document.createElement('div');
+      notification.className = 'auto-save-notification';
+      notification.innerHTML = '💾 Thread auto-saved';
+      notification.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #10b981;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 10000;
+        animation: slideInUp 0.3s ease;
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.animation = 'slideOutDown 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+      }, 2000);
+    },
+    
+    // REGENERATE ENTIRE THREAD WITH NEW LENGTH
+    regenerateEntireThread: async function(container, threadId, targetLength, originalContent) {
+      const regenerateBtn = container.querySelector('.btn-regenerate-thread');
+      if (!regenerateBtn) return;
+      
+      const originalText = regenerateBtn.textContent;
+      regenerateBtn.textContent = '⏳ Regenerating...';
+      regenerateBtn.disabled = true;
+      
+      try {
+        // Calculate desired tweet count based on length
+        const tweetsNeeded = Math.max(3, Math.min(8, Math.ceil(targetLength / 500)));
+        
+        const systemPrompt = `You are a masterful Twitter/X thread storyteller crafting ${tweetsNeeded} tweets (${targetLength} total characters) that captivate from start to finish. Each tweet vibrates with personality, energy, and human warmth. You turn complex ideas into addictive narratives. Write in plain text with strategic emojis - no hashtags, no URLs, no formatting. Pure storytelling magic.`;
+        
+        const userPrompt = `Create a magnetic Twitter thread with EXACTLY ${tweetsNeeded} tweets totaling approximately ${targetLength} characters.
+
+CRITICAL FORMAT REQUIREMENT:
+You MUST start each tweet with its number in this EXACT format:
+1/${tweetsNeeded}:
+2/${tweetsNeeded}:
+3/${tweetsNeeded}:
+etc.
+
+THREAD STRUCTURE:
+- Tweet 1: Explosive hook (15% of total = ${Math.floor(targetLength * 0.15)} chars)
+- Tweets 2-${tweetsNeeded-1}: Value bombs (60% of total = ${Math.floor(targetLength * 0.60 / (tweetsNeeded - 2))} chars each)
+- Tweet ${tweetsNeeded}: Unforgettable closer (25% of total = ${Math.floor(targetLength * 0.25)} chars)
+
+YOUR TONE:
+✓ Enthusiastic and genuinely excited
+✓ Human and conversational
+✓ Bold and confident
+✓ Delightfully engaging
+✓ Strategic line breaks for visual flow
+
+KEEP IT CLEAN:
+✗ No hashtags
+✗ No formatting symbols
+✗ No URLs
+✗ No explanations about format
+
+CONTENT:
+${this.pageContent || originalContent}
+
+OUTPUT FORMAT EXAMPLE:
+1/${tweetsNeeded}:
+[Your explosive hook here]
+
+2/${tweetsNeeded}:
+[Your value bomb here]
+
+Craft your ${targetLength}-character thread now:`;
+        
+        const response = await this.callGeminiAPIWithSystemPrompt(systemPrompt, userPrompt);
+        
+        if (response) {
+          const cleanedResponse = this.cleanTwitterContent(response);
+          const newTweets = this.parseTwitterThread(cleanedResponse);
+          
+          // Remove old tweet cards
+          const oldCards = container.querySelectorAll('.twitter-card');
+          oldCards.forEach(card => card.remove());
+          
+          // Add new tweet cards
+          newTweets.forEach((tweet, index) => {
+            const cardTitle = `Thread ${index + 1}/${newTweets.length}`;
+            const card = this.createTwitterCard(tweet, cardTitle, true);
+            card.dataset.platform = 'thread';
+            card.dataset.threadId = threadId;
+            container.appendChild(card);
+          });
+          
+          // Update header meta
+          const metaSpan = container.querySelector('.thread-meta');
+          if (metaSpan) {
+            metaSpan.textContent = `${newTweets.length} tweets • ${this.getTotalChars(newTweets)} chars`;
+          }
+          
+          // Update current length display
+          const currentLengthSpan = container.querySelector('.current-length');
+          if (currentLengthSpan) {
+            currentLengthSpan.textContent = this.getTotalChars(newTweets);
+          }
+          
+          // Update slider value
+          const masterSlider = container.querySelector('.master-length-slider');
+          if (masterSlider) {
+            masterSlider.value = this.getTotalChars(newTweets);
+          }
+          
+          // Auto-save updated thread
+          await this.autoSaveThread(threadId, newTweets, cleanedResponse);
+          
+          console.log('✅ Thread regenerated successfully');
+        }
+        
+      } catch (error) {
+        console.error('Error regenerating thread:', error);
+        alert('Failed to regenerate thread. Please try again.');
+      } finally {
+        regenerateBtn.textContent = originalText;
         regenerateBtn.disabled = false;
       }
     }

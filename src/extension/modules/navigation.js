@@ -10,6 +10,7 @@
       if (viewName === 'api-setup') targetId = 'api-setup-view';
       if (viewName === 'history') targetId = 'history-view';
       if (viewName === 'gallery') targetId = 'gallery-view';
+      if (viewName === 'threads') targetId = 'threads-view';
       const target = document.getElementById(targetId);
       if (target) {
         target.classList.remove('hidden');
@@ -24,6 +25,13 @@
           if (container) {
             // Default category: twitter
             window.galleryManager.render(container, 'twitter');
+          }
+        }
+        // Special handling for threads view
+        if (viewName === 'threads' && window.TabTalkThreadLibrary) {
+          const container = document.getElementById('threads-container');
+          if (container) {
+            window.TabTalkThreadLibrary.render(container);
           }
         }
       } else {
