@@ -24,6 +24,7 @@
           (this.sidebar = document.getElementById("sidebar")),
           (this.quickTwitterBtn = document.getElementById("quick-twitter")),
           (this.quickTwitterThreadBtn = document.getElementById("quick-twitter-thread")),
+          (this.quickCreateBtn = document.getElementById("quick-create")),
           (this.welcomeView = document.getElementById("welcome-view")),
           (this.apiSetupView = document.getElementById("api-setup-view")),
           (this.chatView = document.getElementById("chat-view")),
@@ -113,17 +114,6 @@
           ig.addEventListener("click", (s) => {
             s.preventDefault();
             this.showView("gallery");
-            if (this.sidebar) {
-              this.sidebar.classList.add("hidden");
-              this.sidebar.style.display = "none";
-            }
-          });
-        // New: Thread Generator link
-        let threadGenLink = document.getElementById("menu-thread-generator-link");
-        threadGenLink &&
-          threadGenLink.addEventListener("click", (s) => {
-            s.preventDefault();
-            this.showView("thread-generator");
             if (this.sidebar) {
               this.sidebar.classList.add("hidden");
               this.sidebar.style.display = "none";
@@ -283,6 +273,10 @@
             this.quickTwitterThreadBtn.addEventListener("click", async () => {
               (this.resetScreenForGeneration && this.resetScreenForGeneration(),
                 await this.generateSocialContent("thread"));
+            }),
+          this.quickCreateBtn &&
+            this.quickCreateBtn.addEventListener("click", () => {
+              this.showView("thread-generator");
             }));
         // Thread Generator button
         let generateThreadBtn = document.getElementById("generate-thread-btn");
