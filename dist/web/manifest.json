@@ -1,8 +1,8 @@
 {
-  "name": "TabTalk AI - Conversational Web Assistant",
-  "short_name": "TabTalk AI",
-  "description": "Chat with any webpage using AI - powered by Google Gemini",
-  "version": "1.0.3",
+  "name": "Fibr — Threads for the Web",
+  "short_name": "Fibr",
+  "description": "Generate premium Twitter/X threads from any page. Local-only keys. No external fonts.",
+  "version": "1.0.4",
   "manifest_version": 3,
   "background": {
     "service_worker": "background.js"

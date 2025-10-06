@@ -379,7 +379,7 @@ Generate your thread now:`;
           </div>
           <div class="thread-actions">
             <button class="btn-copy-all-thread" data-thread-id="${threadId}" title="Copy all tweets">
-              📋 Copy All
+              📋
             </button>
             <span class="copy-all-status hidden">✓ All Copied!</span>
           </div>
@@ -889,18 +889,18 @@ Craft your thread now:`;
     // Get tone color for badge
     getToneColor: function(toneId) {
       const colors = {
-        'supportive': '#10b981',
-        'critical': '#ef4444',
-        'trolling': '#f59e0b',
-        'anti-propaganda': '#8b5cf6',
-        'critical-humor': '#f97316',
-        'sarcastic': '#ec4899',
-        'investigative': '#06b6d4',
-        'optimistic': '#14b8a6',
-        'cautionary': '#eab308',
-        'empowering': '#a855f7'
+        'supportive': 'var(--accent-color)',
+        'critical': 'var(--accent-medium)',
+        'trolling': 'var(--accent-light)',
+        'anti-propaganda': 'var(--accent-color)',
+        'critical-humor': 'var(--accent-medium)',
+        'sarcastic': 'var(--accent-light)',
+        'investigative': 'var(--accent-color)',
+        'optimistic': 'var(--accent-medium)',
+        'cautionary': 'var(--accent-light)',
+        'empowering': 'var(--accent-color)'
       };
-      return colors[toneId] || '#6366f1';
+      return colors[toneId] || 'var(--accent-color)';
     },
 
     // Get tone icon for badge
@@ -1010,7 +1010,7 @@ Craft your thread now:`;
         position: fixed;
         bottom: 20px;
         right: 20px;
-        background: #10b981;
+        background: var(--accent-color);
         color: white;
         padding: 12px 20px;
         border-radius: 8px;
