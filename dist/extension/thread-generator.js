@@ -1,6 +1,129 @@
 (function() {
   const ThreadGenerator = {
     knowledgePacks: {},
+    modalInitialized: false,
+    
+    // Initialize modal
+    init: function() {
+      if (this.modalInitialized) return;
+      this.createModalHTML();
+      this.bindModalEvents();
+      this.modalInitialized = true;
+    },
+    
+    // Create modal HTML
+    createModalHTML: function() {
+      const modalHTML = `
+        <div id="thread-generator-modal" class="tone-modal hidden" role="dialog" aria-labelledby="thread-gen-title" aria-modal="true">
+          <div class="tone-modal-overlay"></div>
+          <div class="tone-modal-content">
+            <div class="tone-modal-header">
+              <h2 id="thread-gen-title">Create Thread</h2>
+              <button class="tone-modal-close" aria-label="Close">&times;</button>
+            </div>
+            
+            <div class="tone-grid" style="padding: 24px;">
+              <div class="form-group" style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Category</label>
+                <select id="modal-thread-category" class="builder-select" style="width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(203, 213, 225, 0.4); background: rgba(255, 255, 255, 0.8); font-size: 14px;">
+                  <option value="history">📜 History</option>
+                  <option value="sports">⚽ Sports</option>
+                  <option value="stories">📖 Stories</option>
+                  <option value="celebrity">⭐ Celebrity</option>
+                  <option value="news">📰 News</option>
+                </select>
+              </div>
+              
+              <div class="form-group" style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Topic</label>
+                <input type="text" id="modal-thread-topic" class="builder-select" placeholder="e.g., The fall of the Roman Empire" style="width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(203, 213, 225, 0.4); background: rgba(255, 255, 255, 0.8); font-size: 14px;" />
+                <small style="display: block; margin-top: 6px; font-size: 11px; color: var(--text-secondary);">Enter any topic you want to create a thread about</small>
+              </div>
+              
+              <div class="form-group" style="margin-bottom: 8px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                  <input type="checkbox" id="modal-use-knowledge-pack" checked style="width: 16px; height: 16px;" />
+                  <span style="font-size: 13px; font-weight: 500; color: var(--text-primary);">Use AI Knowledge Base</span>
+                </label>
+                <small style="display: block; margin-top: 4px; margin-left: 24px; font-size: 11px; color: var(--text-secondary);">Includes curated facts and hooks</small>
+              </div>
+            </div>
+            
+            <div class="tone-modal-actions">
+              <button id="thread-gen-cancel-btn" class="tone-btn tone-btn-secondary">Cancel</button>
+              <button id="thread-gen-generate-btn" class="tone-btn tone-btn-primary">
+                Generate Thread
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      if (!document.getElementById('thread-generator-modal')) {
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+      }
+    },
+    
+    // Bind modal events
+    bindModalEvents: function() {
+      const modal = document.getElementById('thread-generator-modal');
+      if (!modal) return;
+      
+      const closeBtn = modal.querySelector('.tone-modal-close');
+      const overlay = modal.querySelector('.tone-modal-overlay');
+      const cancelBtn = document.getElementById('thread-gen-cancel-btn');
+      const generateBtn = document.getElementById('thread-gen-generate-btn');
+      
+      closeBtn?.addEventListener('click', () => this.hideModal());
+      overlay?.addEventListener('click', () => this.hideModal());
+      cancelBtn?.addEventListener('click', () => this.hideModal());
+      generateBtn?.addEventListener('click', () => this.handleGenerate());
+      
+      modal.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') this.hideModal();
+      });
+    },
+    
+    // Show modal
+    showModal: function() {
+      this.init();
+      const modal = document.getElementById('thread-generator-modal');
+      if (!modal) return;
+      
+      modal.classList.remove('hidden');
+      modal.setAttribute('aria-hidden', 'false');
+      
+      const topicInput = document.getElementById('modal-thread-topic');
+      topicInput?.focus();
+    },
+    
+    // Hide modal
+    hideModal: function() {
+      const modal = document.getElementById('thread-generator-modal');
+      if (!modal) return;
+      
+      modal.classList.add('hidden');
+      modal.setAttribute('aria-hidden', 'true');
+    },
+    
+    // Handle generate
+    handleGenerate: async function() {
+      const category = document.getElementById('modal-thread-category')?.value;
+      const topic = document.getElementById('modal-thread-topic')?.value?.trim();
+      const useKnowledgePack = document.getElementById('modal-use-knowledge-pack')?.checked;
+      
+      if (!topic) {
+        alert('Please enter a topic');
+        return;
+      }
+      
+      this.hideModal();
+      
+      // Call the generation function
+      if (window.TabTalkApp && window.TabTalkApp.generateThreadMVP) {
+        await window.TabTalkApp.generateThreadMVP(category, topic, { useKnowledgePack });
+      }
+    },
     
     // Load knowledge pack for a category
     loadKnowledgePack: async function(category) {
@@ -488,5 +611,10 @@ Craft your ${targetLength}-character thread now:`;
     }
   };
   
+  // Defer initialization until the main app requests it
+  // This prevents race conditions on DOM load
+  // The main popup.js will call ThreadGenerator.init()
+  
+  // Export to window
   window.TabTalkThreadGenerator = ThreadGenerator;
 })();

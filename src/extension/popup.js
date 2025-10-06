@@ -1,3 +1,18 @@
+// Import all modules so esbuild can bundle them correctly
+import './modules/api.js';
+import './modules/storage.js';
+import './modules/navigation.js';
+import './modules/ui-render.js';
+import './modules/twitter.js';
+import './modules/thread-generator.js';
+import './modules/scroll.js';
+import './modules/gallery.js';
+import './modules/thread-library.js';
+import './modules/validation.js';
+import './modules/validation-handlers.js';
+import './modules/tone-selector.js';
+import './modules/universal-cards.js';
+
 (() => {
   (() => {
     var l = class {
@@ -37,19 +52,45 @@
           }));
       }
       async init() {
-        (console.log("TabTalk AI: Initializing popup"),
-          (this.currentTab = (
-            await chrome.tabs.query({ active: !0, currentWindow: !0 })
-          )[0]),
-          await this.loadState(),
-          this.bindEvents());
-        let t = await this.getStorageItem("hasSeenWelcome");
-        (this.apiKey
-          ? (this.showView("chat"), await this.getAndCachePageContent())
-          : t
-            ? this.showView("api-setup")
-            : this.showView("welcome"),
-          console.log("TabTalk AI: Popup initialized"));
+        try {
+          console.log("TabTalk AI: Initializing popup");
+
+          const tabs = await chrome.tabs.query({ active: !0, currentWindow: !0 });
+          if (!tabs || tabs.length === 0) {
+            console.error("TabTalk AI: Failed to get current tab");
+            if (this.pageStatus) {
+              this.pageStatus.textContent = "\u274C Failed to access current tab";
+            }
+          } else {
+            this.currentTab = tabs[0];
+            console.log("TabTalk AI: Current tab:", this.currentTab.url);
+          }
+
+          await this.loadState();
+          this.bindEvents();
+
+          const hasSeenWelcome = await this.getStorageItem("hasSeenWelcome");
+
+          if (this.apiKey) {
+            this.showView("chat");
+            await this.getAndCachePageContent();
+          } else if (hasSeenWelcome) {
+            this.showView("api-setup");
+          } else {
+            this.showView("welcome");
+          }
+
+          console.log("TabTalk AI: Popup initialized");
+        } catch (error) {
+          console.error("TabTalk AI: Initialization error:", error);
+          if (this.pageStatus) {
+            this.pageStatus.textContent = `\u274C Initialization failed: ${error.message}`;
+          }
+          // Fallback to welcome view so UI does not remain blank
+          if (this.showView) {
+            this.showView("welcome");
+          }
+        }
       }
       bindEvents() {
         let t = document.getElementById("settings-cancel-button"),
@@ -198,7 +239,14 @@
             }),
           this.quickCreateBtn &&
             this.quickCreateBtn.addEventListener("click", () => {
-              this.showView("thread-generator");
+              if (
+                window.TabTalkThreadGenerator &&
+                window.TabTalkThreadGenerator.showModal
+              ) {
+                window.TabTalkThreadGenerator.showModal(this);
+              } else {
+                this.showView("thread-generator");
+              }
             }));
         // Thread Generator button
         let generateThreadBtn = document.getElementById("generate-thread-btn");
@@ -209,6 +257,12 @@
             }
           });
         this.initializeHorizontalScroll();
+
+        // Initialize modules that need the DOM now that it's safe
+        if (window.TabTalkThreadGenerator && window.TabTalkThreadGenerator.init) {
+          console.log('TabTalk AI: Initializing Thread Generator modal...');
+          window.TabTalkThreadGenerator.init();
+        }
       }
       async testApiKey(t) {
         try {
@@ -270,27 +324,30 @@
       }
       
     };
-    (window.TabTalkAPI && Object.assign(l.prototype, window.TabTalkAPI),
-      window.TabTalkTwitter &&
-        Object.assign(l.prototype, window.TabTalkTwitter),
-      window.TabTalkThreadGenerator &&
-        Object.assign(l.prototype, window.TabTalkThreadGenerator),
-      window.TabTalkContentAnalysis &&
-        Object.assign(l.prototype, window.TabTalkContentAnalysis),
-      window.TabTalkSocialMedia &&
-        Object.assign(l.prototype, window.TabTalkSocialMedia),
-      window.TabTalkStorage &&
-        Object.assign(l.prototype, window.TabTalkStorage),
-      window.TabTalkUI && Object.assign(l.prototype, window.TabTalkUI),
-      window.TabTalkScroll && Object.assign(l.prototype, window.TabTalkScroll),
-      window.TabTalkNavigation &&
-        Object.assign(l.prototype, window.TabTalkNavigation));
+    
+    // Store the original init for later wrapping
     let T = l.prototype.init;
-    ((l.prototype.init = async function () {
-      return (await T.call(this), this);
-    }),
-      document.addEventListener("DOMContentLoaded", () => {
-        new l().init().catch((t) => console.error("Initialization error:", t));
-      }));
+    
+    // Wait for DOM and modules to be ready before assembling the class
+    document.addEventListener("DOMContentLoaded", () => {
+      // Now that all modules have executed, copy their methods to the main class
+      window.TabTalkAPI && Object.assign(l.prototype, window.TabTalkAPI);
+      window.TabTalkTwitter && Object.assign(l.prototype, window.TabTalkTwitter);
+      window.TabTalkThreadGenerator && Object.assign(l.prototype, window.TabTalkThreadGenerator);
+      window.TabTalkContentAnalysis && Object.assign(l.prototype, window.TabTalkContentAnalysis);
+      window.TabTalkSocialMedia && Object.assign(l.prototype, window.TabTalkSocialMedia);
+      window.TabTalkStorage && Object.assign(l.prototype, window.TabTalkStorage);
+      window.TabTalkUI && Object.assign(l.prototype, window.TabTalkUI);
+      window.TabTalkScroll && Object.assign(l.prototype, window.TabTalkScroll);
+      window.TabTalkNavigation && Object.assign(l.prototype, window.TabTalkNavigation);
+      
+      // Wrap the init method
+      l.prototype.init = async function () {
+        return (await T.call(this), this);
+      };
+      
+      // Now instantiate and initialize
+      new l().init().catch((t) => console.error("Initialization error:", t));
+    });
   })();
 })();

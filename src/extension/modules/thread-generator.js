@@ -1,6 +1,153 @@
 (function() {
   const ThreadGenerator = {
     knowledgePacks: {},
+    modalInitialized: false,
+    popupInstance: null,
+    
+    // Initialize modal
+    init: function() {
+      if (this.modalInitialized) return;
+      this.createModalHTML();
+      this.bindModalEvents();
+      this.modalInitialized = true;
+    },
+    
+    // Create modal HTML
+    createModalHTML: function() {
+      const modalHTML = `
+        <div id="thread-generator-modal" class="tone-modal hidden" role="dialog" aria-labelledby="thread-gen-title" aria-modal="true">
+          <div class="tone-modal-overlay"></div>
+          <div class="tone-modal-content">
+            <div class="tone-modal-header">
+              <h2 id="thread-gen-title">Create Thread</h2>
+              <button class="tone-modal-close" aria-label="Close">&times;</button>
+            </div>
+            
+            <div class="tone-grid" style="padding: 24px;">
+              <div class="form-group" style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Category</label>
+                <select id="modal-thread-category" class="builder-select" style="width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(203, 213, 225, 0.4); background: rgba(255, 255, 255, 0.8); font-size: 14px;">
+                  <option value="history">📜 History</option>
+                  <option value="sports">⚽ Sports</option>
+                  <option value="stories">📖 Stories</option>
+                  <option value="celebrity">⭐ Celebrity</option>
+                  <option value="news">📰 News</option>
+                </select>
+              </div>
+              
+              <div class="form-group" style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Topic</label>
+                <input type="text" id="modal-thread-topic" class="builder-select" placeholder="e.g., The fall of the Roman Empire" style="width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(203, 213, 225, 0.4); background: rgba(255, 255, 255, 0.8); font-size: 14px;" />
+                <small style="display: block; margin-top: 6px; font-size: 11px; color: var(--text-secondary);">Enter any topic you want to create a thread about</small>
+              </div>
+              
+              <div class="form-group" style="margin-bottom: 8px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                  <input type="checkbox" id="modal-use-knowledge-pack" checked style="width: 16px; height: 16px;" />
+                  <span style="font-size: 13px; font-weight: 500; color: var(--text-primary);">Use AI Knowledge Base</span>
+                </label>
+                <small style="display: block; margin-top: 4px; margin-left: 24px; font-size: 11px; color: var(--text-secondary);">Includes curated facts and hooks</small>
+              </div>
+            </div>
+            
+            <div class="tone-modal-actions">
+              <button id="thread-gen-cancel-btn" class="tone-btn tone-btn-secondary">Cancel</button>
+              <button id="thread-gen-generate-btn" class="tone-btn tone-btn-primary">
+                Generate Thread
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      if (!document.getElementById('thread-generator-modal')) {
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+      }
+    },
+    
+    // Bind modal events
+    bindModalEvents: function() {
+      const modal = document.getElementById('thread-generator-modal');
+      if (!modal) return;
+      
+      const closeBtn = modal.querySelector('.tone-modal-close');
+      const overlay = modal.querySelector('.tone-modal-overlay');
+      const cancelBtn = document.getElementById('thread-gen-cancel-btn');
+      const generateBtn = document.getElementById('thread-gen-generate-btn');
+      
+      closeBtn?.addEventListener('click', () => this.hideModal());
+      overlay?.addEventListener('click', () => this.hideModal());
+      cancelBtn?.addEventListener('click', () => this.hideModal());
+      generateBtn?.addEventListener('click', () => this.handleGenerate());
+      
+      modal.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') this.hideModal();
+      });
+    },
+    
+    // Show modal
+    showModal: function(popupInstance) {
+      // Store reference to the popup instance
+      if (popupInstance) {
+        ThreadGenerator.popupInstance = popupInstance;
+        console.log('ThreadGenerator: Stored popup instance, has apiKey:', !!popupInstance.apiKey);
+      } else {
+        console.error('ThreadGenerator: No popup instance provided to showModal');
+        alert('Unable to open thread generator. Please refresh and try again.');
+        return;
+      }
+      
+      ThreadGenerator.init();
+      const modal = document.getElementById('thread-generator-modal');
+      if (!modal) return;
+      
+      modal.classList.remove('hidden');
+      modal.setAttribute('aria-hidden', 'false');
+      
+      const topicInput = document.getElementById('modal-thread-topic');
+      topicInput?.focus();
+    },
+    
+    // Hide modal
+    hideModal: function() {
+      const modal = document.getElementById('thread-generator-modal');
+      if (!modal) return;
+      
+      modal.classList.add('hidden');
+      modal.setAttribute('aria-hidden', 'true');
+    },
+    
+    // Handle generate
+    handleGenerate: async function() {
+      const category = document.getElementById('modal-thread-category')?.value;
+      const topic = document.getElementById('modal-thread-topic')?.value?.trim();
+      const useKnowledgePack = document.getElementById('modal-use-knowledge-pack')?.checked;
+      
+      if (!topic) {
+        alert('Please enter a topic');
+        return;
+      }
+      
+      console.log('ThreadGenerator: handleGenerate called');
+      console.log('ThreadGenerator: popupInstance exists:', !!ThreadGenerator.popupInstance);
+      console.log('ThreadGenerator: popupInstance has apiKey:', !!ThreadGenerator.popupInstance?.apiKey);
+      console.log('ThreadGenerator: popupInstance has generateThreadMVP:', !!ThreadGenerator.popupInstance?.generateThreadMVP);
+      
+      ThreadGenerator.hideModal();
+      
+      // Call the generation function on the stored popup instance
+      if (ThreadGenerator.popupInstance && ThreadGenerator.popupInstance.generateThreadMVP) {
+        await ThreadGenerator.popupInstance.generateThreadMVP(category, topic, { 
+          useKnowledgePack,
+          maxTweets: 8,
+          tone: 'curious'
+        });
+      } else {
+        console.error('Popup instance not available for thread generation');
+        console.error('popupInstance:', ThreadGenerator.popupInstance);
+        alert('Unable to generate thread. Please try again.');
+      }
+    },
     
     // Load knowledge pack for a category
     loadKnowledgePack: async function(category) {
@@ -34,8 +181,12 @@
     
     // Generate thread using AI with knowledge pack context
     generateThreadMVP: async function(category, topic, options = {}) {
-      if (!this.apiKey) {
-        this.addMessage('assistant', '❌ Please set up your Gemini API key first.');
+      // Store reference to popup instance for use in helper functions
+      const popup = this;
+      
+      if (!popup.apiKey) {
+        alert('❌ Please set up your Gemini API key first.');
+        popup.showView && popup.showView('settings');
         return;
       }
       
@@ -43,21 +194,21 @@
       const maxTweets = options.maxTweets || 8;
       const tone = options.tone || 'curious';
       
-      this.setLoading(true, `Generating ${category} thread...`);
+      popup.setLoading(true, `Generating ${category} thread...`);
       console.log(`Fibr: Generating thread for category: ${category}, topic: ${topic}`);
       
       try {
         // Load knowledge pack if enabled
         let knowledgeContext = '';
         if (useKnowledgePack) {
-          const knowledgePack = await this.loadKnowledgePack(category);
+          const knowledgePack = await ThreadGenerator.loadKnowledgePack(category);
           if (knowledgePack && knowledgePack.facts) {
             knowledgeContext = `\n\nRELEVANT KNOWLEDGE BASE:\n${knowledgePack.facts.slice(0, 5).map((fact, i) => `${i + 1}. ${fact}`).join('\n')}\n`;
           }
         }
         
         // Show progress bar
-        this.showProgressBar(`Generating ${category} thread...`);
+        popup.showProgressBar && popup.showProgressBar(`Generating ${category} thread...`);
         
         // Step 1: Generate outline
         const outlineSystemPrompt = `You are a precise thread outline creator. You create structured outlines for engaging Twitter/X threads about ${category}. No markdown, no hashtags.`;
@@ -78,7 +229,7 @@ Format each beat as:
 
 Generate the outline now:`;
         
-        const outlineResponse = await this.callGeminiAPIWithSystemPrompt(outlineSystemPrompt, outlineUserPrompt);
+        const outlineResponse = await popup.callGeminiAPIWithSystemPrompt(outlineSystemPrompt, outlineUserPrompt);
         
         if (!outlineResponse) {
           throw new Error('Failed to generate outline');
@@ -120,7 +271,7 @@ OUTPUT EXAMPLE:
 
 Generate the complete thread now:`;
         
-        const expandResponse = await this.callGeminiAPIWithSystemPrompt(expandSystemPrompt, expandUserPrompt);
+        const expandResponse = await popup.callGeminiAPIWithSystemPrompt(expandSystemPrompt, expandUserPrompt);
         
         if (!expandResponse) {
           throw new Error('Failed to expand thread');
@@ -129,41 +280,41 @@ Generate the complete thread now:`;
         console.log('✅ Thread expanded');
         
         // Step 3: Clean and parse
-        const cleanedResponse = this.cleanTwitterContent(expandResponse);
-        const tweets = this.parseTwitterThread(cleanedResponse);
+        const cleanedResponse = popup.cleanTwitterContent(expandResponse);
+        const tweets = popup.parseTwitterThread(cleanedResponse);
         
         // Step 4: Smart split if any tweet exceeds 280 chars
         const finalTweets = [];
         for (let tweet of tweets) {
-          const charCount = this.getAccurateCharacterCount(tweet);
+          const charCount = popup.getAccurateCharacterCount(tweet);
           if (charCount <= 280) {
             finalTweets.push(tweet);
           } else {
             // Split long tweet
-            const splitTweets = await this.smartSplitTweet(tweet, 280);
+            const splitTweets = await ThreadGenerator.smartSplitTweet.call(popup, tweet, 280);
             finalTweets.push(...splitTweets);
           }
         }
         
         console.log(`✅ Thread generated: ${finalTweets.length} tweets`);
         
-        // Step 5: Render
+        // Step 5: Render - pass popup instance
         const threadId = `thread_${Date.now()}`;
-        this.renderThreadGeneratorResult(finalTweets, threadId, category, topic, useKnowledgePack);
+        ThreadGenerator.renderThreadGeneratorResult.call(popup, finalTweets, threadId, category, topic, useKnowledgePack);
         
         // Auto-save
-        if (this.autoSaveThread) {
-          await this.autoSaveThread(threadId, finalTweets, cleanedResponse);
+        if (popup.autoSaveThread) {
+          await popup.autoSaveThread(threadId, finalTweets, cleanedResponse);
         }
         
-        await this.saveState();
+        await popup.saveState();
         
       } catch (error) {
         console.error('Error generating thread:', error);
-        this.addMessage('assistant', `❌ Error generating thread: ${error.message}`);
+        alert(`❌ Error generating thread: ${error.message}`);
       } finally {
-        this.setLoading(false);
-        this.hideProgressBar();
+        popup.setLoading(false);
+        popup.hideProgressBar && popup.hideProgressBar();
       }
     },
     
@@ -488,5 +639,10 @@ Craft your ${targetLength}-character thread now:`;
     }
   };
   
+  // Defer initialization until the main app requests it
+  // This prevents race conditions on DOM load
+  // The main popup.js will call ThreadGenerator.init()
+  
+  // Export to window
   window.TabTalkThreadGenerator = ThreadGenerator;
 })();

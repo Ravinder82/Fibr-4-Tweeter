@@ -3,6 +3,17 @@
     showView: function(viewName) {
       const views = document.querySelectorAll('.view');
       views.forEach(v => v.classList.add('hidden'));
+      
+      // Show/hide quick actions based on view
+      const quickActions = document.getElementById('quick-actions');
+      if (quickActions) {
+        if (viewName === 'chat') {
+          quickActions.classList.remove('hidden');
+        } else {
+          quickActions.classList.add('hidden');
+        }
+      }
+      
       let targetId = `${viewName}-view`;
       if (viewName === 'chat') targetId = 'chat-view';
       if (viewName === 'settings') targetId = 'settings-view';
@@ -93,5 +104,6 @@
       this.setAriaStatus(`Switched to ${state} view. ${statusMessage}`);
     }
   };
+  
   window.TabTalkNavigation = Navigation;
 })();

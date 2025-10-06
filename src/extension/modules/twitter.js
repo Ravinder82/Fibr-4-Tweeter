@@ -1,6 +1,104 @@
 (function() {
   const Twitter = {
-    generateSocialContent: async function(platform) {
+    // Deep analysis and research of content
+    analyzeAndResearchContent: async function(pageContent, selectedTone) {
+      // Generate cache key from URL + tone + content hash
+      const contentHash = this.simpleHash(pageContent.substring(0, 500));
+      const cacheKey = `analysis_${this.currentTab?.url}_${selectedTone.id}_${contentHash}`;
+      
+      try {
+        // Check cache first (30 min TTL)
+        const cached = await chrome.storage.local.get(cacheKey);
+        if (cached[cacheKey]) {
+          const age = Date.now() - cached[cacheKey].timestamp;
+          if (age < 30 * 60 * 1000) { // 30 minutes
+            console.log('Using cached content analysis');
+            return cached[cacheKey].analysis;
+          }
+        }
+      } catch (error) {
+        console.warn('Cache check failed:', error);
+      }
+
+      // Perform deep analysis
+      const analysisPrompt = `You are an expert content analyst and researcher. Analyze this webpage content and provide:
+
+1. SUMMARY (2-3 sentences): Core message and main points
+2. KEY INSIGHTS (3-5 bullet points): Most important facts, data, or claims
+3. RESEARCH CONTEXT: Relevant domain knowledge, background, trends, or expert perspective from your training data (up to October 2024) that adds depth and credibility
+
+Be concise, factual, and focus on what makes this content significant or noteworthy.
+
+CONTENT:
+${pageContent.substring(0, 3000)}
+
+Provide your analysis in this format:
+SUMMARY: [your summary]
+KEY INSIGHTS:
+- [insight 1]
+- [insight 2]
+- [insight 3]
+RESEARCH CONTEXT: [relevant background knowledge and expert perspective]`;
+
+      try {
+        const analysisResponse = await this.callGeminiAPIWithSystemPrompt(
+          'You are an expert content analyst who provides structured, insightful analysis.',
+          analysisPrompt
+        );
+
+        // Parse the response
+        const analysis = this.parseAnalysisResponse(analysisResponse);
+        
+        // Cache the result
+        try {
+          const cacheData = {};
+          cacheData[cacheKey] = {
+            analysis: analysis,
+            timestamp: Date.now()
+          };
+          await chrome.storage.local.set(cacheData);
+        } catch (error) {
+          console.warn('Failed to cache analysis:', error);
+        }
+
+        return analysis;
+      } catch (error) {
+        console.error('Analysis failed:', error);
+        // Return minimal fallback
+        return {
+          summary: 'Content analysis unavailable.',
+          keyInsights: '- Focus on core message from the content',
+          researchContext: 'Apply general domain knowledge and best practices.'
+        };
+      }
+    },
+
+    // Simple hash function for cache keys
+    simpleHash: function(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+      }
+      return Math.abs(hash).toString(36);
+    },
+
+    // Parse analysis response into structured format
+    parseAnalysisResponse: function(response) {
+      const summaryMatch = response.match(/SUMMARY:\s*(.+?)(?=KEY INSIGHTS:|$)/s);
+      const insightsMatch = response.match(/KEY INSIGHTS:\s*(.+?)(?=RESEARCH CONTEXT:|$)/s);
+      const researchMatch = response.match(/RESEARCH CONTEXT:\s*(.+?)$/s);
+
+      return {
+        summary: summaryMatch ? summaryMatch[1].trim() : 'Content provides valuable information.',
+        keyInsights: insightsMatch ? insightsMatch[1].trim() : '- Key points from the content',
+        researchContext: researchMatch ? researchMatch[1].trim() : 'General domain knowledge applies.'
+      };
+    },
+
+    // Show tone selector before generation
+    showToneSelector: function(platform) {
       if (!this.pageContent || !this.apiKey) {
         if (this.showToast) {
           this.showToast('❌ Please set up your Gemini API key first and ensure page content is loaded.', 3000);
@@ -10,18 +108,80 @@
         return;
       }
 
-      this.setLoading(true, `Generating ${platform} content...`);
+      // Show tone selector modal with context-aware recommendations
+      if (window.TabTalkToneSelector) {
+        window.TabTalkToneSelector.show(
+          platform,
+          this.pageContent,
+          (selectedTone, selectedPlatform) => {
+            this.generateSocialContentWithTone(selectedPlatform, selectedTone);
+          }
+        );
+      } else {
+        console.error('Tone selector not loaded');
+        // Fallback to default tone
+        this.generateSocialContentWithTone(platform, { id: 'supportive', name: 'Supportive with Facts' });
+      }
+    },
+
+    generateSocialContent: async function(platform) {
+      // Legacy method - redirect to tone selector
+      this.showToneSelector(platform);
+    },
+
+    // Generate content with selected tone
+    generateSocialContentWithTone: async function(platform, selectedTone) {
+      if (!this.pageContent || !this.apiKey) {
+        if (this.showToast) {
+          this.showToast('❌ Please set up your Gemini API key first and ensure page content is loaded.', 3000);
+        } else {
+          alert('❌ Please set up your Gemini API key first and ensure page content is loaded.');
+        }
+        return;
+      }
+
+      // Store selected tone for regeneration
+      this.currentSelectedTone = selectedTone;
+
+      this.setLoading(true, `Analyzing content...`);
       console.log(`TabTalk AI: Generating ${platform} content for page: ${this.currentTab?.title}`);
       console.log(`Page content length: ${this.pageContent.length} characters`);
+      console.log(`Selected tone: ${selectedTone.name} (${selectedTone.id})`);
 
       try {
+        // PHASE 1: Deep Analysis & Research
+        this.showProgressBar('Analyzing content...');
+        const contentAnalysis = await this.analyzeAndResearchContent(this.pageContent, selectedTone);
+        
+        // Store analysis for regeneration
+        this.currentContentAnalysis = contentAnalysis;
+        
+        // PHASE 2: Generate with enriched context
+        this.showProgressBar('Generating expert post...');
+        
         let systemPrompt = '';
         let userPrompt = '';
         let emoji = '';
 
+        // Get tone-specific AI instructions
+        const toneInstructions = selectedTone.aiInstructions || this.getDefaultToneInstructions(selectedTone.id);
+
         if (platform === 'twitter') {
           emoji = '🐦';
-          systemPrompt = `You are a charismatic Twitter/X storyteller who writes content that stops people mid-scroll. Your posts are vibrant, human, and overflowing with personality. You write like you're sharing exciting news with a close friend - with genuine enthusiasm, natural emotion, and irresistible energy. Every word should spark curiosity and delight. Write in plain text only - no hashtags, no URLs, no formatting symbols. Just pure, engaging human expression with strategic emojis.`;
+          systemPrompt = `You are an expert Twitter/X content strategist who combines deep analysis with engaging storytelling. You leverage comprehensive research and domain expertise to create posts that are both intellectually rigorous and captivating. Your posts stop people mid-scroll because they offer genuine insights backed by evidence and expert knowledge.
+
+Write in plain text only - no hashtags, no URLs, no formatting symbols. Just pure, engaging expert expression with strategic emojis.
+
+${toneInstructions}
+
+CONTEXT ANALYSIS:
+${contentAnalysis.summary}
+
+KEY INSIGHTS:
+${contentAnalysis.keyInsights}
+
+RESEARCH AUGMENTATION (from domain knowledge):
+${contentAnalysis.researchContext}`;
           userPrompt = `Transform this webpage content into an electrifying Twitter/X post that feels authentically human.
 
 YOUR WRITING STYLE:
@@ -57,7 +217,20 @@ ${this.pageContent}
 Write your captivating post now:`;
         } else if (platform === 'thread') {
           emoji = '🧵';
-          systemPrompt = `You are a masterful Twitter/X thread storyteller. You craft thread narratives that hook readers from tweet 1 and keep them glued until the final tweet. Each tweet pulses with energy, personality, and human warmth. You break down complex ideas into bite-sized revelations that feel like having an engaging conversation with a brilliant friend. Write in plain text with strategic emojis - no hashtags, no URLs, no formatting symbols. Just pure storytelling magic.`;
+          systemPrompt = `You are an expert Twitter/X thread strategist who combines deep analysis with compelling narrative structure. You leverage comprehensive research and domain expertise to create threads that educate, engage, and inspire. Each tweet builds on expert insights while maintaining human warmth and accessibility.
+
+Write in plain text with strategic emojis - no hashtags, no URLs, no formatting symbols. Expert storytelling that resonates.
+
+${toneInstructions}
+
+CONTEXT ANALYSIS:
+${contentAnalysis.summary}
+
+KEY INSIGHTS:
+${contentAnalysis.keyInsights}
+
+RESEARCH AUGMENTATION (from domain knowledge):
+${contentAnalysis.researchContext}`;
           userPrompt = `Create a magnetic Twitter thread (3-8 tweets) from this content.
 
 CRITICAL FORMAT REQUIREMENT:
@@ -104,8 +277,7 @@ Generate your thread now:`;
           return;
         }
 
-        // Show progress bar instead of user message
-        this.showProgressBar(`Generating ${platform === 'twitter' ? 'Post' : 'Thread'}...`);
+        // Progress already shown above
 
         // Use the existing callGeminiAPIWithSystemPrompt method
         const response = await this.callGeminiAPIWithSystemPrompt(systemPrompt, userPrompt);
@@ -351,20 +523,22 @@ Generate your thread now:`;
       const card = document.createElement('div');
       card.className = 'twitter-card';
       
-      // For thread cards, show only character count (no tone, no length slider)
+      // Show selected tone badge and simplified controls
+      const toneBadge = this.currentSelectedTone ? `
+        <div class="tone-badge" style="background: linear-gradient(135deg, ${this.currentSelectedTone.tone1?.color || this.getToneColor(this.currentSelectedTone.id)} 0%, ${this.currentSelectedTone.tone2?.color || this.getToneColor(this.currentSelectedTone.id)} 100%);">
+          ${this.currentSelectedTone.tone1?.icon || this.getToneIcon(this.currentSelectedTone.id)} ${this.currentSelectedTone.name}
+        </div>
+      ` : '';
+
+      // For thread cards, show only character count
+      // For single posts, show tone badge, length control, and regenerate
       const controlsHTML = isThreadCard ? `
         <div class="twitter-controls">
           <div class="twitter-char-count">${this.getAccurateCharacterCount(tweetContent)} characters</div>
         </div>
       ` : `
         <div class="twitter-controls">
-          <div class="twitter-tone-control">
-            <label class="tone-label" for="tone-select">Tone:</label>
-            <select id="tone-select" class="tone-select" aria-label="Tone">
-              <option value="supportive">Supportive with facts</option>
-              <option value="critical">Critical with facts</option>
-            </select>
-          </div>
+          ${toneBadge}
           <div class="twitter-length-control">
             <label class="length-label">Target Length:</label>
             <input type="range" class="length-slider" min="50" max="2000" value="${Math.max(50, this.getAccurateCharacterCount(tweetContent))}" step="50">
@@ -456,7 +630,6 @@ Generate your thread now:`;
         const lengthSlider = card.querySelector('.length-slider');
         const lengthDisplay = card.querySelector('.length-display');
         const regenerateBtn = card.querySelector('.regenerate-btn');
-        const toneSelect = card.querySelector('.tone-select');
         
         if (lengthSlider && lengthDisplay) {
           lengthSlider.addEventListener('input', () => {
@@ -467,12 +640,18 @@ Generate your thread now:`;
         card.dataset.originalContent = this.pageContent;
         card.dataset.platform = cardTitle.includes('Thread') ? 'thread' : 'twitter';
         
+        // Store selected tone in card dataset
+        if (this.currentSelectedTone) {
+          card.dataset.selectedTone = JSON.stringify(this.currentSelectedTone);
+        }
+        
         if (regenerateBtn) {
           regenerateBtn.addEventListener('click', async () => {
             const targetLength = parseInt(lengthSlider.value);
             const platform = card.dataset.platform;
-            const tone = toneSelect ? toneSelect.value : 'supportive';
-            await this.regenerateWithLength(card, targetLength, platform, { tone });
+            // Use stored tone from card dataset
+            const storedTone = card.dataset.selectedTone ? JSON.parse(card.dataset.selectedTone) : this.currentSelectedTone;
+            await this.regenerateWithLength(card, targetLength, platform, { selectedTone: storedTone });
           });
         }
       }
@@ -576,30 +755,32 @@ Generate your thread now:`;
       try {
         let systemPrompt = '';
         let userPrompt = '';
-        const tone = (opts && opts.tone) || 'supportive';
-        const buildToneDelta = (t) => {
-          if (t === 'critical') {
-            return (
-              'TONE RULES (Critical with Facts):\n' +
-              '- You may use your internal general knowledge where appropriate.\n' +
-              '- Identify 1–2 weaknesses, gaps, or contradictions grounded in the provided content.\n' +
-              '- Keep professional, evidence-based wording. No ad hominem.\n' +
-              '- If evidence is limited, hedge (e.g., "may", "appears").\n' +
-              'Preserve ALL formatting constraints above. Do NOT include links or hashtags.'
-            );
-          }
-          // default supportive
-          return (
-            'TONE RULES (Supportive with Facts):\n' +
-            '- You may use your internal general knowledge where appropriate.\n' +
-            '- Highlight 1–2 verifiable points that support the content.\n' +
-            '- Keep professional, concise, and evidence-based.\n' +
-            'Preserve ALL formatting constraints above. Do NOT include links or hashtags.'
-          );
+        
+        // Get selected tone from options or card dataset
+        const selectedTone = (opts && opts.selectedTone) || this.currentSelectedTone || { id: 'supportive', name: 'Supportive with Facts' };
+        const toneInstructions = selectedTone.aiInstructions || this.getDefaultToneInstructions(selectedTone.id);
+        
+        // Reuse cached analysis if available
+        const contentAnalysis = this.currentContentAnalysis || {
+          summary: 'Content provides valuable information.',
+          keyInsights: '- Key points from the content',
+          researchContext: 'Apply general domain knowledge and best practices.'
         };
+        
         if (platform === 'twitter') {
-          systemPrompt = `You are a charismatic Twitter/X storyteller creating ${targetLength}-character posts that radiate personality and human warmth. Every word sparkles with energy and genuine enthusiasm. Write in plain text with strategic emojis - no hashtags, no URLs, no formatting symbols. Make people stop scrolling and feel something real.`;
-          userPrompt = `Recreate this as an electrifying ${targetLength}-character Twitter post that feels delightfully human.
+          systemPrompt = `You are an expert Twitter/X content strategist creating ${targetLength}-character posts that combine deep analysis with engaging storytelling. Every word is backed by research and expertise while radiating personality and human warmth. Write in plain text with strategic emojis - no hashtags, no URLs, no formatting symbols.
+
+${toneInstructions}
+
+CONTEXT ANALYSIS:
+${contentAnalysis.summary}
+
+KEY INSIGHTS:
+${contentAnalysis.keyInsights}
+
+RESEARCH AUGMENTATION:
+${contentAnalysis.researchContext}`;
+          userPrompt = `Recreate this as an expert ${targetLength}-character Twitter post that combines insight with engagement.
 
 YOUR APPROACH:
 ✓ Target: ${targetLength} characters (±10 acceptable)
@@ -609,7 +790,7 @@ YOUR APPROACH:
 ✓ Start with a scroll-stopping hook
 ✓ Add punchy, conversational language
 ✓ Mix short zingers with flowing sentences
-✓ ${tone === 'critical' ? 'Challenge with bold, evidence-based critique' : 'Amplify with enthusiastic support and facts'}
+✓ Apply the ${selectedTone.name} tone throughout
 ✓ End with impact or intrigue
 
 KEEP IT CLEAN:
@@ -624,8 +805,19 @@ ${originalContent}
 Transform it now:`;
         } else if (platform === 'thread') {
           const tweetsNeeded = Math.ceil(targetLength / 400);
-          systemPrompt = `You are a masterful Twitter/X thread storyteller crafting ${tweetsNeeded} tweets (${targetLength} total characters) that captivate from start to finish. Each tweet vibrates with personality, energy, and human warmth. You turn complex ideas into addictive narratives. Write in plain text with strategic emojis - no hashtags, no URLs, no formatting. Pure storytelling magic.`;
-          userPrompt = `Recreate this as a magnetic ${tweetsNeeded}-tweet thread (around ${targetLength} characters total).
+          systemPrompt = `You are an expert Twitter/X thread strategist crafting ${tweetsNeeded} tweets (${targetLength} total characters) that combine deep analysis with compelling narrative. Each tweet builds on expert insights while maintaining human warmth and accessibility. Write in plain text with strategic emojis - no hashtags, no URLs, no formatting.
+
+${toneInstructions}
+
+CONTEXT ANALYSIS:
+${contentAnalysis.summary}
+
+KEY INSIGHTS:
+${contentAnalysis.keyInsights}
+
+RESEARCH AUGMENTATION:
+${contentAnalysis.researchContext}`;
+          userPrompt = `Recreate this as an expert ${tweetsNeeded}-tweet thread (around ${targetLength} characters total).
 
 YOUR STORYTELLING APPROACH:
 ✓ Create ${tweetsNeeded} numbered tweets (1/${tweetsNeeded}, 2/${tweetsNeeded}, etc.)
@@ -636,7 +828,7 @@ YOUR STORYTELLING APPROACH:
 ✓ Each tweet delivers a powerful insight
 ✓ Build narrative momentum throughout
 ✓ Mix punchy short lines with flowing explanations
-✓ ${tone === 'critical' ? 'Challenge boldly with evidence-based critique' : 'Support enthusiastically with compelling facts'}
+✓ Apply the ${selectedTone.name} tone throughout
 ✓ End with an unforgettable closer
 
 KEEP IT CLEAN:
@@ -675,6 +867,57 @@ Craft your thread now:`;
         regenerateBtn.textContent = '🔄';
         regenerateBtn.disabled = false;
       }
+    },
+
+    // Get default tone instructions for legacy support
+    getDefaultToneInstructions: function(toneId) {
+      const defaultTones = {
+        'supportive': 'TONE: Supportive with Facts\n- Highlight verifiable strengths\n- Use encouraging language\n- Back claims with evidence',
+        'critical': 'TONE: Critical with Facts\n- Identify weaknesses with evidence\n- Professional, constructive critique\n- Hedge when evidence is limited',
+        'trolling': 'TONE: Trolling with Facts\n- Playful jabs with data backing\n- Internet culture references\n- Fun but factual',
+        'anti-propaganda': 'TONE: Anti-Propaganda\n- Debunk misconceptions\n- Clear fact vs. fiction framing\n- Evidence-based corrections',
+        'critical-humor': 'TONE: Critical with Humor\n- Witty critique through analogies\n- Clever observations\n- Light but insightful',
+        'sarcastic': 'TONE: Sarcastic\n- Ironic commentary\n- Rhetorical questions\n- Clever, not cruel',
+        'investigative': 'TONE: Investigative\n- Journalistic fact-finding\n- Data-driven analysis\n- Multiple perspectives',
+        'optimistic': 'TONE: Optimistic\n- Future-focused positivity\n- Evidence-backed hope\n- Inspiring action',
+        'cautionary': 'TONE: Cautionary\n- Risk-aware warnings\n- Evidence-based concerns\n- Balanced perspective',
+        'empowering': 'TONE: Empowering\n- Action-oriented language\n- Personal agency focus\n- Achievable steps'
+      };
+      return defaultTones[toneId] || defaultTones['supportive'];
+    },
+
+    // Get tone color for badge
+    getToneColor: function(toneId) {
+      const colors = {
+        'supportive': '#10b981',
+        'critical': '#ef4444',
+        'trolling': '#f59e0b',
+        'anti-propaganda': '#8b5cf6',
+        'critical-humor': '#f97316',
+        'sarcastic': '#ec4899',
+        'investigative': '#06b6d4',
+        'optimistic': '#14b8a6',
+        'cautionary': '#eab308',
+        'empowering': '#a855f7'
+      };
+      return colors[toneId] || '#6366f1';
+    },
+
+    // Get tone icon for badge
+    getToneIcon: function(toneId) {
+      const icons = {
+        'supportive': '🤝',
+        'critical': '⚔️',
+        'trolling': '😈',
+        'anti-propaganda': '🛡️',
+        'critical-humor': '😅',
+        'sarcastic': '🎭',
+        'investigative': '🔍',
+        'optimistic': '🌅',
+        'cautionary': '⚠️',
+        'empowering': '💪'
+      };
+      return icons[toneId] || '🎭';
     },
     
     // AUTO-SAVE THREAD TO PERSISTENT STORAGE
