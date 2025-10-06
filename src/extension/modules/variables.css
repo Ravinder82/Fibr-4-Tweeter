@@ -5,13 +5,13 @@
     --border-color: #cbd5e1;
     --text-primary: #0f172a;
     --text-secondary: #64748b;
-    --accent-color: #3b82f6;
+    --accent-color: #404040;
     --message-bg: #ffffff;
-    --user-message-bg: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    --user-message-bg: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%);
     --assistant-message-bg: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    --success-color: #10b981;
-    --warning-color: #f59e0b;
-    --error-color: #ef4444;
+    --success-color: #666666;
+    --warning-color: #666666;
+    --error-color: #666666;
 }
 
 /* High contrast mode */
