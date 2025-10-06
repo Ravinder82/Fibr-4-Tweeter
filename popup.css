@@ -1,10 +1,10 @@
 /* Global Variables - Black & White Theme */
 :root {
-    /* Backgrounds - Pure whites to light greys */
-    --primary-bg: #ffffff;
-    --secondary-bg: #f5f5f5;
-    --tertiary-bg: #eeeeee;
-    --message-bg: #fafafa;
+    /* Backgrounds - Grey theme with white output cards for focus */
+    --primary-bg: #f8f8f8;      /* Light grey - main background */
+    --secondary-bg: #e8e8e8;    /* Medium grey - secondary backgrounds */
+    --tertiary-bg: #d8d8d8;     /* Darker grey - tertiary elements */
+    --message-bg: #f0f0f0;      /* Off-white grey - message backgrounds */
     
     /* Text - Pure black to medium greys */
     --text-primary: #000000;
@@ -84,7 +84,7 @@
   margin: 48px auto 32px auto;
   padding: 24px 20px;
   max-width: 280px;
-  background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+  background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%);
   border: 2px solid #e0e0e0;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -230,6 +230,14 @@ body {
     transition: all 0.3s ease;
     position: relative;
     z-index: 1;
+    /* tilt-hover + pop-in */
+    will-change: transform, box-shadow, opacity;
+    animation: card-pop-in 0.42s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.twitter-card:hover {
+    transform: perspective(700px) rotateX(0.6deg) rotateY(-0.6deg) translateY(-1px);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.3);
 }
 
 .menu-button:hover {
@@ -372,6 +380,9 @@ main {
         inset 0 1px 0 rgba(255, 255, 255, 0.5);
     flex-shrink: 0;
     white-space: nowrap;
+    /* hover-glow base + pressable preparation */
+    will-change: transform, box-shadow;
+    position: relative; /* for border-sweep pseudo */
 }
 
 .action-btn:hover {
@@ -383,6 +394,28 @@ main {
     background: linear-gradient(135deg, 
         rgba(0, 0, 0, 0.05) 0%, 
         rgba(0, 0, 0, 0.01) 100%);
+}
+
+/* pressable */
+.action-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* border-sweep */
+.action-btn::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.18), transparent);
+    background-size: 200% 100%;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.16s ease;
+}
+.action-btn:hover::after {
+    opacity: 1;
+    animation: border-sweep 1.6s linear infinite;
 }
 
 .action-btn:active {
@@ -994,6 +1027,11 @@ margin-bottom: 24px;
 
 .sidebar:not(.hidden) {
     transform: translateX(0);
+}
+
+/* subtle edge glow when open */
+.sidebar:not(.hidden) {
+  box-shadow: var(--shadow-lg), inset 4px 0 12px rgba(255,255,255,0.35);
 }
 
 .sidebar.hidden {
@@ -4012,3 +4050,97 @@ body.dark-mode .tone-btn-secondary:hover {
 body.dark-mode .tone-badge {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
+
+/* Utility Keyframes */
+@keyframes border-sweep {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+@keyframes card-pop-in {
+  0% { opacity: 0; transform: translateY(8px) scale(0.98); filter: blur(2px); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+/* ============================================ */
+/** MICRO-MOTIONS & UTILITIES */
+/** ============================================ */
+
+/* 1) Skeleton shimmer */
+@keyframes skeleton-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.06) 25%, rgba(0, 0, 0, 0.1) 37%, rgba(0, 0, 0, 0.06) 63%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.2s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+.skeleton.circle {
+  border-radius: 999px;
+}
+
+/* 3) Buttons: idle breathing + focus ripple */
+@keyframes idle-breathe {
+  0%, 100% { transform: translateY(0); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  50% { transform: translateY(-0.3px); box-shadow: 0 2px 8px rgba(0,0,0,.10); }
+}
+.action-btn,
+.button-primary,
+.button-secondary {
+  animation: idle-breathe 3.2s ease-in-out infinite;
+}
+@keyframes focus-ripple {
+  0% { box-shadow: 0 0 0 0 rgba(0,0,0,.18); }
+  100% { box-shadow: 0 0 0 6px rgba(0,0,0,0); }
+}
+.action-btn:focus-visible,
+.button-primary:focus-visible,
+.button-secondary:focus-visible {
+  animation: focus-ripple 480ms ease-out 1;
+}
+
+/* 4) Hover glow + border sweep */
+.button-primary,
+.button-secondary,
+.tone-option,
+.tone-btn-primary,
+.tone-btn-secondary {
+  position: relative;
+}
+.button-primary:hover,
+.button-secondary:hover,
+.tone-option:hover,
+.tone-btn-primary:hover,
+.tone-btn-secondary:hover,
+.tone-option.selected {
+  box-shadow: 0 10px 24px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+.button-primary::after,
+.button-secondary::after,
+.tone-option::after,
+.tone-btn-primary::after,
+.tone-btn-secondary::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,0.18), transparent);
+  background-size: 200% 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s ease;
+}
+.button-primary:hover::after,
+.button-secondary:hover::after,
+.tone-option:hover::after,
+.tone-btn-primary:hover::after,
+.tone-btn-secondary:hover::after {
+  opacity: 1;
+  animation: border-sweep 1.6s linear infinite;
+}
+
+/* Reduced motion respected by the global guard earlier in this file */
