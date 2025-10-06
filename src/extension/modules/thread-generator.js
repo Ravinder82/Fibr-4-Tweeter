@@ -135,6 +135,11 @@
       
       ThreadGenerator.hideModal();
       
+      // Clear previous content before generation
+      if (ThreadGenerator.popupInstance && ThreadGenerator.popupInstance.resetScreenForGeneration) {
+        ThreadGenerator.popupInstance.resetScreenForGeneration();
+      }
+      
       // Call the generation function on the stored popup instance
       if (ThreadGenerator.popupInstance && ThreadGenerator.popupInstance.generateThreadMVP) {
         await ThreadGenerator.popupInstance.generateThreadMVP(category, topic, { 
