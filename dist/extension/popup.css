@@ -1,10 +1,10 @@
 /* Global Variables - Black & White Theme */
 :root {
-    /* Backgrounds - Pure whites to light greys */
-    --primary-bg: #ffffff;
-    --secondary-bg: #f5f5f5;
-    --tertiary-bg: #eeeeee;
-    --message-bg: #fafafa;
+    /* Backgrounds - Grey theme with white output cards for focus */
+    --primary-bg: #f8f8f8;      /* Light grey - main background */
+    --secondary-bg: #e8e8e8;    /* Medium grey - secondary backgrounds */
+    --tertiary-bg: #d8d8d8;     /* Darker grey - tertiary elements */
+    --message-bg: #f0f0f0;      /* Off-white grey - message backgrounds */
     
     /* Text - Pure black to medium greys */
     --text-primary: #000000;
@@ -84,7 +84,7 @@
   margin: 48px auto 32px auto;
   padding: 24px 20px;
   max-width: 280px;
-  background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+  background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%);
   border: 2px solid #e0e0e0;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -143,7 +143,7 @@ body {
     background: var(--primary-bg);
     position: relative;
     overflow: hidden;
-    padding: 0 0 6px 0;
+    padding: 0 0 66px 0; /* Space for bottom nav */
 }
 
 /* Header - Ultra Compact Mobile Island */
@@ -230,6 +230,14 @@ body {
     transition: all 0.3s ease;
     position: relative;
     z-index: 1;
+    /* tilt-hover + pop-in */
+    will-change: transform, box-shadow, opacity;
+    animation: card-pop-in 0.42s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.twitter-card:hover {
+    transform: perspective(700px) rotateX(0.6deg) rotateY(-0.6deg) translateY(-1px);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.3);
 }
 
 .menu-button:hover {
@@ -372,6 +380,9 @@ main {
         inset 0 1px 0 rgba(255, 255, 255, 0.5);
     flex-shrink: 0;
     white-space: nowrap;
+    /* hover-glow base + pressable preparation */
+    will-change: transform, box-shadow;
+    position: relative; /* for border-sweep pseudo */
 }
 
 .action-btn:hover {
@@ -383,6 +394,28 @@ main {
     background: linear-gradient(135deg, 
         rgba(0, 0, 0, 0.05) 0%, 
         rgba(0, 0, 0, 0.01) 100%);
+}
+
+/* pressable */
+.action-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* border-sweep */
+.action-btn::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.18), transparent);
+    background-size: 200% 100%;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.16s ease;
+}
+.action-btn:hover::after {
+    opacity: 1;
+    animation: border-sweep 1.6s linear infinite;
 }
 
 .action-btn:active {
@@ -996,6 +1029,11 @@ margin-bottom: 24px;
     transform: translateX(0);
 }
 
+/* subtle edge glow when open */
+.sidebar:not(.hidden) {
+  box-shadow: var(--shadow-lg), inset 4px 0 12px rgba(255,255,255,0.35);
+}
+
 .sidebar.hidden {
     transform: translateX(100%);
 }
@@ -1160,7 +1198,7 @@ margin-bottom: 24px;
     border-radius: 14px;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 8px 24px rgba(31, 38, 135, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
     overflow: hidden;
 }
 
@@ -1324,7 +1362,7 @@ margin-bottom: 24px;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     box-shadow: 
-        0 8px 32px rgba(31, 38, 135, 0.37),
+        0 8px 32px rgba(0, 0, 0, 0.37),
         inset 0 1px 0 rgba(255, 255, 255, 0.3);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -1333,7 +1371,7 @@ margin-bottom: 24px;
 .twitter-card:hover {
     transform: translateY(-2px);
     box-shadow: 
-        0 12px 48px rgba(31, 38, 135, 0.5),
+        0 12px 48px rgba(0, 0, 0, 0.5),
         inset 0 1px 0 rgba(255, 255, 255, 0.4);
     border-color: rgba(255, 255, 255, 0.3);
 }
@@ -4011,4 +4049,488 @@ body.dark-mode .tone-btn-secondary:hover {
 
 body.dark-mode .tone-badge {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Utility Keyframes */
+@keyframes border-sweep {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+@keyframes card-pop-in {
+  0% { opacity: 0; transform: translateY(8px) scale(0.98); filter: blur(2px); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+/* ============================================ */
+/** MICRO-MOTIONS & UTILITIES */
+/** ============================================ */
+
+/* 1) Skeleton shimmer */
+@keyframes skeleton-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.06) 25%, rgba(0, 0, 0, 0.1) 37%, rgba(0, 0, 0, 0.06) 63%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.2s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+.skeleton.circle {
+  border-radius: 999px;
+}
+
+/* 3) Buttons: idle breathing + focus ripple */
+@keyframes idle-breathe {
+  0%, 100% { transform: translateY(0); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  50% { transform: translateY(-0.3px); box-shadow: 0 2px 8px rgba(0,0,0,.10); }
+}
+.action-btn,
+.button-primary,
+.button-secondary {
+  animation: idle-breathe 3.2s ease-in-out infinite;
+}
+@keyframes focus-ripple {
+  0% { box-shadow: 0 0 0 0 rgba(0,0,0,.18); }
+  100% { box-shadow: 0 0 0 6px rgba(0,0,0,0); }
+}
+.action-btn:focus-visible,
+.button-primary:focus-visible,
+.button-secondary:focus-visible {
+  animation: focus-ripple 480ms ease-out 1;
+}
+
+/* 4) Hover glow + border sweep */
+.button-primary,
+.button-secondary,
+.tone-option,
+.tone-btn-primary,
+.tone-btn-secondary {
+  position: relative;
+}
+.button-primary:hover,
+.button-secondary:hover,
+.tone-option:hover,
+.tone-btn-primary:hover,
+.tone-btn-secondary:hover,
+.tone-option.selected {
+  box-shadow: 0 10px 24px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+.button-primary::after,
+.button-secondary::after,
+.tone-option::after,
+.tone-btn-primary::after,
+.tone-btn-secondary::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,0.18), transparent);
+  background-size: 200% 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s ease;
+}
+.button-primary:hover::after,
+.button-secondary:hover::after,
+.tone-option:hover::after,
+.tone-btn-primary:hover::after,
+.tone-btn-secondary:hover::after {
+  opacity: 1;
+  animation: border-sweep 1.6s linear infinite;
+}
+
+/* Reduced motion respected by the global guard earlier in this file */
+
+/* ============================================ */
+/** MEMORY BUILDER STYLES */
+/* ============================================ */
+
+.memory-builder-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  padding: 16px;
+  gap: 20px;
+}
+
+.memory-header {
+  text-align: center;
+  padding: 16px 0;
+}
+
+.memory-header .header-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.memory-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.memory-header p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.memory-section {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(0, 0, 0, 0.03) 100%);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.memory-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.memory-section .section-description {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.niche-actions,
+.memory-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.current-niche {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.niche-label {
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-right: 6px;
+}
+
+#current-niche-text {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.add-memory-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.memory-list {
+  margin-top: 16px;
+}
+
+.memory-list h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.memory-items-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.memory-item {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(0, 0, 0, 0.02) 100%);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 12px;
+  transition: all 0.2s ease;
+}
+
+.memory-item.viral {
+  border-color: #ff6b35;
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(255, 255, 255, 0.95) 100%);
+}
+
+.memory-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.memory-item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.memory-type {
+  font-size: 16px;
+}
+
+.memory-date {
+  flex: 1;
+}
+
+.viral-badge {
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+  color: white;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.memory-item-content {
+  margin-bottom: 10px;
+}
+
+.memory-summary {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.5;
+  margin: 0 0 6px 0;
+}
+
+.memory-url {
+  font-size: 11px;
+  color: var(--accent-color);
+  text-decoration: none;
+  display: block;
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  word-break: break-all;
+  transition: all 0.2s ease;
+}
+
+.memory-url:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.12);
+  transform: translateX(2px);
+}
+
+.memory-item-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.memory-action-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid var(--border-color);
+}
+
+.memory-action-btn.viral-btn {
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+  color: white;
+  border: none;
+}
+
+.memory-action-btn.viral-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+}
+
+.memory-action-btn.delete-btn {
+  background: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+  border-color: rgba(244, 67, 54, 0.3);
+}
+
+.memory-action-btn.delete-btn:hover {
+  background: rgba(244, 67, 54, 0.2);
+  transform: translateY(-1px);
+}
+
+.empty-memory {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+/* Notification animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+/* ============================================ */
+/** BOTTOM NAVIGATION BAR (iPhone Style) */
+/* ============================================ */
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 248, 248, 0.95) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 8px;
+  z-index: 1000;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+  height: 100%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  padding: 8px 4px;
+}
+
+.nav-item::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  width: 60px;
+  height: 60px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 50%;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+}
+
+.nav-item:active::before {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+  stroke-width: 2;
+}
+
+.nav-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+  letter-spacing: 0.3px;
+}
+
+/* Active state */
+.nav-item.active .nav-icon {
+  color: var(--text-primary);
+  transform: translateY(-2px);
+  stroke-width: 2.5;
+}
+
+.nav-item.active .nav-label {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+/* Hover state (for desktop) */
+.nav-item:hover:not(.active) .nav-icon {
+  color: var(--accent-color);
+  transform: translateY(-1px);
+}
+
+.nav-item:hover:not(.active) .nav-label {
+  color: var(--accent-color);
+}
+
+/* Active indicator line */
+.nav-item.active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 3px;
+  background: linear-gradient(90deg, #404040 0%, #666666 100%);
+  border-radius: 0 0 3px 3px;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Hide bottom nav on onboarding screens */
+#welcome-view:not(.hidden) ~ .bottom-nav,
+#api-setup-view:not(.hidden) ~ .bottom-nav,
+#settings-view:not(.hidden) ~ .bottom-nav {
+  display: none;
+}
+
+/* Adjust main content to not overlap with bottom nav */
+main {
+  padding-bottom: 0;
+}
+
+/* Smooth transitions for view changes */
+.view {
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }

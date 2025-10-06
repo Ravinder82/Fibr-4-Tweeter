@@ -1,18 +1,18 @@
-# Fibr Color Theme Documentation 🎨
+# Fibr Grey Theme Documentation 🎨
 
 ## Overview
-Fibr extension uses a sophisticated **monochrome black & white design** with grey accents, creating a minimalist and professional user experience. This theme is applied consistently across all components including the recently added onboarding screens.
+Fibr extension uses a sophisticated **grey & white design** with white accents, creating a refined and professional user experience. This theme maintains the core monochrome philosophy while transitioning main backgrounds to grey tones, keeping output cards white for optimal content focus.
 
 ## Core Color Palette
 
 ### Root CSS Variables
 ```css
 :root {
-    /* Backgrounds - Pure whites to light greys */
-    --primary-bg: #ffffff;      /* Pure white - main background */
-    --secondary-bg: #f5f5f5;    /* Light grey - secondary backgrounds */
-    --tertiary-bg: #eeeeee;     /* Medium light grey - tertiary elements */
-    --message-bg: #fafafa;      /* Off-white - message backgrounds */
+    /* Backgrounds - Grey theme with white output cards for focus */
+    --primary-bg: #f8f8f8;      /* Light grey - main background */
+    --secondary-bg: #e8e8e8;    /* Medium grey - secondary backgrounds */
+    --tertiary-bg: #d8d8d8;     /* Darker grey - tertiary elements */
+    --message-bg: #f0f0f0;      /* Off-white grey - message backgrounds */
 
     /* Text Hierarchy */
     --text-primary: #000000;    /* Pure black - headings, primary text */
@@ -203,7 +203,8 @@ input:focus, textarea:focus {
 2. **Medium Grey (#666666)**: Secondary text, descriptions, icons
 3. **Light Grey (#999999)**: Hints, placeholders, subtle accents
 4. **Very Light Grey (#e0e0e0)**: Borders, separators
-5. **White (#ffffff)**: Main backgrounds, cards
+5. **White (#ffffff)**: Output cards, content focus areas
+6. **Grey Scale (#f8f8f8 → #d8d8d8)**: Main backgrounds, creating depth
 
 ### Interactive States
 - **Hover**: Subtle lift (translateY) with shadow increase
@@ -212,6 +213,12 @@ input:focus, textarea:focus {
 - **Disabled**: Reduced opacity with cursor change
 
 ## Recent Additions
+
+### Grey Theme Transition ✅
+- **Background Variables**: Updated --primary-bg, --secondary-bg, --tertiary-bg, --message-bg to grey tones
+- **Output Card Preservation**: Twitter cards and gallery cards maintain white backgrounds for content focus
+- **Glassmorphism Effects**: Maintained white glassmorphism overlays for optimal contrast against grey backgrounds
+- **Visual Hierarchy**: Enhanced depth through grey scale backgrounds while preserving white content areas
 
 ### Onboarding Screen Styling ✅
 - **Demo Modal**: Complete modal styling with fade-in animations
@@ -222,14 +229,15 @@ input:focus, textarea:focus {
 ## Implementation Status
 
 ✅ **Completed Components:**
-- Core color variables and palette
+- Core color variables and palette (grey theme)
 - Button styling (primary/secondary)
 - Modal components (demo modal, tone selector)
-- Card layouts (Twitter cards, gallery)
+- Card layouts (Twitter cards with white backgrounds, gallery)
 - Input fields and forms
 - Text hierarchy and typography
 - Shadow and elevation system
 - Onboarding screens (demo modal, settings)
+- Grey theme transition with preserved white output cards
 
 ## Usage Guidelines
 
@@ -255,4 +263,4 @@ input:focus, textarea:focus {
 
 ---
 
-**Fibr Monochrome Theme v1.1** | Updated with Onboarding Screen Styling
+**Fibr Grey Theme v1.2** | Updated with Grey Theme Transition

@@ -4,6 +4,11 @@
       const views = document.querySelectorAll('.view');
       views.forEach(v => v.classList.add('hidden'));
       
+      // Update bottom nav active state
+      if (window.BottomNav) {
+        window.BottomNav.setActive(viewName);
+      }
+      
       // Show/hide quick actions based on view
       const quickActions = document.getElementById('quick-actions');
       if (quickActions) {
@@ -48,6 +53,10 @@
         // Special handling for thread-generator view
         if (viewName === 'thread-generator' && this.initializeHowItWorksToggle) {
           this.initializeHowItWorksToggle();
+        }
+        // Special handling for memory-builder view
+        if (viewName === 'memory-builder' && window.MemoryBuilderUI) {
+          window.MemoryBuilderUI.init();
         }
       } else {
         console.warn(`showView: target view not found for "${viewName}" (id "${targetId}")`);
