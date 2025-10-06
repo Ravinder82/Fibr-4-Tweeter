@@ -3722,6 +3722,255 @@ body.dark-mode .tone-btn-secondary:hover {
   background: rgba(71, 85, 105, 0.5);
 }
 
+/* ============================================ */
+/** MODAL STYLES - Black & White Theme */
+/** ============================================ */
+
+/* Modal Overlay & Container */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: modalFadeIn 0.2s ease;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+/* Modal Content */
+.modal-content {
+  position: relative;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  background: linear-gradient(135deg, 
+    var(--primary-bg) 0%, 
+    var(--secondary-bg) 100%);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: modalSlideUp 0.3s ease;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Modal Header */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, 
+    rgba(0, 0, 0, 0.02) 0%, 
+    rgba(0, 0, 0, 0.02) 100%);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.modal-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Modal Body */
+.modal-body {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+  color: var(--text-primary);
+}
+
+.modal-body p {
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.modal-body ol {
+  padding-left: 20px;
+}
+
+.modal-body li {
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+}
+
+.modal-body a {
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.modal-body a:hover {
+  text-decoration: underline;
+}
+
+/* Modal Footer */
+.modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, 
+    var(--secondary-bg) 0%, 
+    var(--tertiary-bg) 100%);
+  border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+/* Modal Close Button */
+.modal-close {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.modal-close:hover {
+  background: rgba(0, 0, 0, 0.1);
+  transform: scale(1.05);
+}
+
+/* ============================================ */
+/** BUTTON STYLES - Black & White Theme */
+/** ============================================ */
+
+.button-primary {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--accent-color) 0%, #666666 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-decoration: none;
+}
+
+.button-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #555555 0%, #444444 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.button-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.button-secondary {
+  padding: 12px 24px;
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-decoration: none;
+}
+
+.button-secondary:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: var(--border-dark);
+  transform: translateY(-1px);
+}
+
+.button-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ============================================ */
+/** ONBOARDING INFO STYLES */
+/** ============================================ */
+
+.onboarding-info {
+  background: linear-gradient(135deg, 
+    var(--secondary-bg) 0%, 
+    var(--tertiary-bg) 100%);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 16px;
+}
+
+.onboarding-info h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+}
+
+.onboarding-info ol {
+  padding-left: 20px;
+  margin: 0;
+}
+
+.onboarding-info li {
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.onboarding-info strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* ============================================ */
+/** MODAL ANIMATIONS */
+/** ============================================ */
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Animations */
 @keyframes slideInUp {
   from {
