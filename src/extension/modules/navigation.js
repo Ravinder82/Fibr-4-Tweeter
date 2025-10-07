@@ -4,6 +4,14 @@
       const views = document.querySelectorAll('.view');
       views.forEach(v => v.classList.add('hidden'));
       
+      // Add/remove body class for onboarding views (CSS fallback)
+      const isOnboarding = (viewName === 'welcome' || viewName === 'api-setup' || viewName === 'settings');
+      if (isOnboarding) {
+        document.body.classList.add('onboarding-view');
+      } else {
+        document.body.classList.remove('onboarding-view');
+      }
+      
       // Update bottom nav active state
       if (window.BottomNav) {
         window.BottomNav.setActive(viewName);
@@ -17,6 +25,29 @@
         } else {
           quickActions.classList.add('hidden');
         }
+      }
+      
+      // Show/hide bottom nav and adjust container/main padding based on view
+      const bottomNav = document.getElementById('bottom-nav');
+      const mainContent = document.querySelector('main');
+      const container = document.querySelector('.container');
+      
+      if (viewName === 'welcome' || viewName === 'api-setup' || viewName === 'settings') {
+        if (bottomNav) {
+          bottomNav.style.display = 'none';
+          bottomNav.style.visibility = 'hidden';
+          bottomNav.style.height = '0';
+        }
+        if (mainContent) mainContent.style.paddingBottom = '0';
+        if (container) container.style.paddingBottom = '0'; // Remove bottom padding from container
+      } else {
+        if (bottomNav) {
+          bottomNav.style.display = 'flex';
+          bottomNav.style.visibility = 'visible';
+          bottomNav.style.height = '45px';
+        }
+        if (mainContent) mainContent.style.paddingBottom = '45px';
+        if (container) container.style.paddingBottom = '66px'; // Restore bottom padding for nav
       }
       
       let targetId = `${viewName}-view`;
