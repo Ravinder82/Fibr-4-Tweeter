@@ -66,6 +66,15 @@ import './modules/bottom-nav.js';
           }
 
           await this.loadState();
+
+          // Initialize theme from storage, default to dark mode
+          try {
+            let theme = await this.getStorageItem ? await this.getStorageItem("theme") : null;
+            if (!theme) {
+              theme = 'dark'; // Default to dark mode
+            }
+            document.documentElement.setAttribute('data-theme', theme);
+          } catch (e) {}
           // One-time migration: move old savedThreads into Gallery savedContent
           if (this.migrateThreadsToGallery) {
             try { await this.migrateThreadsToGallery(); } catch (e) { console.warn('Thread migration skipped', e); }
@@ -143,6 +152,18 @@ import './modules/bottom-nav.js';
               this.updateViewState("settings"),
               this.sidebar && this.sidebar.classList.add("hidden"));
           });
+        // Theme toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle) {
+          themeToggle.addEventListener('click', async () => {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            if (this.setStorageItem) {
+              try { await this.setStorageItem('theme', next); } catch {}
+            }
+          });
+        }
         // New: Gallery link
         let ig = document.getElementById("menu-gallery-link");
         ig &&
