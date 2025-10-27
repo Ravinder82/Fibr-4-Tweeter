@@ -1,7 +1,7 @@
 'use strict';
 const assert = require('assert');
 const path = require('path');
-const { cleanTwitterContent, parseTwitterThread } = require(path.join(__dirname, '../dist/extension/twitter-helpers-node.js'));
+const { cleanTwitterContent, parseTwitterThread } = require(path.join(__dirname, '../src/extension/modules/twitter-helpers-node.js'));
 
 function test(name, fn) {
   try {

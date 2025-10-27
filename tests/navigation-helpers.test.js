@@ -1,7 +1,7 @@
 'use strict';
 const assert = require('assert');
 const path = require('path');
-const { computeViewState } = require(path.join(__dirname, '../dist/extension/navigation-helpers-node.js'));
+const { computeViewState } = require(path.join(__dirname, '../src/extension/modules/navigation-helpers-node.js'));
 
 function test(name, fn) {
   try { fn(); console.log('✓', name); } catch (err) { console.error('✗', name, '\n ', err?.stack || err); process.exitCode = 1; }

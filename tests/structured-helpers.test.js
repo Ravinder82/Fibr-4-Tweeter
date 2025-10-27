@@ -1,7 +1,7 @@
 'use strict';
 const assert = require('assert');
 const path = require('path');
-const { splitFactCheckSections } = require(path.join(__dirname, '../dist/extension/structured-helpers-node.js'));
+const { splitFactCheckSections } = require(path.join(__dirname, '../src/extension/modules/structured-helpers-node.js'));
 
 function test(name, fn) {
   try { fn(); console.log('✓', name); } catch (err) { console.error('✗', name, '\n ', err?.stack || err); process.exitCode = 1; }

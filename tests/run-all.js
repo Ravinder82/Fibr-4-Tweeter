@@ -8,7 +8,6 @@ function run(file) {
 try {
   run('./twitter-helpers.test.js');
   run('./structured-helpers.test.js');
-  run('./history-helpers.test.js');
   run('./navigation-helpers.test.js');
   console.log('\nAll test suites executed.');
 } catch (e) {

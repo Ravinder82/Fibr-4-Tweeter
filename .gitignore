@@ -1,6 +1,7 @@
 node_modules/
 .DS_Store
 .env
+dist/
 
 # Ignore all markdown files except README.md and compliance reports
 
