@@ -25,9 +25,12 @@
       const header = document.createElement('div');
       header.className = 'gallery-header';
       header.innerHTML = `
-        <button class="back-btn" id="gallery-back-btn" aria-label="Back" title="Back">←</button>
-        <h2>Gallery</h2>
-        <div class="gallery-tools">
+        <div class="gallery-header-top">
+          <button class="back-btn" id="gallery-back-btn" aria-label="Back" title="Back">←</button>
+          <h2>Gallery</h2>
+          <span id="gallery-count" class="gallery-count"></span>
+        </div>
+        <div class="gallery-header-bottom">
           <input id="gallery-search" class="gallery-search" placeholder="Search saved..." aria-label="Search saved content" />
           <select id="gallery-sort" class="gallery-sort" aria-label="Sort">
             <option value="updated_desc">Updated ↓</option>
@@ -35,7 +38,7 @@
             <option value="length_asc">Length ↑</option>
             <option value="length_desc">Length ↓</option>
           </select>
-          <span id="gallery-count" class="gallery-count"></span>
+          <button id="gallery-delete-all" class="gallery-delete-all" title="Delete all">Delete All</button>
         </div>
       `;
       container.appendChild(header);
@@ -58,6 +61,7 @@
       const searchInput = header.querySelector('#gallery-search');
       const sortSelect = header.querySelector('#gallery-sort');
       const countEl = header.querySelector('#gallery-count');
+      const deleteAllBtn = header.querySelector('#gallery-delete-all');
 
       const apply = async () => {
         const q = (searchInput.value || '').toLowerCase();
@@ -78,6 +82,19 @@
       searchInput.addEventListener('input', this.debounce(apply, 150));
       sortSelect.addEventListener('change', apply);
       countEl.textContent = `${items.length}/50`;
+
+      if (deleteAllBtn) {
+        deleteAllBtn.addEventListener('click', async () => {
+          const ok = confirm('Delete all saved items in this category?');
+          if (!ok) return;
+          if (window.TabTalkStorage && TabTalkStorage.clearSavedCategory) {
+            await TabTalkStorage.clearSavedCategory(category);
+            this.initVirtualList(list, []);
+            this.renderList(list, []);
+            countEl.textContent = `0/50`;
+          }
+        });
+      }
     },
 
     sortItems(items, sort) {
@@ -170,147 +187,193 @@
 
     renderCard(item) {
       const card = document.createElement('div');
-      card.className = 'gallery-card collapsed';
-      card.setAttribute('tabindex', '0');
-      card.setAttribute('aria-expanded', 'false');
+      // Determine card type for dynamic sizing
+      const isThread = (item.platform || '').toLowerCase() === 'thread' || 
+                       (item.title || '').toLowerCase().includes('thread') ||
+                       (item.content || '').includes('1/') || 
+                       (item.content || '').includes('🧵');
+      const isLongContent = (item.content || '').length > 500;
+      
+      // Apply appropriate class for sizing
+      let cardClass = 'gallery-card';
+      if (isThread) {
+        cardClass += ' card-thread';
+      } else if (isLongContent) {
+        cardClass += ' card-long';
+      }
+      
+      card.className = cardClass;
       const accurate = this.getAccurateCharacterCount(item.content || '');
       card.innerHTML = `
         <div class="gallery-card-header">
           <div class="title-row">
-            <span class="title">${this.escapeHtml(item.title || 'Twitter Post')}</span>
-            ${item.domain ? `<span class="badge">${this.escapeHtml(item.domain)}</span>` : ''}
+            <span class="title">${this.escapeHtml(item.title || 'Post')}</span>
             <span class="badge platform">${this.escapeHtml((item.platform || 'twitter').toUpperCase())}</span>
           </div>
           <div class="meta-row">
             <span class="timestamp">${this.formatDate(item.updatedAt || item.timestamp)}</span>
             <span class="metrics">${accurate} chars</span>
-            <button class="toggle-btn" aria-label="Expand" title="Expand" data-state="collapsed">▾</button>
           </div>
         </div>
-        <div class="gallery-card-content">
-          <div class="gallery-text-wrap">
-            <textarea class="gallery-text" aria-label="Saved content" disabled>${this.escapeHtml(item.content || '')}</textarea>
-            <div class="fade-mask" aria-hidden="true"></div>
+        <div class="gallery-card-body">
+          <div class="gallery-preview" data-content="${this.escapeHtml(item.content || '')}">
+            ${this.escapeHtml(item.content || '').substring(0, 200)}${(item.content || '').length > 200 ? '...' : ''}
           </div>
-          <div class="gallery-controls">
-            <button class="btn copy" title="Copy">Copy</button>
-            <button class="btn edit" title="Edit">Edit</button>
-            <button class="btn save hidden" title="Save">Save</button>
-            <button class="btn delete" title="Delete">Delete</button>
-            ${item.url ? `<a class="btn link" href="#" title="Open Source">Open</a>` : ''}
-          </div>
+        </div>
+        <div class="gallery-card-footer">
+          <button class="btn-action copy" title="Copy"><span>Copy</span></button>
+          <button class="btn-action read" title="Read"><span>Read</span></button>
+          <button class="btn-action edit" title="Edit"><span>Edit</span></button>
+          <button class="btn-action delete" title="Delete"><span>Delete</span></button>
         </div>
       `;
 
-      const text = card.querySelector('.gallery-text');
-      const copyBtn = card.querySelector('.btn.copy');
-      const editBtn = card.querySelector('.btn.edit');
-      const saveBtn = card.querySelector('.btn.save');
-      const deleteBtn = card.querySelector('.btn.delete');
-      const linkBtn = card.querySelector('.btn.link');
+      const preview = card.querySelector('.gallery-preview');
+      const copyBtn = card.querySelector('.btn-action.copy');
+      const readBtn = card.querySelector('.btn-action.read');
+      const editBtn = card.querySelector('.btn-action.edit');
+      const deleteBtn = card.querySelector('.btn-action.delete');
 
       // Copy
-      copyBtn.addEventListener('click', async () => {
+      copyBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
         try {
-          await navigator.clipboard.writeText(text.value);
-          copyBtn.textContent = 'Copied';
+          await navigator.clipboard.writeText(item.content || '');
+          const span = copyBtn.querySelector('span');
+          span.textContent = '✓';
           copyBtn.classList.add('success');
-          setTimeout(() => { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('success'); }, 1500);
+          setTimeout(() => { span.textContent = 'Copy'; copyBtn.classList.remove('success'); }, 1500);
         } catch (e) {
           console.error('Gallery copy failed', e);
         }
       });
 
-      // Edit/Save
-      editBtn.addEventListener('click', () => {
-        text.disabled = false;
-        text.focus();
-        editBtn.classList.add('hidden');
-        saveBtn.classList.remove('hidden');
-        this.autoResize(text);
+      // Read - Open modal
+      readBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.openReadModal(item);
       });
-      saveBtn.addEventListener('click', async () => {
-        text.disabled = true;
-        editBtn.classList.remove('hidden');
-        saveBtn.classList.add('hidden');
-        const patch = {
-          content: text.value,
-          updatedAt: Date.now(),
-          charCountAccurate: this.getAccurateCharacterCount(text.value)
-        };
-        await this.updateItem(item, patch);
+
+      // Edit - Open modal in edit mode
+      editBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.openEditModal(item);
       });
 
       // Delete
-      deleteBtn.addEventListener('click', async () => {
+      deleteBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const ok = confirm('Delete this saved item?');
+        if (!ok) return;
         await this.deleteItem(item);
         card.remove();
       });
 
-      // Open source link
-      if (linkBtn) {
-        linkBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          if (item.url) {
-            chrome.tabs.create({ url: item.url });
-          }
-        });
-      }
-
-      // Toggle expand/collapse handlers
-      const textWrap = card.querySelector('.gallery-text-wrap');
-      const toggleBtn = card.querySelector('.toggle-btn');
-
-      const toggle = (force) => {
-        const willExpand = force !== undefined ? force : card.classList.contains('collapsed');
-        if (willExpand) {
-          card.classList.remove('collapsed');
-          card.setAttribute('aria-expanded', 'true');
-          if (toggleBtn) { toggleBtn.dataset.state = 'expanded'; toggleBtn.setAttribute('aria-label','Collapse'); toggleBtn.title = 'Collapse'; }
-          // auto-resize after expand
-          this.autoResize(text);
-        } else {
-          card.classList.add('collapsed');
-          card.setAttribute('aria-expanded', 'false');
-          if (toggleBtn) { toggleBtn.dataset.state = 'collapsed'; toggleBtn.setAttribute('aria-label','Expand'); toggleBtn.title = 'Expand'; }
-        }
-      };
-
-      // Click anywhere on content to toggle (ignore control buttons/links)
-      const contentArea = card.querySelector('.gallery-card-content');
-      contentArea.addEventListener('click', (e) => {
-        const isControl = e.target.closest('.gallery-controls') || e.target.closest('button') || e.target.closest('a');
-        if (isControl) return;
-        // Do not collapse when editing
-        if (!text.disabled) return;
-        toggle();
+      // Click card to read
+      card.addEventListener('click', (e) => {
+        // Ignore if clicking a button
+        if (e.target.closest('.btn-action')) return;
+        this.openReadModal(item);
       });
-
-      // Header toggle button
-      if (toggleBtn) {
-        toggleBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          toggle();
-        });
-      }
-
-      // Keyboard accessibility
-      card.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          // Do not toggle when focusing on controls
-          const active = document.activeElement;
-          if (active && (active.closest('.gallery-controls') || active.tagName === 'TEXTAREA' || active.classList.contains('toggle-btn'))) return;
-          toggle();
-        } else if (e.key === 'Escape') {
-          toggle(false);
-        }
-      });
-
-      // Initial autosize
-      setTimeout(() => this.autoResize(text), 0);
 
       return card;
+    },
+
+    openReadModal(item) {
+      const modal = document.createElement('div');
+      modal.className = 'gallery-modal';
+      modal.innerHTML = `
+        <div class="gallery-modal-overlay"></div>
+        <div class="gallery-modal-content">
+          <div class="gallery-modal-header">
+            <div>
+              <h3>${this.escapeHtml(item.title || 'Post')}</h3>
+              <span class="modal-meta">${this.formatDate(item.updatedAt || item.timestamp)} • ${this.getAccurateCharacterCount(item.content || '')} chars</span>
+            </div>
+            <button class="modal-close" aria-label="Close">×</button>
+          </div>
+          <div class="gallery-modal-body">
+            <div class="modal-text">${this.escapeHtml(item.content || '').replace(/\n/g, '<br>')}</div>
+          </div>
+          <div class="gallery-modal-footer">
+            <button class="modal-btn copy">Copy</button>
+            <button class="modal-btn edit">Edit</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      const close = () => modal.remove();
+      modal.querySelector('.modal-close').addEventListener('click', close);
+      modal.querySelector('.gallery-modal-overlay').addEventListener('click', close);
+      
+      modal.querySelector('.modal-btn.copy').addEventListener('click', async () => {
+        await navigator.clipboard.writeText(item.content || '');
+        const btn = modal.querySelector('.modal-btn.copy');
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 1500);
+      });
+
+      modal.querySelector('.modal-btn.edit').addEventListener('click', () => {
+        close();
+        this.openEditModal(item);
+      });
+
+      // ESC to close
+      const escHandler = (e) => {
+        if (e.key === 'Escape') {
+          close();
+          document.removeEventListener('keydown', escHandler);
+        }
+      };
+      document.addEventListener('keydown', escHandler);
+    },
+
+    openEditModal(item) {
+      const modal = document.createElement('div');
+      modal.className = 'gallery-modal';
+      modal.innerHTML = `
+        <div class="gallery-modal-overlay"></div>
+        <div class="gallery-modal-content">
+          <div class="gallery-modal-header">
+            <div>
+              <h3>Edit: ${this.escapeHtml(item.title || 'Post')}</h3>
+              <span class="modal-meta">Editing mode</span>
+            </div>
+            <button class="modal-close" aria-label="Close">×</button>
+          </div>
+          <div class="gallery-modal-body">
+            <textarea class="modal-textarea" placeholder="Edit your content...">${this.escapeHtml(item.content || '')}</textarea>
+          </div>
+          <div class="gallery-modal-footer">
+            <button class="modal-btn cancel">Cancel</button>
+            <button class="modal-btn save primary">Save Changes</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      const textarea = modal.querySelector('.modal-textarea');
+      const close = () => modal.remove();
+      
+      modal.querySelector('.modal-close').addEventListener('click', close);
+      modal.querySelector('.gallery-modal-overlay').addEventListener('click', close);
+      modal.querySelector('.modal-btn.cancel').addEventListener('click', close);
+
+      modal.querySelector('.modal-btn.save').addEventListener('click', async () => {
+        const patch = {
+          content: textarea.value,
+          updatedAt: Date.now(),
+          charCountAccurate: this.getAccurateCharacterCount(textarea.value)
+        };
+        await this.updateItem(item, patch);
+        close();
+        // Refresh gallery
+        const container = document.querySelector('#gallery-view');
+        if (container) this.render(container);
+      });
+
+      textarea.focus();
     },
 
     async updateItem(item, patch) {
@@ -326,11 +389,6 @@
     async deleteItem(item) {
       const category = (item._category) || 'twitter';
       await TabTalkStorage.deleteSavedContent(category, item.id);
-    },
-
-    autoResize(textarea) {
-      textarea.style.height = 'auto';
-      textarea.style.height = Math.max(80, textarea.scrollHeight) + 'px';
     },
 
     debounce(fn, ms) {

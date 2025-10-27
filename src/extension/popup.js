@@ -7,7 +7,6 @@ import './modules/twitter.js';
 import './modules/thread-generator.js';
 import './modules/scroll.js';
 import './modules/gallery.js';
-import './modules/thread-library.js';
 import './modules/validation.js';
 import './modules/validation-handlers.js';
 import './modules/tone-selector.js';
@@ -67,6 +66,10 @@ import './modules/bottom-nav.js';
           }
 
           await this.loadState();
+          // One-time migration: move old savedThreads into Gallery savedContent
+          if (this.migrateThreadsToGallery) {
+            try { await this.migrateThreadsToGallery(); } catch (e) { console.warn('Thread migration skipped', e); }
+          }
           this.bindEvents();
 
           const hasSeenWelcome = await this.getStorageItem("hasSeenWelcome");
@@ -151,17 +154,7 @@ import './modules/bottom-nav.js';
               this.sidebar.style.display = "none";
             }
           });
-        // New: Thread Library link
-        let threadsLink = document.getElementById("menu-threads-link");
-        threadsLink &&
-          threadsLink.addEventListener("click", (s) => {
-            s.preventDefault();
-            this.showView("threads");
-            if (this.sidebar) {
-              this.sidebar.classList.add("hidden");
-              this.sidebar.style.display = "none";
-            }
-          });
+        // Removed: Thread Library link (Threads feature deprecated)
         let r = document.getElementById("welcome-get-started");
         r &&
           r.addEventListener("click", async () => {

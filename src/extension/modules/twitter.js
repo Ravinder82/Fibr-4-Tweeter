@@ -920,50 +920,47 @@ Craft your thread now:`;
       return icons[toneId] || '🎭';
     },
     
-    // AUTO-SAVE THREAD TO PERSISTENT STORAGE
+    // AUTO-SAVE THREAD TO GALLERY (single source of truth)
     autoSaveThread: async function(threadId, tweets, rawContent) {
-      if (!window.TabTalkStorage || !window.TabTalkStorage.saveThread) {
-        console.warn('Storage module not available for thread persistence');
+      if (!window.TabTalkStorage || !window.TabTalkStorage.saveContent) {
+        console.warn('Storage module not available for gallery persistence');
         return;
       }
-      
       try {
-        // DELETE OLD AUTO-SAVED THREADS (keep only latest)
-        const allThreads = await window.TabTalkStorage.getAllThreads();
-        const autoSavedThreads = Object.values(allThreads).filter(t => t.isAutoSaved);
-        
-        // Delete all previous auto-saved threads
-        for (const oldThread of autoSavedThreads) {
-          await window.TabTalkStorage.deleteThread(oldThread.id);
-          console.log('🗑️ Deleted old auto-saved thread:', oldThread.id);
-        }
-        
-        const threadData = {
+        // Keep previous auto-saved threads; do not auto-delete older items
+
+        // Compose combined content for gallery text area
+        const combined = Array.isArray(tweets)
+          ? tweets.map((t, idx) => `${idx + 1}/${tweets.length}:\n${t}`).join('\n\n---\n\n')
+          : String(rawContent || '');
+
+        // Persist to Gallery under twitter category with type 'thread'
+        await window.TabTalkStorage.saveContent('twitter', {
           id: threadId,
+          type: 'thread',
+          platform: 'thread',
           title: this.currentTab?.title || 'Untitled Thread',
           url: this.currentTab?.url || '',
           domain: this.currentDomain || '',
-          platform: 'thread',
-          isAutoSaved: true, // Mark as auto-saved
-          tweets: tweets.map((tweet, index) => ({
+          content: combined,
+          tweets: Array.isArray(tweets) ? tweets.map((tweet, index) => ({
             id: `tweet_${index + 1}`,
             number: `${index + 1}/${tweets.length}`,
             content: tweet,
             charCount: this.getAccurateCharacterCount(tweet)
-          })),
+          })) : [],
           rawContent: rawContent,
-          totalTweets: tweets.length,
-          totalChars: this.getTotalChars(tweets),
-          createdAt: Date.now()
-        };
-        
-        await window.TabTalkStorage.saveThread(threadData);
-        console.log('✅ Thread auto-saved persistently:', threadId);
-        
-        // Show subtle notification
+          totalTweets: Array.isArray(tweets) ? tweets.length : 0,
+          totalChars: Array.isArray(tweets) ? this.getTotalChars(tweets) : this.getAccurateCharacterCount(combined),
+          isAutoSaved: true,
+          timestamp: Date.now(),
+          updatedAt: Date.now()
+        });
+
+        console.log('✅ Thread auto-saved to Gallery:', threadId);
         this.showAutoSaveNotification();
       } catch (error) {
-        console.error('Error auto-saving thread:', error);
+        console.error('Error auto-saving thread to Gallery:', error);
       }
     },
     

@@ -226,7 +226,9 @@
       
       // Check if already saved
       if (window.TabTalkStorage) {
-        window.TabTalkStorage.isContentSaved(category, contentData.id || Date.now().toString())
+        // Normalize storage category: threads are stored under 'twitter' with type metadata
+        const initialTargetCategory = category === 'thread' ? 'twitter' : category;
+        window.TabTalkStorage.isContentSaved(initialTargetCategory, contentData.id || Date.now().toString())
           .then(isSaved => {
             if (isSaved) {
               saveBtn.classList.add('saved');
@@ -240,14 +242,15 @@
         e.stopPropagation();
         const contentId = saveBtn.getAttribute('data-content-id');
         const category = saveBtn.getAttribute('data-category');
+        const targetCategory = category === 'thread' ? 'twitter' : category;
         
         if (!window.TabTalkStorage) return;
         
-        const isSaved = await window.TabTalkStorage.isContentSaved(category, contentId);
+        const isSaved = await window.TabTalkStorage.isContentSaved(targetCategory, contentId);
         
         if (isSaved) {
           // Remove from saved
-          await window.TabTalkStorage.deleteSavedContent(category, contentId);
+          await window.TabTalkStorage.deleteSavedContent(targetCategory, contentId);
           saveBtn.classList.remove('saved');
           saveBtn.querySelector('svg').setAttribute('fill', 'none');
           this.showToast('Removed from saved content');
@@ -260,10 +263,13 @@
             title: this.currentTab?.title || document.title
           };
           
-          await window.TabTalkStorage.saveContent(category, {
+          await window.TabTalkStorage.saveContent(targetCategory, {
             id: contentId,
             content,
             metadata,
+            // Normalize: mark type and platform for Gallery badges/filters
+            type: contentData.type || (category === 'thread' ? 'thread' : 'post'),
+            platform: contentData.platform || (category === 'thread' ? 'thread' : 'twitter'),
             ...contentData
           });
           
