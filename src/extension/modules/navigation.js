@@ -85,10 +85,6 @@
         if (viewName === 'thread-generator' && this.initializeHowItWorksToggle) {
           this.initializeHowItWorksToggle();
         }
-        // Special handling for memory-builder view
-        if (viewName === 'memory-builder' && window.MemoryBuilderUI) {
-          window.MemoryBuilderUI.init();
-        }
       } else {
         console.warn(`showView: target view not found for "${viewName}" (id "${targetId}")`);
       }

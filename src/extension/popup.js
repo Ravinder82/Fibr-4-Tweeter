@@ -11,9 +11,6 @@ import './modules/thread-library.js';
 import './modules/validation.js';
 import './modules/validation-handlers.js';
 import './modules/tone-selector.js';
-import './modules/niche-manager.js';
-import './modules/memory-manager.js';
-import './modules/memory-builder-ui.js';
 import './modules/bottom-nav.js';
 
 (() => {
