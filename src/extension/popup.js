@@ -11,6 +11,7 @@ import './modules/validation.js';
 import './modules/validation-handlers.js';
 import './modules/tone-selector.js';
 import './modules/bottom-nav.js';
+import './modules/enhanced-quick-actions.js';
 
 (() => {
   (() => {
@@ -170,10 +171,6 @@ import './modules/bottom-nav.js';
           ig.addEventListener("click", (s) => {
             s.preventDefault();
             this.showView("gallery");
-            if (this.sidebar) {
-              this.sidebar.classList.add("hidden");
-              this.sidebar.style.display = "none";
-            }
           });
         // Removed: Thread Library link (Threads feature deprecated)
         let r = document.getElementById("welcome-get-started");
@@ -241,6 +238,12 @@ import './modules/bottom-nav.js';
             this.menuButton.setAttribute("aria-label", "Open menu"),
           this.apiKeyInput &&
             this.apiKeyInput.setAttribute("aria-label", "Gemini API Key"),
+          // Check if all buttons exist
+          console.log('Button elements found:', {
+            quickTwitterBtn: !!this.quickTwitterBtn,
+            quickTwitterThreadBtn: !!this.quickTwitterThreadBtn,
+            quickCreateBtn: !!this.quickCreateBtn
+          }),
           this.quickTwitterBtn &&
             this.quickTwitterBtn.addEventListener("click", async () => {
               (this.resetScreenForGeneration && this.resetScreenForGeneration(),
@@ -248,6 +251,7 @@ import './modules/bottom-nav.js';
             }),
           this.quickTwitterThreadBtn &&
             this.quickTwitterThreadBtn.addEventListener("click", async () => {
+              console.log('Thread button clicked - showing tone selector for thread generation');
               (this.resetScreenForGeneration && this.resetScreenForGeneration(),
                 await this.generateSocialContent("thread"));
             }),

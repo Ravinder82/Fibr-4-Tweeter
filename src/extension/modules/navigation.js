@@ -1,6 +1,7 @@
 (function() {
   const Navigation = {
     showView: function(viewName) {
+      console.log('Navigation: showing view:', viewName);
       const views = document.querySelectorAll('.view');
       views.forEach(v => v.classList.add('hidden'));
       
@@ -57,6 +58,7 @@
       if (viewName === 'api-setup') targetId = 'api-setup-view';
       if (viewName === 'history') targetId = 'history-view';
       if (viewName === 'gallery') targetId = 'gallery-view';
+      if (viewName === 'thread-generator') targetId = 'thread-generator-view';
       const target = document.getElementById(targetId);
       if (target) {
         target.classList.remove('hidden');

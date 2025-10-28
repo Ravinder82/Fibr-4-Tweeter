@@ -184,6 +184,8 @@ RESEARCH AUGMENTATION (from domain knowledge):
 ${contentAnalysis.researchContext}`;
           userPrompt = `Transform this webpage content into an electrifying Twitter/X post that feels authentically human.
 
+IMPORTANT: Create a UNIQUE and FRESH take - avoid repeating previous angles. Generation ID: ${Date.now()}
+
 YOUR WRITING STYLE:
 ✓ Write with GENUINE excitement and energy
 ✓ Use natural line breaks to create rhythm and pacing
@@ -232,6 +234,8 @@ ${contentAnalysis.keyInsights}
 RESEARCH AUGMENTATION (from domain knowledge):
 ${contentAnalysis.researchContext}`;
           userPrompt = `Create a magnetic Twitter thread (3-8 tweets) from this content.
+
+IMPORTANT: Create a UNIQUE and FRESH narrative - explore different angles each time. Generation ID: ${Date.now()}
 
 CRITICAL FORMAT REQUIREMENT:
 Start each tweet with: 1/n: 2/n: 3/n: etc.

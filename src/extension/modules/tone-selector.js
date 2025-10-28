@@ -230,27 +230,30 @@
           <div class="tone-modal-overlay"></div>
           <div class="tone-modal-content">
             <div class="tone-modal-header">
-              <h2 id="tone-modal-title">Choose your tone</h2>
-              <button class="tone-modal-close" aria-label="Close tone selector">&times;</button>
+              <h2 id="tone-modal-title">Select Content Tone</h2>
+              <button class="tone-modal-close" aria-label="Close">&times;</button>
             </div>
 
             <!-- AI Recommendations Section -->
             <div id="tone-recommendations" class="tone-recommendations hidden">
               <div class="recommendations-header">
-                <span class="recommendations-title">Suggested tones</span>
+                <span class="recommendations-title">✨ AI Suggested Tones</span>
               </div>
               <div id="recommended-tones" class="recommended-tones-list"></div>
             </div>
 
             <!-- Tone Grid -->
-            <div class="tone-grid" role="radiogroup" aria-label="Select content tone">
-              ${this.renderToneGrid()}
+            <div class="modal-section">
+              <label class="section-label">Choose Your Tone</label>
+              <div class="tone-grid" role="radiogroup" aria-label="Select content tone">
+                ${this.renderToneGrid()}
+              </div>
             </div>
 
             <!-- Custom Tone Builder Toggle -->
             <div class="custom-tone-section">
               <button id="toggle-custom-builder" class="custom-builder-toggle">
-                <span class="toggle-text">Custom mix (optional)</span>
+                <span class="toggle-text">🎨 Custom Tone Mix (optional)</span>
                 <span class="toggle-arrow">▼</span>
               </button>
               
@@ -297,7 +300,7 @@
             <div class="tone-modal-actions">
               <button id="tone-cancel-btn" class="tone-btn tone-btn-secondary">Cancel</button>
               <button id="tone-generate-btn" class="tone-btn tone-btn-primary" disabled>
-                Generate
+                Generate Content
               </button>
             </div>
           </div>

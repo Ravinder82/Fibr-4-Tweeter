@@ -26,7 +26,7 @@
             <div class="tone-grid" style="padding: 24px;">
               <div class="form-group" style="margin-bottom: 20px;">
                 <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Category</label>
-                <select id="modal-thread-category" class="builder-select" style="width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(203, 213, 225, 0.4); background: rgba(255, 255, 255, 0.8); font-size: 14px;">
+                <select id="modal-thread-category" class="builder-select" style="width: 100%; padding: 10px 12px; border-radius: 10px; font-size: 14px;">
                   <option value="history">📜 History</option>
                   <option value="sports">⚽ Sports</option>
                   <option value="stories">📖 Stories</option>
@@ -37,7 +37,7 @@
               
               <div class="form-group" style="margin-bottom: 20px;">
                 <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Topic</label>
-                <input type="text" id="modal-thread-topic" class="builder-select" placeholder="e.g., The fall of the Roman Empire" style="width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(203, 213, 225, 0.4); background: rgba(255, 255, 255, 0.8); font-size: 14px;" />
+                <input type="text" id="modal-thread-topic" class="builder-select" placeholder="e.g., The fall of the Roman Empire" style="width: 100%; padding: 10px 12px; border-radius: 10px; font-size: 14px;" />
                 <small style="display: block; margin-top: 6px; font-size: 11px; color: var(--text-secondary);">Enter any topic you want to create a thread about</small>
               </div>
               
@@ -617,30 +617,71 @@ Craft your ${targetLength}-character thread now:`;
       
       const category = categorySelect.value;
       const topic = topicInput.value.trim();
-      const useKnowledgePack = useKnowledgeToggle ? useKnowledgeToggle.checked : true;
       
       if (!topic) {
-        alert('Please enter a topic');
+        window.TabTalkUI?.showToast('Please enter a topic', 2000);
         return;
       }
       
-      // Switch to chat view to show results
-      this.showView('chat');
-      
-      // Clear previous messages for clean display
-      if (this.resetScreenForGeneration) {
-        this.resetScreenForGeneration();
+      // Use enhanced thread generation if available
+      if (window.TabTalkEnhancedQuickActions) {
+        window.TabTalkEnhancedQuickActions.generateThread();
+        return;
       }
       
-      // Generate thread
-      await this.generateThreadMVP(category, topic, {
-        useKnowledgePack,
-        maxTweets: 8,
-        tone: 'curious'
-      });
+      // Fallback to original thread generation
+      const useKnowledge = useKnowledgeToggle ? useKnowledgeToggle.checked : true;
       
-      // Clear the topic input for next generation
-      topicInput.value = '';
+      try {
+        // Show loading state
+        const generateBtn = document.getElementById('generate-thread-btn');
+        const originalText = generateBtn.textContent;
+        generateBtn.textContent = '⏳ Generating...';
+        generateBtn.disabled = true;
+        
+        // Build enhanced prompt with category and persona/format info
+        let prompt = `Create an engaging Twitter thread about "${topic}".`;
+        
+        if (category !== 'general') {
+          prompt += ` Use the ${category} knowledge base for relevant facts and insights.`;
+        }
+        
+        prompt += ` Create an 8-tweet thread with the following requirements:
+- Start each tweet with "1/n:", "2/n:", etc.
+- Use natural emojis (2-4 per thread total)
+- No hashtags or URLs
+- Include a compelling hook in the first tweet
+- End with a clear call-to-action
+- Use the ${category} style and tone appropriate for this topic`;
+
+        if (useKnowledge) {
+          prompt += ` Include relevant facts, statistics, and expert insights from the knowledge base.`;
+        }
+        
+        // Generate thread using API
+        const threadContent = await window.TabTalkAPI?.callGeminiAPI(prompt);
+        
+        if (threadContent) {
+          // Display result in messages container
+          this.displayThreadResult(threadContent, topic, category);
+          
+          // Save to gallery
+          this.saveThreadToGallery(threadContent, topic, category);
+          
+          window.TabTalkUI?.showToast('Thread generated successfully!', 2000);
+        }
+        
+      } catch (error) {
+        console.error('Thread generation failed:', error);
+        window.TabTalkUI?.showToast('Failed to generate thread', 3000);
+      } finally {
+        // Reset button state
+        const generateBtn = document.getElementById('generate-thread-btn');
+        if (generateBtn) {
+          generateBtn.textContent = '🚀 Generate Enhanced Thread';
+          generateBtn.disabled = false;
+        }
+      }
     }
   };
   
