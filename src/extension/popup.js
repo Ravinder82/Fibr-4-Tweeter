@@ -12,6 +12,7 @@ import './modules/validation-handlers.js';
 import './modules/tone-selector.js';
 import './modules/bottom-nav.js';
 import './modules/enhanced-quick-actions.js';
+import './modules/click-farming.js';
 
 (() => {
   (() => {

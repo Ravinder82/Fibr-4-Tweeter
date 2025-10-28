@@ -5085,3 +5085,355 @@ main {
 .view {
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
+
+/* ============================================
+   CLICK FARMING MODAL STYLES
+   ============================================ */
+
+/* Modal overlay and container */
+#click-farming-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+#click-farming-modal.hidden {
+  display: none;
+}
+
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1;
+}
+
+.click-farming-modal-content {
+  position: relative;
+  width: 90%;
+  max-width: 500px;
+  max-height: 85vh;
+  background: var(--primary-bg);
+  border-radius: 16px;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease;
+  overflow: hidden;
+  z-index: 2;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Modal header */
+.click-farming-modal-content .modal-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--secondary-bg);
+  position: relative;
+}
+
+.click-farming-modal-content .modal-header h2 {
+  margin: 0 0 6px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.click-farming-modal-content .modal-header p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--tertiary-bg);
+  color: var(--text-secondary);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  background: var(--border-color);
+  color: var(--text-primary);
+  transform: rotate(90deg);
+}
+
+/* Modal body */
+.click-farming-modal-content .modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+  max-height: calc(85vh - 160px);
+}
+
+.click-farming-modal-content .modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.click-farming-modal-content .modal-body::-webkit-scrollbar-track {
+  background: var(--secondary-bg);
+}
+
+.click-farming-modal-content .modal-body::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+/* Modal footer */
+.click-farming-modal-content .modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-color);
+  background: var(--secondary-bg);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.click-farming-modal-content .modal-footer button {
+  flex: 1;
+  max-width: 150px;
+}
+
+/* Content type chips */
+.content-type-chips,
+.hook-style-chips,
+.cta-type-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.content-type-chip,
+.hook-style-chip,
+.cta-type-chip {
+  padding: 8px 14px;
+  background: var(--tertiary-bg);
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.content-type-chip:hover,
+.hook-style-chip:hover,
+.cta-type-chip:hover {
+  background: var(--border-color);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.content-type-chip.active,
+.hook-style-chip.active,
+.cta-type-chip.active {
+  background: linear-gradient(135deg, #404040 0%, #505050 100%);
+  border-color: #606060;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Idea generator button */
+.idea-generator-btn {
+  width: 100%;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #404040 0%, #505050 100%);
+  border: 1px solid #606060;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+}
+
+.idea-generator-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.idea-generator-btn:active {
+  transform: translateY(0);
+}
+
+.idea-generator-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Ideas container */
+.ideas-container {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ideas-container.hidden {
+  display: none;
+}
+
+.idea-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: var(--tertiary-bg);
+  border: 1.5px solid var(--border-color);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.idea-item:hover {
+  background: var(--border-color);
+  border-color: var(--border-dark);
+  transform: translateX(4px);
+}
+
+.idea-item.selected {
+  background: linear-gradient(135deg, #404040 0%, #505050 100%);
+  border-color: #606060;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.idea-number {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  background: var(--secondary-bg);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.idea-item.selected .idea-number {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.idea-text {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.idea-item.selected .idea-text {
+  color: #ffffff;
+}
+
+/* Form sections spacing */
+.click-farming-modal-content .form-section {
+  margin-bottom: 20px;
+}
+
+.click-farming-modal-content .form-group {
+  margin-bottom: 16px;
+}
+
+.click-farming-modal-content .section-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.click-farming-modal-content .form-input,
+.click-farming-modal-content .form-select {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--tertiary-bg);
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.click-farming-modal-content .form-input:focus,
+.click-farming-modal-content .form-select:focus {
+  outline: none;
+  border-color: #606060;
+  background: var(--secondary-bg);
+}
+
+.click-farming-modal-content .form-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Dark theme adjustments */
+:root[data-theme="dark"] .click-farming-modal-content {
+  background: var(--primary-bg);
+}
+
+:root[data-theme="dark"] .modal-overlay {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+:root[data-theme="dark"] .content-type-chip.active,
+:root[data-theme="dark"] .hook-style-chip.active,
+:root[data-theme="dark"] .cta-type-chip.active {
+  background: linear-gradient(135deg, #505050 0%, #606060 100%);
+  border-color: #707070;
+}
+
+:root[data-theme="dark"] .idea-item.selected {
+  background: linear-gradient(135deg, #505050 0%, #606060 100%);
+  border-color: #707070;
+}

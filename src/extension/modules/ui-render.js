@@ -44,6 +44,94 @@
       return t.trim();
     },
 
+    // Clean up AI-generated post content by removing explanations and formatting
+    cleanPostContent: function(post) {
+      if (!post) return '';
+      
+      let content = String(post);
+      
+      // First, try to extract the best post if multiple options are provided
+      const optionMatches = content.match(/\*\*Option\s+\d+[^*]*\*\*[\s\S]*?(?=\*\*Option|\*\*Explanation|\*\*Why|$)/gi);
+      if (optionMatches && optionMatches.length > 0) {
+        // Use the first option as it's usually the best one
+        content = optionMatches[0];
+      }
+      
+      // Remove comprehensive AI prefaces and explanations
+      content = content.replace(/^(?:Okay, here's|Here's|This is|Below is)[^\n]*:\s*/i, '');
+      content = content.replace(/^\*\*Option\s+\d+.*?\*\*[^\n]*\n/gi, '');
+      content = content.replace(/^\*\*Explanation.*?\*\*[^\n]*\n/gi, '');
+      content = content.replace(/^\*\*Why.*?\*\*[^\n]*\n/gi, '');
+      content = content.replace(/Explanation of Choices & Strategies Used:[^\n]*\n/gi, '');
+      content = content.replace(/Why these options should work:[^\n]*\n/gi, '');
+      content = content.replace(/Choose the option.*?\.\n/gi, '');
+      
+      // Remove bullet point explanations and strategy sections
+      content = content.replace(/^\s*\*\s*Hook.*?:.*$/gim, '');
+      content = content.replace(/^\s*\*\s*Value Proposition.*?:.*$/gim, '');
+      content = content.replace(/^\s*\*\s*Engagement.*?:.*$/gim, '');
+      content = content.replace(/^\s*\*\s*Emojis.*?:.*$/gim, '');
+      content = content.replace(/^\s*\*\s*Hashtags.*?:.*$/gim, '');
+      content = content.replace(/^\s*\*\s*Thread.*?:.*$/gim, '');
+      content = content.replace(/^\s*\*\s*Clarity.*?:.*$/gim, '');
+      content = content.replace(/^\s*\*\s*Specificity.*?:.*$/gim, '');
+      content = content.replace(/^\s*\*\s*Urgency.*?:.*$/gim, '');
+      content = content.replace(/^\s*\*\s*Social Proof.*?:.*$/gim, '');
+      content = content.replace(/^\s*\*\s*Reciprocity.*?:.*$/gim, '');
+      
+      // Remove all lines that start with "*   " followed by explanation words
+      content = content.replace(/^\s*\*\s*(?:Hook|Value|Engagement|Emojis|Hashtags|Thread|Clarity|Specificity|Urgency|Social|Reciprocity).*$/gim, '');
+      
+      // Remove section headers and explanation paragraphs
+      content = content.replace(/^\*\*.*?Choices.*?\*\*.*$/gim, '');
+      content = content.replace(/^\*\*.*?Strategies.*?\*\*.*$/gim, '');
+      content = content.replace(/^\*\*.*?should work.*?\*\*.*$/gim, '');
+      content = content.replace(/^\*\*.*?Approach.*?\*\*.*$/gim, '');
+      content = content.replace(/^\*\*.*?Edge.*?\*\*.*$/gim, '');
+      content = content.replace(/^\*\*.*?FOMO.*?\*\*.*$/gim, '');
+      
+      // Remove markdown formatting for cleaner display
+      content = content.replace(/\*\*([^*]+)\*\*/g, '$1');
+      content = content.replace(/\*([^*]+)\*/g, '$1');
+      
+      // Clean up excessive line breaks and spacing
+      content = content.replace(/\n{3,}/g, '\n\n');
+      content = content.replace(/^[ \t]+|[ \t]+$/gm, '');
+      
+      // Remove any remaining explanation text patterns
+      const lines = content.split('\n');
+      const cleanedLines = lines.filter(line => {
+        const trimmed = line.trim();
+        return trimmed && 
+               !trimmed.match(/^(Explanation|Why|Choose|Strategies|Choices|Options?|Hook|Value|Engagement|Emojis|Hashtags|Thread|Clarity|Specificity|Urgency|Social|Reciprocity)[:\s]/i) &&
+               !trimmed.match(/^\*\*[^\*]*\*\*$/) &&
+               !trimmed.match(/^\*\*.*?(Choices|Strategies|Approach|Edge|FOMO).*?\*\*$/) &&
+               !trimmed.match(/^\s*\*\s*(?:The|Each|This|Use|Create|Referencing|Providing|Choose|Then|Good)/);
+      });
+      
+      let result = cleanedLines.join('\n').trim();
+      
+      // If result is empty after cleaning, try to extract actual post content from the original
+      if (!result || result.length < 20) {
+        // Look for actual post patterns in the original content
+        const postPatterns = [
+          /STOP.*[\s\S]*?#[A-Za-z]+/i,
+          /🤯.*[\s\S]*?#[A-Za-z]+/i,
+          /\(1\/\d+\).*[\s\S]*?#[A-Za-z]+/i
+        ];
+        
+        for (const pattern of postPatterns) {
+          const match = content.match(pattern);
+          if (match && match[0].length > 30) {
+            result = match[0].trim();
+            break;
+          }
+        }
+      }
+      
+      return result || 'Unable to extract clean post content. Please try generating again.';
+    },
+
     setLoading: function(isLoading, statusMessage = '...') {
       this.isLoading = isLoading;
       if (isLoading) {
@@ -92,7 +180,8 @@
         blog: '📰',
         proscons: '⚖️',
         timeline: '📅',
-        quotes: '💬'
+        quotes: '💬',
+        'click-farming': '🎯'
       };
       const contentType = options.contentType || 'content';
       const emoji = emojiMap[contentType] || '📄';
@@ -159,10 +248,12 @@
         }
       });
       container.appendChild(card);
-      const target = options.container || this.messagesContainer;
-      target.appendChild(container);
-      if (target === this.messagesContainer) {
-        target.scrollTo({ top: target.scrollHeight, behavior: 'smooth' });
+      const target = options.container || this.messagesContainer || document.getElementById('messages-container');
+      if (target) {
+        target.appendChild(container);
+        if (target === this.messagesContainer) {
+          target.scrollTo({ top: target.scrollHeight, behavior: 'smooth' });
+        }
       }
       return card;
     },
@@ -226,8 +317,8 @@
       
       // Check if already saved
       if (window.TabTalkStorage) {
-        // Normalize storage category: threads are stored under 'twitter' with type metadata
-        const initialTargetCategory = category === 'thread' ? 'twitter' : category;
+        // Normalize storage category: store threads and click-farming under 'twitter' so Gallery shows them
+        const initialTargetCategory = (category === 'thread' || category === 'click-farming') ? 'twitter' : category;
         window.TabTalkStorage.isContentSaved(initialTargetCategory, contentData.id || Date.now().toString())
           .then(isSaved => {
             if (isSaved) {
@@ -242,7 +333,7 @@
         e.stopPropagation();
         const contentId = saveBtn.getAttribute('data-content-id');
         const category = saveBtn.getAttribute('data-category');
-        const targetCategory = category === 'thread' ? 'twitter' : category;
+        const targetCategory = (category === 'thread' || category === 'click-farming') ? 'twitter' : category;
         
         if (!window.TabTalkStorage) return;
         
