@@ -570,6 +570,38 @@ Now generate the perfect viral engagement post:`;
         card.dataset.hookStyle = this.selectedHookStyle;
         card.dataset.cta = this.selectedCTA;
         card.dataset.topic = this.currentTopic;
+
+        // Live-only image prompt generation if enabled
+        try {
+          const includePrompt = document.getElementById('include-click-farming-image-prompt')?.checked;
+          if (includePrompt && window.TabTalkImagePromptGenerator) {
+            (async () => {
+              try {
+                const contentId = `click_${Date.now()}`;
+                const prompt = await window.TabTalkImagePromptGenerator.generatePromptForCard(contentId, cleanContent);
+                if (prompt) {
+                  // Attach to card for copy, but do not persist to Gallery
+                  card.dataset.imagePrompt = encodeURIComponent(prompt);
+                  // Inject UI block under content
+                  const contentEl = card.querySelector('.twitter-card-content');
+                  if (contentEl && !card.querySelector('.image-prompt-display')) {
+                    const promptEl = document.createElement('div');
+                    promptEl.className = 'image-prompt-display';
+                    promptEl.innerHTML = `
+                      <div class="image-prompt-label">🖼️ Nano Banana Prompt (9:16)</div>
+                      <div class="image-prompt-text">${window.TabTalkUI?.escapeHtml ? window.TabTalkUI.escapeHtml(prompt) : prompt}</div>
+                    `;
+                    contentEl.appendChild(promptEl);
+                  }
+                }
+              } catch (e) {
+                console.warn('Click Farming: image prompt generation failed:', e);
+              }
+            })();
+          }
+        } catch (e) {
+          console.warn('Click Farming: image prompt option handling failed:', e);
+        }
       }
       
       // Scroll to bottom to show the new content

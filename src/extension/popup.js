@@ -13,6 +13,7 @@ import './modules/tone-selector.js';
 import './modules/bottom-nav.js';
 import './modules/enhanced-quick-actions.js';
 import './modules/click-farming.js';
+import './modules/image-prompt-generator.js';
 
 (() => {
   (() => {
@@ -98,7 +99,10 @@ import './modules/click-farming.js';
         } catch (error) {
           console.error("TabTalk AI: Initialization error:", error);
           if (this.pageStatus) {
-            this.pageStatus.textContent = `\u274C Initialization failed: ${error.message}`;
+            // Special handling for extension context invalidated (common during development)
+            error.message && error.message.includes("Extension context invalidated") 
+              ? (this.pageStatus.textContent = "⚠️ Extension reloaded. Please refresh the page and try again.")
+              : (this.pageStatus.textContent = `\u274C Initialization failed: ${error.message}`);
           }
           // Fallback to welcome view so UI does not remain blank
           if (this.showView) {
@@ -335,7 +339,10 @@ import './modules/click-farming.js';
             else throw new Error(e.error);
           } catch (t) {
             (console.error("TabTalk AI (popup):", t),
-              (this.pageStatus.textContent = `\u274C ${t.message}`));
+              // Special handling for extension context invalidated (common during development)
+              t.message && t.message.includes("Extension context invalidated") 
+                ? (this.pageStatus.textContent = "⚠️ Extension reloaded. Please refresh the page and try again.")
+                : (this.pageStatus.textContent = `\u274C ${t.message}`));
           } finally {
             this.setLoading(!1);
           }

@@ -113,14 +113,14 @@ RESEARCH CONTEXT: [relevant background knowledge and expert perspective]`;
         window.TabTalkToneSelector.show(
           platform,
           this.pageContent,
-          (selectedTone, selectedPlatform) => {
-            this.generateSocialContentWithTone(selectedPlatform, selectedTone);
+          (selectedTone, selectedPlatform, includeImagePrompt) => {
+            this.generateSocialContentWithTone(selectedPlatform, selectedTone, includeImagePrompt);
           }
         );
       } else {
         console.error('Tone selector not loaded');
         // Fallback to default tone
-        this.generateSocialContentWithTone(platform, { id: 'supportive', name: 'Supportive with Facts' });
+        this.generateSocialContentWithTone(platform, { id: 'supportive', name: 'Supportive with Facts' }, false);
       }
     },
 
@@ -130,7 +130,7 @@ RESEARCH CONTEXT: [relevant background knowledge and expert perspective]`;
     },
 
     // Generate content with selected tone
-    generateSocialContentWithTone: async function(platform, selectedTone) {
+    generateSocialContentWithTone: async function(platform, selectedTone, includeImagePrompt = false) {
       if (!this.pageContent || !this.apiKey) {
         if (this.showToast) {
           this.showToast('❌ Please set up your Gemini API key first and ensure page content is loaded.', 3000);
@@ -140,13 +140,15 @@ RESEARCH CONTEXT: [relevant background knowledge and expert perspective]`;
         return;
       }
 
-      // Store selected tone for regeneration
+      // Store selected tone and image prompt preference for regeneration
       this.currentSelectedTone = selectedTone;
+      this.currentIncludeImagePrompt = includeImagePrompt;
 
       this.setLoading(true, `Analyzing content...`);
       console.log(`TabTalk AI: Generating ${platform} content for page: ${this.currentTab?.title}`);
       console.log(`Page content length: ${this.pageContent.length} characters`);
       console.log(`Selected tone: ${selectedTone.name} (${selectedTone.id})`);
+      console.log(`Include image prompt: ${includeImagePrompt}`);
 
       try {
         // PHASE 1: Deep Analysis & Research
@@ -289,7 +291,24 @@ Generate your thread now:`;
         if (response) {
           console.log(`TabTalk AI: Successfully generated ${platform} content, response length: ${response.length} characters`);
           const cleanedResponse = this.cleanTwitterContent(response);
-          this.addTwitterMessage('assistant', cleanedResponse, platform);
+          
+          // Generate image prompt if requested
+          let imagePrompt = null;
+          if (includeImagePrompt) {
+            this.showProgressBar('Generating image prompt...');
+            try {
+              if (window.TabTalkImagePromptGenerator) {
+                const contentId = `content_${Date.now()}`;
+                imagePrompt = await window.TabTalkImagePromptGenerator.generatePromptForCard(contentId, cleanedResponse);
+                console.log('Image prompt generated:', imagePrompt ? 'Success' : 'Failed');
+              }
+            } catch (error) {
+              console.error('Image prompt generation failed:', error);
+              // Continue without image prompt
+            }
+          }
+          
+          this.addTwitterMessage('assistant', cleanedResponse, platform, imagePrompt);
           // Save a history record for future History page
           if (this.addToHistory) {
             const record = {
@@ -298,7 +317,8 @@ Generate your thread now:`;
               title: this.currentTab?.title || '',
               domain: this.currentDomain || '',
               content: cleanedResponse,
-              type: platform
+              type: platform,
+              imagePrompt: imagePrompt || undefined
             };
             await this.addToHistory(platform, record);
           }
@@ -356,12 +376,12 @@ Generate your thread now:`;
       if (existingProgress) existingProgress.remove();
     },
 
-    addTwitterMessage: function(role, content, platform) {
+    addTwitterMessage: function(role, content, platform, imagePrompt = null) {
       // Directly render Twitter content (no chat history needed)
-      this.renderTwitterContent(content, platform);
+      this.renderTwitterContent(content, platform, imagePrompt);
     },
 
-    renderTwitterContent: function(content, platform) {
+    renderTwitterContent: function(content, platform, imagePrompt = null) {
       const contentContainer = document.createElement('div');
       contentContainer.className = 'twitter-content-container';
       if (platform === 'thread') {
@@ -425,7 +445,7 @@ Generate your thread now:`;
         const copyAllBtn = threadHeader.querySelector('.btn-copy-all-thread');
         const copyAllStatus = threadHeader.querySelector('.copy-all-status');
         copyAllBtn.addEventListener('click', async () => {
-          await this.copyAllTweets(tweets, copyAllBtn, copyAllStatus);
+          await this.copyAllTweets(tweets, copyAllBtn, copyAllStatus, threadId);
         });
         
         // Bind Master Control events
@@ -461,11 +481,47 @@ Generate your thread now:`;
           card.dataset.platform = platform;
           card.dataset.threadId = threadId;
           contentContainer.appendChild(card);
+
+          // If user requested image prompts, generate one per tweet card asynchronously
+          if (this.currentIncludeImagePrompt && window.TabTalkImagePromptGenerator) {
+            (async () => {
+              try {
+                const contentId = `thread_${threadId}_tweet_${index + 1}`;
+                const tweetPrompt = await window.TabTalkImagePromptGenerator.generatePromptForCard(contentId, tweet);
+                if (tweetPrompt) {
+                  // Persist on card for copy/save flows
+                  card.dataset.imagePrompt = encodeURIComponent(tweetPrompt);
+                  // Inject prompt UI if not present
+                  const contentEl = card.querySelector('.twitter-card-content');
+                  if (contentEl && !card.querySelector('.image-prompt-display')) {
+                    const promptEl = document.createElement('div');
+                    promptEl.className = 'image-prompt-display';
+                    promptEl.innerHTML = `
+                      <div class="image-prompt-label">🖼️ Nano Banana Prompt (9:16)</div>
+                      <div class="image-prompt-text">${this.escapeHtml(tweetPrompt)}</div>
+                    `;
+                    contentEl.appendChild(promptEl);
+                  } else if (contentEl) {
+                    // Update existing prompt text if container already exists
+                    const textEl = card.querySelector('.image-prompt-text');
+                    if (textEl) textEl.textContent = tweetPrompt;
+                  }
+
+                  // Do NOT persist image prompts to saved Gallery
+                }
+              } catch (e) {
+                console.warn('Image prompt generation for thread tweet failed:', e);
+              }
+            })();
+          }
         });
       } else {
         // DISABLED: Universal cards system - using legacy system for stability
-        const card = this.createTwitterCard(content, 'Post');
+        const card = this.createTwitterCard(content, 'Post', false, imagePrompt);
         card.dataset.platform = platform;
+        if (imagePrompt) {
+          card.dataset.imagePrompt = encodeURIComponent(imagePrompt);
+        }
         contentContainer.appendChild(card);
       }
       this.messagesContainer.appendChild(contentContainer);
@@ -523,7 +579,7 @@ Generate your thread now:`;
       return tweets;
     },
 
-    createTwitterCard: function(tweetContent, cardTitle, isThreadCard = false) {
+    createTwitterCard: function(tweetContent, cardTitle, isThreadCard = false, imagePrompt = null) {
       const card = document.createElement('div');
       card.className = 'twitter-card';
       
@@ -553,6 +609,14 @@ Generate your thread now:`;
         </div>
       `;
       
+      // Build image prompt HTML if present
+      const imagePromptHTML = imagePrompt ? `
+        <div class="image-prompt-display">
+          <div class="image-prompt-label">🖼️ Nano Banana Prompt (9:16)</div>
+          <div class="image-prompt-text">${this.escapeHtml(imagePrompt)}</div>
+        </div>
+      ` : '';
+      
       card.innerHTML = `
         <div class="twitter-card-header">
           <span class="twitter-card-title">${cardTitle}</span>
@@ -568,6 +632,7 @@ Generate your thread now:`;
         <div class="twitter-card-content">
           <textarea class="twitter-text" placeholder="Edit your tweet content...">${tweetContent}</textarea>
           ${controlsHTML}
+          ${imagePromptHTML}
         </div>
       `;
       
@@ -581,7 +646,7 @@ Generate your thread now:`;
         const contentType = cardTitle.toLowerCase().includes('thread') ? 'thread' : 'twitter';
         const actionsContainer = card.querySelector('.twitter-header-actions');
         if (actionsContainer) {
-          window.TabTalkUI.addSaveButtonToCard(actionsContainer, contentType, contentData);
+          window.TabTalkUI.addSaveButtonToCard(card, actionsContainer, contentType, contentData);
         }
       }
       
@@ -595,7 +660,16 @@ Generate your thread now:`;
       copyBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
         try {
-          await navigator.clipboard.writeText(textArea.value);
+          let textToCopy = textArea.value;
+          
+          // Include image prompt if present (from param or dataset injected later)
+          const datasetPrompt = card.dataset.imagePrompt ? decodeURIComponent(card.dataset.imagePrompt) : null;
+          const promptToUse = imagePrompt || datasetPrompt;
+          if (promptToUse) {
+            textToCopy += '\n\n---\n🖼️ Nano Banana Prompt (9:16):\n' + promptToUse;
+          }
+          
+          await navigator.clipboard.writeText(textToCopy);
           
           // Success state
           copyBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -969,26 +1043,42 @@ Craft your thread now:`;
     },
     
     // COPY ALL TWEETS FUNCTIONALITY
-    copyAllTweets: async function(tweets, button, statusElement) {
+    copyAllTweets: async function(tweets, button, statusElement, threadId = null) {
       try {
-        // Join all tweets with double line breaks for easy pasting
+        let promptsByIndex = [];
+        if (threadId) {
+          // Collect per-tweet prompts from DOM cards for this thread
+          const cards = Array.from(document.querySelectorAll(`.twitter-card[data-thread-id="${threadId}"]`));
+          promptsByIndex = cards.map((card) => {
+            const ds = card.dataset.imagePrompt ? decodeURIComponent(card.dataset.imagePrompt) : null;
+            return ds || null;
+          });
+        }
+
+        // Build combined text with optional image prompts
         const allTweetsText = tweets.map((tweet, index) => {
-          return `${index + 1}/${tweets.length}:\n${tweet}`;
+          const header = `${index + 1}/${tweets.length}:`;
+          const base = `${header}\n${tweet}`;
+          const maybePrompt = promptsByIndex[index];
+          if (maybePrompt) {
+            return `${base}\n\n---\n🖼️ Nano Banana Prompt (9:16):\n${maybePrompt}`;
+          }
+          return base;
         }).join('\n\n---\n\n');
-        
+
         await navigator.clipboard.writeText(allTweetsText);
-        
+
         // Update UI
         button.classList.add('hidden');
         statusElement.classList.remove('hidden');
-        
+
         // Reset after 3 seconds
         setTimeout(() => {
           button.classList.remove('hidden');
           statusElement.classList.add('hidden');
         }, 3000);
-        
-        console.log('✅ All tweets copied to clipboard');
+
+        console.log('✅ All tweets (with prompts if available) copied to clipboard');
       } catch (error) {
         console.error('Error copying all tweets:', error);
         alert('Failed to copy tweets. Please try again.');
@@ -1134,6 +1224,13 @@ Craft your ${targetLength}-character thread now:`;
         regenerateBtn.textContent = originalText;
         regenerateBtn.disabled = false;
       }
+    },
+    
+    // Utility: escape HTML for display
+    escapeHtml: function(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
   };
 

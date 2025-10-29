@@ -296,6 +296,22 @@
               <div id="saved-custom-tones" class="saved-custom-tones hidden"></div>
             </div>
 
+            <!-- Image Prompt Option -->
+            <div class="image-prompt-section">
+              <label class="image-prompt-toggle">
+                <input type="checkbox" id="include-image-prompt" class="image-prompt-checkbox">
+                <span class="image-prompt-label">
+                  <svg class="image-prompt-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                  </svg>
+                  Generate Image Prompt (9:16 Nano Banana)
+                </span>
+              </label>
+              <p class="image-prompt-description">AI will create an optimized image prompt for your content</p>
+            </div>
+
             <!-- Modal Actions -->
             <div class="tone-modal-actions">
               <button id="tone-cancel-btn" class="tone-btn tone-btn-secondary">Cancel</button>
@@ -853,9 +869,13 @@ INTEGRATION RULES:
     handleGenerate: function() {
       if (!this.selectedTone) return;
 
+      // Check if image prompt is requested
+      const imagePromptCheckbox = document.getElementById('include-image-prompt');
+      const includeImagePrompt = imagePromptCheckbox ? imagePromptCheckbox.checked : false;
+
       // Store callback and hide modal
       if (this.onGenerateCallback) {
-        this.onGenerateCallback(this.selectedTone, this.currentPlatform);
+        this.onGenerateCallback(this.selectedTone, this.currentPlatform, includeImagePrompt);
       }
 
       this.hideModal();

@@ -234,11 +234,21 @@
       const editBtn = card.querySelector('.btn-action.edit');
       const deleteBtn = card.querySelector('.btn-action.delete');
 
-      // Copy
+      // Copy (no image prompts in saved content)
       copyBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
         try {
-          await navigator.clipboard.writeText(item.content || '');
+          let textToCopy = '';
+          const isThread = (item.platform || '').toLowerCase() === 'thread' && Array.isArray(item.tweets) && item.tweets.length > 0;
+          if (isThread) {
+            textToCopy = item.tweets.map((t, index) => {
+              const header = t.number || `${index + 1}/${item.tweets.length}:`;
+              return `${header}\n${t.content || ''}`;
+            }).join('\n\n---\n\n');
+          } else {
+            textToCopy = item.content || '';
+          }
+          await navigator.clipboard.writeText(textToCopy);
           const span = copyBtn.querySelector('span');
           span.textContent = '✓';
           copyBtn.classList.add('success');
@@ -282,6 +292,8 @@
     openReadModal(item) {
       const modal = document.createElement('div');
       modal.className = 'gallery-modal';
+      // Build modal content; do not include image prompts for saved content
+      let imagePromptSection = '';
       modal.innerHTML = `
         <div class="gallery-modal-overlay"></div>
         <div class="gallery-modal-content">
@@ -308,7 +320,17 @@
       modal.querySelector('.gallery-modal-overlay').addEventListener('click', close);
       
       modal.querySelector('.modal-btn.copy').addEventListener('click', async () => {
-        await navigator.clipboard.writeText(item.content || '');
+        let textToCopy = '';
+        const isThread = (item.platform || '').toLowerCase() === 'thread' && Array.isArray(item.tweets) && item.tweets.length > 0;
+        if (isThread) {
+          textToCopy = item.tweets.map((t, index) => {
+            const header = t.number || `${index + 1}/${item.tweets.length}:`;
+            return `${header}\n${t.content || ''}`;
+          }).join('\n\n---\n\n');
+        } else {
+          textToCopy = item.content || '';
+        }
+        await navigator.clipboard.writeText(textToCopy);
         const btn = modal.querySelector('.modal-btn.copy');
         btn.textContent = 'Copied!';
         setTimeout(() => btn.textContent = 'Copy', 1500);

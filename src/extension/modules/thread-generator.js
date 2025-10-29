@@ -48,6 +48,14 @@
                 </label>
                 <small style="display: block; margin-top: 4px; margin-left: 24px; font-size: 11px; color: var(--text-secondary);">Includes curated facts and hooks</small>
               </div>
+
+              <div class="form-group" style="margin-bottom: 8px; margin-top: 6px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                  <input type="checkbox" id="modal-include-image-prompts" style="width: 16px; height: 16px;" />
+                  <span style="font-size: 13px; font-weight: 500; color: var(--text-primary);">Generate per‑tweet Image Prompts (9:16)</span>
+                </label>
+                <small style="display: block; margin-top: 4px; margin-left: 24px; font-size: 11px; color: var(--text-secondary);">Live only. Not saved to Gallery.</small>
+              </div>
             </div>
             
             <div class="tone-modal-actions">
@@ -381,7 +389,7 @@ Generate the complete thread now:`;
       const copyAllBtn = threadHeader.querySelector('.btn-copy-all-thread');
       const copyAllStatus = threadHeader.querySelector('.copy-all-status');
       copyAllBtn.addEventListener('click', async () => {
-        await this.copyAllTweets(tweets, copyAllBtn, copyAllStatus);
+        await this.copyAllTweets(tweets, copyAllBtn, copyAllStatus, threadId);
       });
       
       // Add Master Thread Control (unified slider + presets + regenerate)
@@ -442,6 +450,7 @@ Generate the complete thread now:`;
       });
       
       // Individual tweet cards in SIMPLE MODE (no per-tweet controls)
+      const includeImagePrompts = document.getElementById('modal-include-image-prompts')?.checked;
       tweets.forEach((tweet, index) => {
         const cardTitle = `Thread ${index + 1}/${tweets.length}`;
         // Pass true for isThreadCard = simple mode (only char count)
@@ -450,6 +459,33 @@ Generate the complete thread now:`;
         card.dataset.threadId = threadId;
         card.dataset.category = category;
         contentContainer.appendChild(card);
+
+        // Live-only per-tweet image prompt generation if enabled
+        if (includeImagePrompts && window.TabTalkImagePromptGenerator) {
+          (async () => {
+            try {
+              const contentId = `threadgen_${threadId}_tweet_${index + 1}`;
+              const prompt = await window.TabTalkImagePromptGenerator.generatePromptForCard(contentId, tweet);
+              if (prompt) {
+                // Attach to card for copy; do not persist to Gallery
+                card.dataset.imagePrompt = encodeURIComponent(prompt);
+                // Inject UI block under content
+                const contentEl = card.querySelector('.twitter-card-content');
+                if (contentEl && !card.querySelector('.image-prompt-display')) {
+                  const promptEl = document.createElement('div');
+                  promptEl.className = 'image-prompt-display';
+                  promptEl.innerHTML = `
+                    <div class="image-prompt-label">🖼️ Nano Banana Prompt (9:16)</div>
+                    <div class="image-prompt-text">${window.TabTalkUI?.escapeHtml ? window.TabTalkUI.escapeHtml(prompt) : prompt}</div>
+                  `;
+                  contentEl.appendChild(promptEl);
+                }
+              }
+            } catch (e) {
+              console.warn('Thread Generator: image prompt generation failed:', e);
+            }
+          })();
+        }
       });
       
       this.messagesContainer.appendChild(contentContainer);

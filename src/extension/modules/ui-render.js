@@ -214,7 +214,7 @@
         };
         const actionsContainer = card.querySelector('.twitter-header-actions');
         if (actionsContainer) {
-          window.TabTalkUI.addSaveButtonToCard(actionsContainer, contentType, contentData);
+          window.TabTalkUI.addSaveButtonToCard(card, actionsContainer, contentType, contentData);
         }
       }
       
@@ -227,7 +227,13 @@
         try {
           const structured = card.querySelector('.structured-html');
           const md = structured?.getAttribute('data-markdown');
-          const textToCopy = md ? decodeURIComponent(md) : (structured?.innerText || '');
+          let textToCopy = md ? decodeURIComponent(md) : (structured?.innerText || '');
+          
+          // Include image prompt if present
+          const imagePrompt = card.dataset.imagePrompt ? decodeURIComponent(card.dataset.imagePrompt) : null;
+          if (imagePrompt) {
+            textToCopy += '\n\n---\n🖼️ Nano Banana Prompt (9:16):\n' + imagePrompt;
+          }
           
           await navigator.clipboard.writeText(textToCopy);
           
@@ -287,14 +293,14 @@
     },
     
     // NEW: Add save button to content cards
-    addSaveButtonToCard: function(cardElement, category, contentData) {
+    addSaveButtonToCard: function(cardElement, actionsContainer, category, contentData) {
       if (!cardElement || !category || !contentData) return;
       
       // Create save button with unified styling
       const saveBtn = document.createElement('button');
       
       // Check if this is a Twitter card (has twitter-header-actions container)
-      const isTwitterCard = cardElement.classList.contains('twitter-header-actions');
+      const isTwitterCard = actionsContainer && actionsContainer.classList.contains('twitter-header-actions');
       
       if (isTwitterCard) {
         // Use unified Twitter action button styling
@@ -354,7 +360,7 @@
             title: this.currentTab?.title || document.title
           };
           
-          await window.TabTalkStorage.saveContent(targetCategory, {
+          const savePayload = {
             id: contentId,
             content,
             metadata,
@@ -362,7 +368,9 @@
             type: contentData.type || (category === 'thread' ? 'thread' : 'post'),
             platform: contentData.platform || (category === 'thread' ? 'thread' : 'twitter'),
             ...contentData
-          });
+          };
+          
+          await window.TabTalkStorage.saveContent(targetCategory, savePayload);
           
           saveBtn.classList.add('saved');
           saveBtn.querySelector('svg').setAttribute('fill', 'currentColor');
@@ -370,8 +378,9 @@
         }
       });
       
-      // Add to card
-      cardElement.appendChild(saveBtn);
+      // Add to actions container (or card if no container provided)
+      const targetElement = actionsContainer || cardElement;
+      targetElement.appendChild(saveBtn);
     },
     
     // Show toast notification
