@@ -75,5 +75,5 @@
       });
     }
   };
-  window.TabTalkAPI = API;
+  window.FibrAPI = API;
 })();

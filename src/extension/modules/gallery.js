@@ -3,11 +3,11 @@
     INIT_KEY: 'savedContent',
 
     async loadSaved(category = 'twitter') {
-      if (!window.TabTalkStorage || !TabTalkStorage.getSavedContent) {
-        console.error('Gallery: TabTalkStorage not available');
+      if (!window.FibrStorage || !FibrStorage.getSavedContent) {
+        console.error('Gallery: FibrStorage not available');
         return [];
       }
-      const saved = await TabTalkStorage.getSavedContent();
+      const saved = await FibrStorage.getSavedContent();
       if (!saved) return [];
       if (category === 'all') {
         // Flatten all categories if needed later
@@ -53,8 +53,8 @@
       // Wire header controls
       const backBtn = header.querySelector('#gallery-back-btn');
       backBtn.addEventListener('click', () => {
-        if (window.TabTalkNavigation && TabTalkNavigation.showView) {
-          TabTalkNavigation.showView('chat');
+        if (window.FibrNavigation && FibrNavigation.showView) {
+          FibrNavigation.showView('chat');
         }
       });
 
@@ -87,8 +87,8 @@
         deleteAllBtn.addEventListener('click', async () => {
           const ok = confirm('Delete all saved items in this category?');
           if (!ok) return;
-          if (window.TabTalkStorage && TabTalkStorage.clearSavedCategory) {
-            await TabTalkStorage.clearSavedCategory(category);
+          if (window.FibrStorage && FibrStorage.clearSavedCategory) {
+            await FibrStorage.clearSavedCategory(category);
             this.initVirtualList(list, []);
             this.renderList(list, []);
             countEl.textContent = `0/50`;
@@ -189,8 +189,8 @@
       const card = document.createElement('div');
       
       // BULLETPROOF THREAD DETECTION - Use centralized detection
-      const isThread = window.TabTalkTwitter && window.TabTalkTwitter.isThreadContent 
-        ? window.TabTalkTwitter.isThreadContent(item)
+      const isThread = window.FibrTwitter && window.FibrTwitter.isThreadContent 
+        ? window.FibrTwitter.isThreadContent(item)
         : this.fallbackThreadDetection(item);
       
       const isLongContent = (item.content || '').length > 500;
@@ -242,8 +242,8 @@
           let textToCopy = '';
           
           // Use centralized thread detection
-          const isThread = window.TabTalkTwitter && window.TabTalkTwitter.isThreadContent 
-            ? window.TabTalkTwitter.isThreadContent(item)
+          const isThread = window.FibrTwitter && window.FibrTwitter.isThreadContent 
+            ? window.FibrTwitter.isThreadContent(item)
             : this.fallbackThreadDetection(item);
           
           if (isThread) {
@@ -403,18 +403,18 @@
     },
 
     async updateItem(item, patch) {
-      const saved = await TabTalkStorage.getSavedContent();
+      const saved = await FibrStorage.getSavedContent();
       const category = (item._category) || 'twitter';
       if (!Array.isArray(saved[category])) return;
       const idx = saved[category].findIndex(i => i.id === item.id);
       if (idx === -1) return;
       saved[category][idx] = { ...saved[category][idx], ...patch };
-      await TabTalkStorage.setStorageItem('savedContent', saved);
+      await FibrStorage.setStorageItem('savedContent', saved);
     },
 
     async deleteItem(item) {
       const category = (item._category) || 'twitter';
-      await TabTalkStorage.deleteSavedContent(category, item.id);
+      await FibrStorage.deleteSavedContent(category, item.id);
     },
 
     debounce(fn, ms) {
@@ -468,8 +468,8 @@
       // Method 2: Parse from combined content using enhanced parsing
       if (item.content) {
         // Use Twitter module's enhanced parsing if available
-        if (window.TabTalkTwitter && window.TabTalkTwitter.parseTwitterThread) {
-          const parsedTweets = window.TabTalkTwitter.parseTwitterThread(item.content);
+        if (window.FibrTwitter && window.FibrTwitter.parseTwitterThread) {
+          const parsedTweets = window.FibrTwitter.parseTwitterThread(item.content);
           if (parsedTweets.length > 1) {
             return parsedTweets.map((tweet, index) => {
               return `${index + 1}/${parsedTweets.length}:\n${tweet}`;

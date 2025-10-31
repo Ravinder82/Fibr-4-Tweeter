@@ -129,13 +129,13 @@
       const backBtn = container.querySelector('#privacy-back');
       if (backBtn) {
         backBtn.addEventListener('click', () => {
-          if (window.TabTalkNavigation && window.TabTalkNavigation.showView) {
-            window.TabTalkNavigation.showView('chat');
+          if (window.FibrNavigation && window.FibrNavigation.showView) {
+            window.FibrNavigation.showView('chat');
           }
         });
       }
     }
   };
   
-  window.TabTalkPrivacyPolicy = PrivacyPolicy;
+  window.FibrPrivacyPolicy = PrivacyPolicy;
 })();

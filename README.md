@@ -203,6 +203,30 @@ Choose from 8 analysis types:
 - **Open Source**: Complete code transparency and community auditing
 - **Minimal Permissions**: Only required permissions (activeTab, storage, scripting)
 
+### Hosting the Privacy Policy for Chrome Web Store
+
+To satisfy Chrome Web Store requirements, follow these steps to host the publicly accessible privacy policy:
+
+1. **Prepare the HTML**  
+   - Create a `website/` folder in the repo root (already tracked in main).  
+   - Ensure `website/privacy-policy.html` contains the latest policy content (see this repo's file for reference).
+
+2. **Publish to GitHub Pages**  
+   ```bash
+   git checkout --orphan gh-pages
+   git reset --hard
+   cp website/privacy-policy.html privacy-policy.html
+   git add privacy-policy.html
+   git commit -m "Publish privacy policy"
+   git push origin gh-pages --force
+   git checkout main
+   ```
+
+3. **Enable Pages in GitHub UI** *(manual step)*  
+   - Repo → **Settings → Pages**  
+   - Build & deployment: “Deploy from a branch” → `gh-pages` branch, root folder  
+   - Save and verify: `https://ravinder82.github.io/Fibr-4-Tweeter/privacy-policy.html`
+
 ## 📁 Project Structure
 
 ```

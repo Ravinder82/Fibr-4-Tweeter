@@ -54,10 +54,10 @@
     // Populate reply tones in the modal
     populateReplyTones: function() {
       const toneGrid = document.querySelector('#repost-modal .tone-grid');
-      if (!toneGrid || !window.TabTalkToneSelector) return;
+      if (!toneGrid || !window.FibrToneSelector) return;
 
       // Get only reply category tones from the main tone selector, excluding "Fact Check" to avoid duplication
-      const replyTones = Object.values(window.TabTalkToneSelector.toneDefinitions)
+      const replyTones = Object.values(window.FibrToneSelector.toneDefinitions)
         .filter(tone => tone.category === 'reply' && tone.id !== 'fact-check');
 
       toneGrid.innerHTML = replyTones.map(tone => `
@@ -130,7 +130,7 @@
 
       // Store selection
       const toneId = option.dataset.toneId;
-      this.selectedTone = window.TabTalkToneSelector?.toneDefinitions[toneId];
+      this.selectedTone = window.FibrToneSelector?.toneDefinitions[toneId];
 
       // Enable generate button
       const generateBtn = document.getElementById('repost-generate-btn');
@@ -185,8 +185,8 @@
       const preservedTone = selectedTone;
 
       // CRITICAL FIX: Clear previous repost outputs BEFORE generation starts
-      if (window.TabTalkTwitter && window.TabTalkTwitter.clearPreviousRepostOutputs) {
-        window.TabTalkTwitter.clearPreviousRepostOutputs.call(this.appInstance);
+      if (window.FibrTwitter && window.FibrTwitter.clearPreviousRepostOutputs) {
+        window.FibrTwitter.clearPreviousRepostOutputs.call(this.appInstance);
       }
 
       // Generate content using the Twitter module directly (same as tone selector)
@@ -196,10 +196,10 @@
       console.log('Repost: Generating with tone:', preservedTone);
       console.log('Repost: Include image prompt:', includeImagePrompt);
       
-      if (window.TabTalkTwitter && window.TabTalkTwitter.generateSocialContentWithTone) {
+      if (window.FibrTwitter && window.FibrTwitter.generateSocialContentWithTone) {
         // Bind the Twitter module methods to the app instance context
         // Parameters: platform, selectedTone, includeImagePrompt
-        await window.TabTalkTwitter.generateSocialContentWithTone.call(
+        await window.FibrTwitter.generateSocialContentWithTone.call(
           this.appInstance,
           'twitter',           // platform
           preservedTone,        // selectedTone object
@@ -214,15 +214,15 @@
         );
       } else {
         this.showToast('❌ Content generation not available.', 3000);
-        console.error('TabTalkTwitter module or generateSocialContentWithTone method not found');
+        console.error('FibrTwitter module or generateSocialContentWithTone method not found');
         console.error('Available on appInstance:', Object.keys(this.appInstance));
       }
     },
 
     // Show toast message
     showToast: function(message, duration = 3000) {
-      if (window.TabTalkUI?.showToast) {
-        window.TabTalkUI.showToast(message, duration);
+      if (window.FibrUI?.showToast) {
+        window.FibrUI.showToast(message, duration);
       } else {
         console.log('Toast:', message);
       }
@@ -230,7 +230,7 @@
   };
 
   // Expose globally
-  window.TabTalkRepostModal = RepostModal;
+  window.FibrRepostModal = RepostModal;
 
   // Auto-initialize when DOM is ready
   if (document.readyState === 'loading') {

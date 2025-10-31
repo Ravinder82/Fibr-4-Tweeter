@@ -63,17 +63,17 @@ import './modules/privacy-policy.js';
       }
       async init() {
         try {
-          console.log("TabTalk AI: Initializing popup");
+          console.log("Fibr: Initializing popup");
 
           const tabs = await chrome.tabs.query({ active: !0, currentWindow: !0 });
           if (!tabs || tabs.length === 0) {
-            console.error("TabTalk AI: Failed to get current tab");
+            console.error("Fibr: Failed to get current tab");
             if (this.pageStatus) {
               this.pageStatus.textContent = "\u274C Failed to access current tab";
             }
           } else {
             this.currentTab = tabs[0];
-            console.log("TabTalk AI: Current tab:", this.currentTab.url);
+            console.log("Fibr: Current tab:", this.currentTab.url);
           }
 
           await this.loadState();
@@ -103,9 +103,9 @@ import './modules/privacy-policy.js';
             this.showView("welcome");
           }
 
-          console.log("TabTalk AI: Popup initialized");
+          console.log("Fibr: Popup initialized");
         } catch (error) {
-          console.error("TabTalk AI: Initialization error:", error);
+          console.error("Fibr: Initialization error:", error);
           if (this.pageStatus) {
             // Special handling for extension context invalidated (common during development)
             error.message && error.message.includes("Extension context invalidated") 
@@ -274,19 +274,19 @@ import './modules/privacy-policy.js';
           this.quickRepostBtn &&
             this.quickRepostBtn.addEventListener("click", async () => {
               if (
-                !window.TabTalkRepostModal ||
-                typeof window.TabTalkRepostModal.showWithContentLoading !== "function"
+                !window.FibrRepostModal ||
+                typeof window.FibrRepostModal.showWithContentLoading !== "function"
               ) {
-                console.warn("TabTalk AI: Repost modal module not available");
+                console.warn("Fibr: Repost modal module not available");
                 this.showToast
                   ? this.showToast('❌ Repost flow unavailable. Please reload the extension.', 4000)
                   : alert('❌ Repost flow unavailable. Please reload the extension.');
                 return;
               }
               try {
-                await window.TabTalkRepostModal.showWithContentLoading(this);
+                await window.FibrRepostModal.showWithContentLoading(this);
               } catch (error) {
-                console.error('TabTalk AI: Failed to open repost modal', error);
+                console.error('Fibr: Failed to open repost modal', error);
                 this.showToast
                   ? this.showToast(`❌ Repost setup failed: ${error.message}`, 4000)
                   : alert(`❌ Repost setup failed: ${error.message}`);
@@ -295,17 +295,17 @@ import './modules/privacy-policy.js';
           this.quickCommentsBtn &&
             this.quickCommentsBtn.addEventListener("click", async () => {
               this.resetScreenForGeneration && this.resetScreenForGeneration();
-              if (window.TabTalkCommentsModal?.showWithContentLoading) {
+              if (window.FibrCommentsModal?.showWithContentLoading) {
                 try {
-                  await window.TabTalkCommentsModal.showWithContentLoading(this);
+                  await window.FibrCommentsModal.showWithContentLoading(this);
                 } catch (error) {
-                  console.error('TabTalk AI: Failed to open comments modal', error);
+                  console.error('Fibr: Failed to open comments modal', error);
                   this.showToast
                     ? this.showToast(`❌ Comments setup failed: ${error.message}`, 4000)
                     : alert(`❌ Comments setup failed: ${error.message}`);
                 }
               } else {
-                console.warn('TabTalk AI: Comments modal module not available');
+                console.warn('Fibr: Comments modal module not available');
                 this.showToast
                   ? this.showToast('❌ Comments flow unavailable. Please reload the extension.', 4000)
                   : alert('❌ Comments flow unavailable. Please reload the extension.');
@@ -320,10 +320,10 @@ import './modules/privacy-policy.js';
           this.quickCreateBtn &&
             this.quickCreateBtn.addEventListener("click", () => {
               if (
-                window.TabTalkThreadGenerator &&
-                window.TabTalkThreadGenerator.showModal
+                window.FibrThreadGenerator &&
+                window.FibrThreadGenerator.showModal
               ) {
-                window.TabTalkThreadGenerator.showModal(this);
+                window.FibrThreadGenerator.showModal(this);
               } else {
                 this.showView("thread-generator");
               }
@@ -339,9 +339,9 @@ import './modules/privacy-policy.js';
         this.initializeHorizontalScroll();
 
         // Initialize modules that need the DOM now that it's safe
-        if (window.TabTalkThreadGenerator && window.TabTalkThreadGenerator.init) {
-          console.log('TabTalk AI: Initializing Thread Generator modal...');
-          window.TabTalkThreadGenerator.init();
+        if (window.FibrThreadGenerator && window.FibrThreadGenerator.init) {
+          console.log('Fibr: Initializing Thread Generator modal...');
+          window.FibrThreadGenerator.init();
         }
       }
       async testApiKey(t) {

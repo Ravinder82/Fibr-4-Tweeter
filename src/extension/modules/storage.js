@@ -23,10 +23,10 @@
     async loadState() {
       try {
         const data = await chrome.storage.local.get(['geminiApiKey', 'apiKey']);
-        console.log('TabTalk AI: Loading state, API key exists:', !!data.geminiApiKey);
+        console.log('Fibr: Loading state, API key exists:', !!data.geminiApiKey);
         if (data.geminiApiKey || data.apiKey) {
           this.apiKey = data.geminiApiKey || data.apiKey;
-          console.log('TabTalk AI: API key loaded successfully');
+          console.log('Fibr: API key loaded successfully');
           if (this.apiKeyInput) this.apiKeyInput.value = this.apiKey;
         }
         if (this.currentTab) {
@@ -34,7 +34,7 @@
           this.currentDomain = url.hostname;
           if (this.pageTitle) {
             this.pageTitle.textContent = this.currentTab.title || 'Untitled Page';
-            console.log('TabTalk AI: Page title set to:', this.pageTitle.textContent);
+            console.log('Fibr: Page title set to:', this.pageTitle.textContent);
           }
         }
         return data;
@@ -55,7 +55,7 @@
       this.apiKey = apiKey;
       try {
         await chrome.storage.local.set({ geminiApiKey: apiKey, apiKey, hasSeenWelcome: true });
-        console.log('TabTalk AI: API key saved');
+        console.log('Fibr: API key saved');
       } catch (e) {
         await this.setStorageItem('apiKey', apiKey);
         await this.setStorageItem('hasSeenWelcome', true);
@@ -77,7 +77,7 @@
         // Reset onboarding flag and show welcome view
         await this.setStorageItem('hasSeenWelcome', false);
         this.showView('welcome');
-        console.log('TabTalk AI: API key deleted');
+        console.log('Fibr: API key deleted');
       } catch (error) {
         console.error('Error deleting API key:', error);
         alert('Error deleting API key. Please try again.');
@@ -130,7 +130,7 @@
       }
       
       await this.setStorageItem('savedContent', savedContent);
-      console.log(`TabTalk AI: Content saved to ${category} category`);
+      console.log(`Fibr: Content saved to ${category} category`);
       return item.id;
     },
     
@@ -139,7 +139,7 @@
       if (savedContent[category]) {
         savedContent[category] = savedContent[category].filter(item => item.id !== itemId);
         await this.setStorageItem('savedContent', savedContent);
-        console.log(`TabTalk AI: Content deleted from ${category} category`);
+        console.log(`Fibr: Content deleted from ${category} category`);
       }
     },
     
@@ -149,14 +149,14 @@
       if (savedContent && Object.prototype.hasOwnProperty.call(savedContent, category)) {
         savedContent[category] = [];
         await this.setStorageItem('savedContent', savedContent);
-        console.log(`TabTalk AI: Cleared all saved items in category ${category}`);
+        console.log(`Fibr: Cleared all saved items in category ${category}`);
       }
     },
     
     // Bulk delete: remove all saved content across categories
     async clearAllSaved() {
       await this.setStorageItem('savedContent', {});
-      console.log('TabTalk AI: Cleared all saved content across all categories');
+      console.log('Fibr: Cleared all saved content across all categories');
     },
     
     async isContentSaved(category, contentId) {
@@ -224,11 +224,11 @@
         // Clean up old storage and set migration flag
         try { await chrome.storage.local.remove(['savedThreads']); } catch {}
         await this.setStorageItem('threadsMigratedToGallery', true);
-        console.log('TabTalk AI: Migrated savedThreads to Gallery savedContent');
+        console.log('Fibr: Migrated savedThreads to Gallery savedContent');
       } catch (e) {
         console.error('Migration threads->gallery failed', e);
       }
     }
   };
-  window.TabTalkStorage = Storage;
+  window.FibrStorage = Storage;
 })();

@@ -565,10 +565,10 @@ THE GOAL: Create ONE impressive piece of content that perfectly matches the orig
 
       // Store selection
       this.selectedToneId = option.dataset.toneId;
-      console.log('TabTalkToneSelector: Selected tone ID:', this.selectedToneId);
-      console.log('TabTalkToneSelector: Available tone IDs:', Object.keys(this.toneDefinitions));
+      console.log('FibrToneSelector: Selected tone ID:', this.selectedToneId);
+      console.log('FibrToneSelector: Available tone IDs:', Object.keys(this.toneDefinitions));
       this.selectedTone = this.toneDefinitions[this.selectedToneId];
-      console.log('TabTalkToneSelector: Selected tone object:', this.selectedTone);
+      console.log('FibrToneSelector: Selected tone object:', this.selectedTone);
 
       // Enable generate button
       const generateBtn = document.getElementById('tone-generate-btn');
@@ -810,12 +810,12 @@ INTEGRATION RULES:
 
     // Handle generate
     handleGenerate: function() {
-      console.log('TabTalkToneSelector: handleGenerate called');
-      console.log('TabTalkToneSelector: selectedToneId:', this.selectedToneId);
-      console.log('TabTalkToneSelector: selectedTone:', this.selectedTone);
+      console.log('FibrToneSelector: handleGenerate called');
+      console.log('FibrToneSelector: selectedToneId:', this.selectedToneId);
+      console.log('FibrToneSelector: selectedTone:', this.selectedTone);
       
       if (!this.selectedTone) {
-        console.warn('TabTalkToneSelector: No tone selected, cannot generate');
+        console.warn('FibrToneSelector: No tone selected, cannot generate');
         return;
       }
 
@@ -825,7 +825,7 @@ INTEGRATION RULES:
 
       // Store callback and hide modal
       if (this.onGenerateCallback) {
-        console.log('TabTalkToneSelector: Calling callback with tone:', this.selectedTone);
+        console.log('FibrToneSelector: Calling callback with tone:', this.selectedTone);
         this.onGenerateCallback(this.selectedTone, this.currentPlatform, includeImagePrompt);
       }
 
@@ -892,5 +892,5 @@ INTEGRATION RULES:
   }
 
   // Export to window
-  window.TabTalkToneSelector = ToneSelector;
+  window.FibrToneSelector = ToneSelector;
 })();

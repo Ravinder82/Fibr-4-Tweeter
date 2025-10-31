@@ -204,7 +204,7 @@
       `;
       
       // Add save button to analytics card header actions container
-      if (window.TabTalkUI && window.TabTalkUI.addSaveButtonToCard) {
+      if (window.FibrUI && window.FibrUI.addSaveButtonToCard) {
         const contentType = options.contentType || 'content';
         const contentData = {
           id: options.contentId || Date.now().toString(),
@@ -213,7 +213,7 @@
         };
         const actionsContainer = card.querySelector('.twitter-header-actions');
         if (actionsContainer) {
-          window.TabTalkUI.addSaveButtonToCard(card, actionsContainer, contentType, contentData);
+          window.FibrUI.addSaveButtonToCard(card, actionsContainer, contentType, contentData);
         }
       }
       
@@ -321,10 +321,10 @@
       saveBtn.title = 'Save to history';
       
       // Check if already saved
-      if (window.TabTalkStorage) {
+      if (window.FibrStorage) {
         // Normalize storage category: store threads under 'twitter' so Gallery shows them
         const initialTargetCategory = category === 'thread' ? 'twitter' : category;
-        window.TabTalkStorage.isContentSaved(initialTargetCategory, contentData.id || Date.now().toString())
+        window.FibrStorage.isContentSaved(initialTargetCategory, contentData.id || Date.now().toString())
           .then(isSaved => {
             if (isSaved) {
               saveBtn.classList.add('saved');
@@ -340,13 +340,13 @@
         const category = saveBtn.getAttribute('data-category');
         const targetCategory = category === 'thread' ? 'twitter' : category;
         
-        if (!window.TabTalkStorage) return;
+        if (!window.FibrStorage) return;
         
-        const isSaved = await window.TabTalkStorage.isContentSaved(targetCategory, contentId);
+        const isSaved = await window.FibrStorage.isContentSaved(targetCategory, contentId);
         
         if (isSaved) {
           // Remove from saved
-          await window.TabTalkStorage.deleteSavedContent(targetCategory, contentId);
+          await window.FibrStorage.deleteSavedContent(targetCategory, contentId);
           saveBtn.classList.remove('saved');
           saveBtn.querySelector('svg').setAttribute('fill', 'none');
           this.showToast('Removed from saved content');
@@ -369,7 +369,7 @@
             ...contentData
           };
           
-          await window.TabTalkStorage.saveContent(targetCategory, savePayload);
+          await window.FibrStorage.saveContent(targetCategory, savePayload);
           
           saveBtn.classList.add('saved');
           saveBtn.querySelector('svg').setAttribute('fill', 'currentColor');
@@ -399,5 +399,5 @@
       }, duration);
     },
   };
-  window.TabTalkUI = UI;
+  window.FibrUI = UI;
 })();

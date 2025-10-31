@@ -1,8 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/package",
-  "name": "tabtalk-ai",
-  "version": "1.0.0",
-  "description": "TabTalk AI - Chat with any webpage using Google Gemini",
+  "name": "fibr",
+  "version": "2.0.0",
+  "description": "Fibr - Generate premium Twitter/X content powered by Gemini",
   "main": "index.js",
   "scripts": {
     "build": "npm run clean && npm run build:extension && npm run build:web",
@@ -12,8 +12,8 @@
     "dev:extension": "esbuild src/extension/popup.js --bundle --outfile=dist/extension/popup.js --watch",
     "dev:web": "esbuild src/web-app/app.js --bundle --outfile=dist/web/app.js --watch",
     "clean": "rm -rf dist/",
-    "package:extension": "cd dist/extension && zip -r ../../tabtalk-ai-extension.zip .",
-    "package:web": "cd dist/web && zip -r ../../tabtalk-ai-web.zip .",
+    "package:extension": "cd dist/extension && zip -r ../../fibr-extension.zip .",
+    "package:web": "cd dist/web && zip -r ../../fibr-web.zip .",
     "test": "node tests/run-all.js",
     "knip": "knip",
     "generate:icons": "node scripts/generate-icons.js"
@@ -25,7 +25,7 @@
     "chrome-extension",
     "web-app"
   ],
-  "author": "TabTalk AI Team",
+  "author": "Fibr Team",
   "license": "MIT",
   "devDependencies": {
     "esbuild": "^0.19.12",
