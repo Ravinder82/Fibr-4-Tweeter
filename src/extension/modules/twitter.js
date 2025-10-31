@@ -73,6 +73,17 @@ RESEARCH CONTEXT: [relevant background knowledge and expert perspective]`;
       }
     },
 
+    clearPreviousCommentOutputs: function() {
+      if (!this.messagesContainer) return;
+      const existingCommentContainers = this.messagesContainer.querySelectorAll('.twitter-content-container');
+      existingCommentContainers.forEach(container => {
+        const isComment = container.querySelector('.twitter-card-title')?.textContent?.toLowerCase().includes('comment');
+        if (isComment) {
+          container.remove();
+        }
+      });
+    },
+
     // Simple hash function for cache keys
     simpleHash: function(str) {
       let hash = 0;
@@ -364,6 +375,119 @@ Share your authentic thread now: Generation ID: ${Date.now()}`;
       }
     },
 
+    generateCommentReplyWithTone: async function(selectedTone) {
+      if (!this.pageContent || !this.apiKey) {
+        if (this.showToast) {
+          this.showToast('❌ Please set up your Gemini API key first and ensure page content is loaded.', 3000);
+        } else {
+          alert('❌ Please set up your Gemini API key first and ensure page content is loaded.');
+        }
+        return;
+      }
+
+      this.currentSelectedTone = selectedTone;
+      this.currentIncludeImagePrompt = false;
+
+      this.clearPreviousCommentOutputs();
+
+      this.setLoading(true, 'Researching the discussion...');
+      console.log('TabTalk AI: Generating comment reply', {
+        toneId: selectedTone?.id,
+        toneName: selectedTone?.name,
+        pageTitle: this.currentTab?.title
+      });
+
+      try {
+        this.showProgressBar('Analyzing conversation context...');
+        const contentAnalysis = await this.analyzeAndResearchContent(this.pageContent, selectedTone);
+        this.currentContentAnalysis = contentAnalysis;
+
+        this.showProgressBar('Drafting high-signal comment...');
+
+        const toneInstructions = selectedTone.aiInstructions || this.getDefaultToneInstructions(selectedTone.id);
+
+        const systemPrompt = `You are an elite social strategist trusted by top creators to drop high-signal replies in Twitter/X comment sections. Every reply must feel like it comes from a seasoned operator who did the homework on the conversation.
+
+OPERATING CONDITIONS:
+1. Re-immerse yourself in the analysis and source notes below before drafting.
+2. Extract the sharpest, most conversation-native detail that proves you actually read the post.
+3. Deliver the reply in one cohesive paragraph that can ship immediately.
+
+QUALITY BARS:
+- 2–4 sentences (80–220 characters total) with zero filler or meta commentary.
+- Surface at least one concrete proof (metric, quote, shipped feature, customer signal, roadmap hint).
+- Speak with confident, collaborative energy—never salesy, never fawning, never hostile.
+- No hashtags, no @handles, no emoji spam (max 1 if it heightens authenticity).
+- Never end with engagement bait or vague “thoughts?” requests.
+
+TONE MODULE — ${selectedTone.name.toUpperCase()}:
+${toneInstructions}
+
+CONTEXT ANALYSIS DIGEST:
+${contentAnalysis.summary}
+
+KEY INSIGHTS TO LEVERAGE:
+${contentAnalysis.keyInsights}
+
+ADDITIONAL RESEARCH SIGNALS:
+${contentAnalysis.researchContext}`;
+
+        const userPrompt = `Write one fresh, ready-to-post reply for the active Twitter/X conversation.
+
+OUTPUT REQUIREMENTS:
+- Sound like a peer with real operating experience.
+- Lead with context that proves you internalized the content.
+- Weave in at least one tangible detail (metric, system behavior, release note, user outcome).
+- Keep it human—no bullet lists, no headers, no second options.
+- This replaces any previous reply; do not recycle earlier phrasing.
+
+SOURCE MATERIAL (full page extraction):
+${this.pageContent}
+
+Produce the final comment now in plain text only. Fresh run ID: ${Date.now()}`;
+
+        const response = await this.callGeminiAPIWithSystemPrompt(systemPrompt, userPrompt);
+
+        if (!response) {
+          throw new Error('Empty response received from Gemini API');
+        }
+
+        const cleanedResponse = this.cleanTwitterContent(response);
+        this.addTwitterMessage('assistant', cleanedResponse, 'comment');
+
+        if (this.addToHistory) {
+          const record = {
+            timestamp: new Date().toISOString(),
+            url: this.currentTab?.url || '',
+            title: this.currentTab?.title || '',
+            domain: this.currentDomain || '',
+            content: cleanedResponse,
+            type: 'comment'
+          };
+          await this.addToHistory('comment', record);
+        }
+
+        await this.saveState();
+      } catch (error) {
+        console.error('Error generating comment reply:', error);
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          hasApiKey: !!this.apiKey,
+          hasPageContent: !!this.pageContent,
+          toneId: selectedTone?.id
+        });
+        if (this.showToast) {
+          this.showToast(`❌ Comment reply failed: ${error.message}`, 4000);
+        } else {
+          alert(`❌ Comment reply failed: ${error.message}`);
+        }
+      } finally {
+        this.setLoading(false);
+        this.hideProgressBar();
+      }
+    },
+
     showProgressBar: function(message) {
       // Remove any existing progress bar
       this.hideProgressBar();
@@ -552,12 +676,20 @@ Share your authentic thread now: Generation ID: ${Date.now()}`;
         
       } else {
         // DISABLED: Universal cards system - using legacy system for stability
-        const card = this.createTwitterCard(content, 'Post', false, imagePrompt);
+        const cardTitle = platform === 'comment' ? 'Comment Reply' : 'Post';
+        const card = this.createTwitterCard(content, cardTitle, false, imagePrompt);
         card.dataset.platform = platform;
         if (imagePrompt) {
           card.dataset.imagePrompt = encodeURIComponent(imagePrompt);
         }
+        if (platform === 'comment') {
+          const lengthControl = card.querySelector('.twitter-length-control');
+          lengthControl?.remove();
+        }
         contentContainer.appendChild(card);
+      }
+      if (platform === 'comment') {
+        this.clearPreviousCommentOutputs();
       }
       this.messagesContainer.appendChild(contentContainer);
       setTimeout(() => {
