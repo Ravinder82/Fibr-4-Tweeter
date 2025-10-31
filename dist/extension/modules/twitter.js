@@ -415,9 +415,7 @@ Share your authentic thread now: Generation ID: ${Date.now()}`;
       this.currentSelectedTone = selectedTone;
       this.currentIncludeImagePrompt = false;
 
-      // Note: Clearing now happens BEFORE generation in comments-modal.js
-      // Keeping this as safety fallback for direct calls
-      this.clearPreviousCommentOutputs();
+      // Content is already cleared by resetScreenForGeneration() before modal opened
 
       this.setLoading(true, 'Researching the discussion...');
       console.log('TabTalk AI: Generating comment reply', {
@@ -733,14 +731,8 @@ Produce the final comment now in plain text only. Fresh run ID: ${Date.now()}`;
         contentContainer.appendChild(card);
       }
       
-      // SAFETY: Clear previous outputs of same type BEFORE appending new content
-      // This is a defensive fallback in case modal clearing didn't work
-      if (platform === 'comment') {
-        this.clearPreviousCommentOutputs();
-      } else if (platform === 'twitter') {
-        // Don't clear here for repost - already cleared in modal
-        // This prevents race conditions
-      }
+      // Content is already cleared by resetScreenForGeneration() before any action
+      // Just append the new content directly
       this.messagesContainer.appendChild(contentContainer);
       setTimeout(() => {
         this.messagesContainer.scrollTo({

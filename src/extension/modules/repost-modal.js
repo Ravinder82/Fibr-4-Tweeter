@@ -188,10 +188,8 @@
 
       const preservedTone = selectedTone;
 
-      // CRITICAL FIX: Clear previous repost outputs BEFORE generation starts
-      if (window.FibrTwitter && window.FibrTwitter.clearPreviousRepostOutputs) {
-        window.FibrTwitter.clearPreviousRepostOutputs.call(this.appInstance);
-      }
+      // Content is already cleared by resetScreenForGeneration() called before modal opened
+      // No need for selective clearing here
 
       // Generate content using the Twitter module directly (same as tone selector)
       // The tone selector callback passes: (selectedTone, selectedPlatform, includeImagePrompt)

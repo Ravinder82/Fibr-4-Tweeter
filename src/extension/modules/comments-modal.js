@@ -183,10 +183,8 @@ NON-NEGOTIABLE RULES:
       const toneToUse = this.selectedTone;
       this.hideModal();
 
-      // CRITICAL FIX: Clear previous comment outputs BEFORE generation starts
-      if (window.TabTalkTwitter && window.TabTalkTwitter.clearPreviousCommentOutputs) {
-        window.TabTalkTwitter.clearPreviousCommentOutputs.call(this.appInstance);
-      }
+      // Content is already cleared by resetScreenForGeneration() called before modal opened
+      // No need for selective clearing here
 
       try {
         if (window.TabTalkTwitter && typeof window.TabTalkTwitter.generateCommentReplyWithTone === 'function') {

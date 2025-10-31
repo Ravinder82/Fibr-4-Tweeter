@@ -303,6 +303,9 @@ import './modules/privacy-policy.js';
             }),
           this.quickRepostBtn &&
             this.quickRepostBtn.addEventListener("click", async () => {
+              // Clear previous content before opening modal
+              this.resetScreenForGeneration && this.resetScreenForGeneration();
+              
               if (
                 !window.FibrRepostModal ||
                 typeof window.FibrRepostModal.showWithContentLoading !== "function"
@@ -349,6 +352,9 @@ import './modules/privacy-policy.js';
             }),
           this.quickCreateBtn &&
             this.quickCreateBtn.addEventListener("click", () => {
+              // Clear previous content before opening thread generator
+              this.resetScreenForGeneration && this.resetScreenForGeneration();
+              
               if (
                 window.FibrThreadGenerator &&
                 window.FibrThreadGenerator.showModal
