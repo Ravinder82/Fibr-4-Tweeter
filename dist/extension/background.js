@@ -25,10 +25,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             .catch(error => sendResponse({ success: false, error: error.message }));
             
         return true; // Keep message channel open for async response
-    } else if (request.action === 'validateApiKey') {
+    } else if (request.action === 'validateApiKey' || request.action === 'testApiKey') {
+        // Support both 'validateApiKey' and 'testApiKey' for backward compatibility
         const { apiKey } = request;
         
-        console.log("Background: Validating API key:", apiKey ? "Key provided" : "No key");
+        console.log("Background: Validating API key (action:", request.action + "):", apiKey ? "Key provided" : "No key");
         
         if (!apiKey) {
             sendResponse({ success: false, error: 'No API key provided' });
@@ -37,6 +38,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         
         // Clean the API key (remove any extra whitespace)
         const cleanedKey = apiKey.trim().replace(/\s+/g, '');
+        
+        console.log("Background: Cleaned key length:", cleanedKey.length, "starts with:", cleanedKey.substring(0, 4));
         
         // Properly handle async response
         validateApiKey(cleanedKey)
@@ -119,22 +122,66 @@ async function callGeminiApi(apiKey, payload) {
 }
 
 async function validateApiKey(apiKey) {
+    console.log("Background: Starting API key validation...");
+    
+    // Basic format validation
+    if (!apiKey || typeof apiKey !== 'string') {
+        console.error("Background: Invalid API key type");
+        return { success: false, error: 'Invalid API key format' };
+    }
+    
+    // ROBUST: Clean the key thoroughly
+    const cleanKey = String(apiKey)
+        .trim()
+        .replace(/[\s\u200B-\u200D\uFEFF]/g, '')
+        .replace(/[\r\n\t]/g, '');
+    
+    console.log("Background: Cleaned key length:", cleanKey.length);
+    console.log("Background: Key preview:", cleanKey.substring(0, 10) + "..." + cleanKey.substring(cleanKey.length - 4));
+    
+    if (cleanKey.length < 30) {
+        console.error("Background: API key too short:", cleanKey.length);
+        return { success: false, error: `API key too short (${cleanKey.length} chars). Expected 39+ characters.` };
+    }
+    
+    // LENIENT: Don't enforce AIza prefix - let the API call determine validity
+    // Some valid keys might have different prefixes
+    if (!cleanKey.startsWith('AIza')) {
+        console.warn("Background: Key doesn't start with AIza (starts with:", cleanKey.substring(0, 4) + "), but will attempt validation");
+    }
+    
     // Use a minimal test payload to validate the API key
     const testPayload = {
         contents: [{
-            parts: [{ text: "Hello" }]
+            parts: [{ text: "Hi" }]
         }]
     };
     
     try {
-        const response = await callGeminiApi(apiKey, testPayload);
+        console.log("Background: Sending test request to Gemini API...");
+        const response = await callGeminiApi(cleanKey, testPayload);
+        
+        console.log("Background: Test request completed:", response.success ? "SUCCESS" : "FAILED");
+        
         // Check if the API call was successful
         if (response.success) {
+            console.log("Background: ✓ API key is valid");
             return { success: true };
         } else {
-            return { success: false, error: response.error || 'Invalid API key' };
+            console.error("Background: ✗ API key validation failed:", response.error);
+            // Provide more user-friendly error messages
+            let errorMsg = response.error || 'Invalid API key';
+            if (errorMsg.includes('API_KEY_INVALID') || errorMsg.includes('400')) {
+                errorMsg = 'Invalid API key. Please check your key and try again.';
+            } else if (errorMsg.includes('429')) {
+                errorMsg = 'Rate limit exceeded. Please wait a moment and try again.';
+            } else if (errorMsg.includes('403')) {
+                errorMsg = 'API key does not have permission. Please check your API key settings.';
+            }
+            return { success: false, error: errorMsg };
         }
     } catch (error) {
+        console.error("Background: Exception during validation:", error);
         return { success: false, error: error.message || 'Network error occurred' };
     }
 }

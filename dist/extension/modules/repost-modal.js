@@ -96,11 +96,14 @@
       if (!modal) return;
 
       modal.classList.remove('hidden');
-      modal.setAttribute('aria-hidden', 'false');
+      modal.removeAttribute('aria-hidden');
+      modal.removeAttribute('inert');
 
-      // Focus first tone option
-      const firstTone = modal.querySelector('.repost-tone-option');
-      firstTone?.focus();
+      // Focus first tone option after a brief delay
+      setTimeout(() => {
+        const firstTone = modal.querySelector('.repost-tone-option');
+        firstTone?.focus();
+      }, 50);
     },
 
     // Hide the repost modal
@@ -110,6 +113,7 @@
 
       modal.classList.add('hidden');
       modal.setAttribute('aria-hidden', 'true');
+      modal.setAttribute('inert', '');
 
       // Reset selections
       this.resetSelections();

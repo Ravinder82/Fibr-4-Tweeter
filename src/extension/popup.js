@@ -92,7 +92,19 @@ import './modules/privacy-policy.js';
           }
           this.bindEvents();
 
-          const hasSeenWelcome = await this.getStorageItem("hasSeenWelcome");
+          // ROBUST: Check hasSeenWelcome with fallback
+          let hasSeenWelcome = false;
+          try {
+            if (this.getStorageItem) {
+              hasSeenWelcome = await this.getStorageItem("hasSeenWelcome");
+            } else {
+              const data = await chrome.storage.local.get(["hasSeenWelcome"]);
+              hasSeenWelcome = data.hasSeenWelcome;
+            }
+          } catch (error) {
+            console.error("Error checking hasSeenWelcome:", error);
+            hasSeenWelcome = false;
+          }
 
           if (this.apiKey) {
             this.showView("chat");
@@ -196,14 +208,32 @@ import './modules/privacy-policy.js';
         let r = document.getElementById("welcome-get-started");
         r &&
           r.addEventListener("click", async () => {
-            (await this.setStorageItem("hasSeenWelcome", !0),
-              this.showView("api-setup"));
+            try {
+              if (this.setStorageItem) {
+                await this.setStorageItem("hasSeenWelcome", true);
+              } else {
+                await chrome.storage.local.set({ hasSeenWelcome: true });
+              }
+              this.showView("api-setup");
+            } catch (error) {
+              console.error("Error in welcome-get-started:", error);
+              this.showView("api-setup");
+            }
           });
         let o = document.getElementById("welcome-start");
         o &&
           o.addEventListener("click", async () => {
-            (await this.setStorageItem("hasSeenWelcome", !0),
-              this.showView("api-setup"));
+            try {
+              if (this.setStorageItem) {
+                await this.setStorageItem("hasSeenWelcome", true);
+              } else {
+                await chrome.storage.local.set({ hasSeenWelcome: true });
+              }
+              this.showView("api-setup");
+            } catch (error) {
+              console.error("Error in welcome-start:", error);
+              this.showView("api-setup");
+            }
           });
         let u = document.getElementById("api-setup-back");
         u &&
@@ -346,10 +376,12 @@ import './modules/privacy-policy.js';
       }
       async testApiKey(t) {
         try {
+          console.log("Fibr: Testing API key...");
           let e = await chrome.runtime.sendMessage({
-            action: "testApiKey",
+            action: "validateApiKey",
             apiKey: t,
           });
+          console.log("Fibr: API key test result:", e);
           return e && e.success;
         } catch (e) {
           return (console.error("Error testing API key:", e), !1);
@@ -419,7 +451,35 @@ import './modules/privacy-policy.js';
       window.TabTalkThreadGenerator && Object.assign(l.prototype, window.TabTalkThreadGenerator);
       window.TabTalkContentAnalysis && Object.assign(l.prototype, window.TabTalkContentAnalysis);
       window.TabTalkSocialMedia && Object.assign(l.prototype, window.TabTalkSocialMedia);
-      window.TabTalkStorage && Object.assign(l.prototype, window.TabTalkStorage);
+      
+      // ROBUST: Ensure storage methods are available from either FibrStorage or TabTalkStorage
+      const storageModule = window.TabTalkStorage || window.FibrStorage;
+      if (storageModule) {
+        Object.assign(l.prototype, storageModule);
+        console.log('Fibr: Storage module loaded successfully');
+      } else {
+        console.error('Fibr: Storage module not found! Adding fallback methods.');
+        // Add fallback storage methods
+        l.prototype.getStorageItem = async function(key) {
+          try {
+            const data = await chrome.storage.local.get([key]);
+            return data ? data[key] : undefined;
+          } catch (error) {
+            console.error('getStorageItem fallback error:', error);
+            return undefined;
+          }
+        };
+        l.prototype.setStorageItem = async function(key, value) {
+          try {
+            await chrome.storage.local.set({ [key]: value });
+            return true;
+          } catch (error) {
+            console.error('setStorageItem fallback error:', error);
+            return false;
+          }
+        };
+      }
+      
       window.TabTalkUI && Object.assign(l.prototype, window.TabTalkUI);
       window.TabTalkScroll && Object.assign(l.prototype, window.TabTalkScroll);
       window.TabTalkNavigation && Object.assign(l.prototype, window.TabTalkNavigation);

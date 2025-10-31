@@ -489,8 +489,8 @@ TOPIC: ${this.currentTopic}`;
 
     displayThreadResult(thread) {
       // Switch to chat view and display the thread
-      if (window.TabTalkUI) {
-        window.TabTalkUI.showView('chat');
+      if (window.TabTalkNavigation) {
+        window.TabTalkNavigation.showView('chat');
       }
       
       // Create thread card

@@ -117,10 +117,13 @@ NON-NEGOTIABLE RULES:
       if (!modal) return;
 
       modal.classList.remove('hidden');
-      modal.setAttribute('aria-hidden', 'false');
+      modal.removeAttribute('aria-hidden');
+      modal.removeAttribute('inert');
 
-      const firstTone = modal.querySelector('.comments-tone-option');
-      firstTone?.focus();
+      setTimeout(() => {
+        const firstTone = modal.querySelector('.comments-tone-option');
+        firstTone?.focus();
+      }, 50);
     },
 
     hideModal: function() {
@@ -129,6 +132,7 @@ NON-NEGOTIABLE RULES:
 
       modal.classList.add('hidden');
       modal.setAttribute('aria-hidden', 'true');
+      modal.setAttribute('inert', '');
       this.resetSelections();
     },
 
@@ -208,6 +212,7 @@ NON-NEGOTIABLE RULES:
   };
 
   window.TabTalkCommentsModal = CommentsModal;
+  window.FibrCommentsModal = CommentsModal; // Fibr alias
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => CommentsModal.init());

@@ -81,10 +81,10 @@
         if (viewName === 'thread-generator' && this.initializeHowItWorksToggle) {
           this.initializeHowItWorksToggle();
         }
-        if (viewName === 'privacy' && window.TabTalkPrivacyPolicy) {
+        if (viewName === 'privacy' && window.FibrPrivacyPolicy) {
           const container = document.getElementById('privacy-policy-container');
           if (container && !container.dataset.initialized) {
-            window.TabTalkPrivacyPolicy.render(container);
+            window.FibrPrivacyPolicy.render(container);
             container.dataset.initialized = 'true';
           }
         }
@@ -145,4 +145,5 @@
   };
   
   window.TabTalkNavigation = Navigation;
+  window.FibrNavigation = Navigation; // Fibr alias
 })();

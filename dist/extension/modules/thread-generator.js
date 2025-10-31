@@ -99,10 +99,13 @@
       if (!modal) return;
       
       modal.classList.remove('hidden');
-      modal.setAttribute('aria-hidden', 'false');
+      modal.removeAttribute('aria-hidden');
+      modal.removeAttribute('inert');
       
-      const topicInput = document.getElementById('modal-thread-topic');
-      topicInput?.focus();
+      setTimeout(() => {
+        const topicInput = document.getElementById('modal-thread-topic');
+        topicInput?.focus();
+      }, 50);
     },
     
     // Hide modal
@@ -112,6 +115,7 @@
       
       modal.classList.add('hidden');
       modal.setAttribute('aria-hidden', 'true');
+      modal.setAttribute('inert', '');
     },
     
     // Handle generate
@@ -799,10 +803,10 @@ Generate your expert research thread now:`;
           const tweets = this.parseTwitterThread(cleanedResponse);
           
           // Display result in messages container
-          this.displayThreadResult(cleanedResponse, topic, category);
+          this.displayThreadResult(cleanedResponse, topic);
           
           // Save to gallery
-          this.saveThreadToGallery(cleanedResponse, topic, category);
+          this.saveThreadToGallery(cleanedResponse, topic);
           
           window.TabTalkUI?.showToast('Expert thread generated successfully!', 2000);
         }
@@ -827,4 +831,5 @@ Generate your expert research thread now:`;
   
   // Export to window
   window.TabTalkThreadGenerator = ThreadGenerator;
+  window.FibrThreadGenerator = ThreadGenerator; // Fibr alias
 })();

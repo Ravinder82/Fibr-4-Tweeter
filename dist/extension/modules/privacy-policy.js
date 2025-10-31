@@ -138,4 +138,5 @@
   };
   
   window.FibrPrivacyPolicy = PrivacyPolicy;
+  window.TabTalkPrivacyPolicy = PrivacyPolicy; // Backward compatibility alias
 })();

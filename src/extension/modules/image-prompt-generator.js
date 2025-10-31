@@ -164,4 +164,5 @@ Generate the expert-level graphics design prompt now:`;
 
   // Expose globally
   window.TabTalkImagePromptGenerator = ImagePromptGenerator;
+  window.FibrImagePromptGenerator = ImagePromptGenerator; // Fibr alias
 })();

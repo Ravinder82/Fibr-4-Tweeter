@@ -1706,4 +1706,5 @@ Generate your expert research thread now:`;
   };
 
   window.TabTalkTwitter = Twitter;
+  window.FibrTwitter = Twitter; // Fibr alias
 })();
