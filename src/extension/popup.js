@@ -4,6 +4,7 @@ import './modules/storage.js';
 import './modules/navigation.js';
 import './modules/ui-render.js';
 import './modules/twitter.js';
+import './modules/repost-modal.js';
 import './modules/thread-generator.js';
 import './modules/scroll.js';
 import './modules/gallery.js';
@@ -31,6 +32,7 @@ import './modules/topic-enhancer.js';
           (this.quickActions = document.getElementById("quick-actions")),
           (this.sidebar = document.getElementById("sidebar")),
           (this.quickTwitterBtn = document.getElementById("quick-twitter")),
+          (this.quickRepostBtn = document.getElementById("quick-repost")),
           (this.quickTwitterThreadBtn = document.getElementById("quick-twitter-thread")),
           (this.quickCreateBtn = document.getElementById("quick-create")),
           (this.welcomeView = document.getElementById("welcome-view")),
@@ -246,6 +248,7 @@ import './modules/topic-enhancer.js';
           // Check if all buttons exist
           console.log('Button elements found:', {
             quickTwitterBtn: !!this.quickTwitterBtn,
+            quickRepostBtn: !!this.quickRepostBtn,
             quickTwitterThreadBtn: !!this.quickTwitterThreadBtn,
             quickCreateBtn: !!this.quickCreateBtn
           }),
@@ -253,6 +256,27 @@ import './modules/topic-enhancer.js';
             this.quickTwitterBtn.addEventListener("click", async () => {
               (this.resetScreenForGeneration && this.resetScreenForGeneration(),
                 await this.generateSocialContent("twitter"));
+            }),
+          this.quickRepostBtn &&
+            this.quickRepostBtn.addEventListener("click", async () => {
+              if (
+                !window.TabTalkRepostModal ||
+                typeof window.TabTalkRepostModal.showWithContentLoading !== "function"
+              ) {
+                console.warn("TabTalk AI: Repost modal module not available");
+                this.showToast
+                  ? this.showToast('❌ Repost flow unavailable. Please reload the extension.', 4000)
+                  : alert('❌ Repost flow unavailable. Please reload the extension.');
+                return;
+              }
+              try {
+                await window.TabTalkRepostModal.showWithContentLoading(this);
+              } catch (error) {
+                console.error('TabTalk AI: Failed to open repost modal', error);
+                this.showToast
+                  ? this.showToast(`❌ Repost setup failed: ${error.message}`, 4000)
+                  : alert(`❌ Repost setup failed: ${error.message}`);
+              }
             }),
           this.quickTwitterThreadBtn &&
             this.quickTwitterThreadBtn.addEventListener("click", async () => {

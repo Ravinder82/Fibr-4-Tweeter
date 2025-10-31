@@ -33,7 +33,10 @@
                 <div class="action-buttons-wrapper">
                     <!-- Twitter Post Generation -->
                     <button id="quick-twitter" class="action-btn" title="Generate Twitter/X post">
-                        <span class="btn-text">Twitter Post</span>
+                        <span class="btn-text">Post</span>
+                    </button>
+                    <button id="quick-repost" class="action-btn" title="Generate reply/repost content">
+                        <span class="btn-text">Repost</span>
                     </button>
                     <button id="quick-twitter-thread" class="action-btn" title="Generate Twitter/X thread">
                         <span class="btn-text">Thread</span>
@@ -270,6 +273,48 @@
             </div>
             
         </main>
+
+        <!-- REPOST MODAL -->
+        <div id="repost-modal" class="tone-modal hidden" role="dialog" aria-labelledby="repost-modal-title" aria-modal="true">
+            <div class="tone-modal-overlay"></div>
+            <div class="tone-modal-content">
+                <div class="tone-modal-header">
+                    <h2 id="repost-modal-title">Select Repost Tone</h2>
+                    <button class="tone-modal-close repost-modal-close" aria-label="Close">&times;</button>
+                </div>
+
+                <!-- Reply/Repost Tone Grid -->
+                <div class="modal-section">
+                    <div class="tone-grid" role="radiogroup" aria-label="Select reply tone">
+                        <!-- Reply tones will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Image Prompt Option -->
+                <div class="image-prompt-section">
+                    <label class="image-prompt-toggle">
+                        <input type="checkbox" id="repost-include-image-prompt" class="image-prompt-checkbox">
+                        <span class="image-prompt-label">
+                            <svg class="image-prompt-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                            Generate Image Prompt (9:16 Nano Banana)
+                        </span>
+                    </label>
+                    <p class="image-prompt-description">AI will create an optimized image prompt for your content</p>
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="tone-modal-actions">
+                    <button id="repost-cancel-btn" class="tone-btn tone-btn-secondary">Cancel</button>
+                    <button id="repost-generate-btn" class="tone-btn tone-btn-primary" disabled>
+                        Generate
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- BOTTOM NAVIGATION BAR -->
         <nav id="bottom-nav" class="bottom-nav">
