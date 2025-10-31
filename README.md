@@ -1,5 +1,25 @@
 # Fibr - AI-Powered Twitter Content Generator
 
+## Table of Contents
+
+- [✨ What is Fibr?](#-what-is-fibr)
+- [🚀 Key Features](#-key-features)
+- [📸 Screenshots](#-screenshots)
+- [🛠️ Installation](#️-installation)
+- [⚙️ Setup & Configuration](#️-setup--configuration)
+- [🎯 How to Use](#-how-to-use)
+- [🎨 UI Navigation](#-ui-navigation)
+- [🔧 Technical Details](#-technical-details)
+- [🔐 Privacy & Security](#-privacy--security)
+- [📁 Project Structure](#-project-structure)
+- [🚀 Development](#-development)
+- [⚠️ Limitations & Known Issues](#️-limitations--known-issues)
+- [🔧 Troubleshooting](#-troubleshooting)
+- [🛒 Chrome Web Store Launch Kit](#-chrome-web-store-launch-kit)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
+- [🆘 Support & Community](#-support--community)
+
 ## ✨ What is Fibr?
 
 **Fibr** is a cutting-edge Chrome extension that revolutionizes how you create Twitter content. Using advanced AI powered by Google's Gemini 2.0 Flash API, Fibr automatically analyzes any webpage and generates:
@@ -20,26 +40,33 @@ Transform lengthy articles, blog posts, or research into engaging Twitter conten
 - Responsive design that adapts to any screen size
 - Intuitive navigation with horizontal scrolling action bar
 
+### ⚡ **One-Tap Quick Actions**
+- Quick access buttons for Post, Repost, Thread, Memory Builder, Gallery, and viral Click Farming flows
+- Repost modal mirrors Twitter native UX with tone presets, image prompt toggle, and instant generation
+- Thread generator launches a focused modal with topic inputs, AI knowledge packs, and optional image prompts
+
 ### 🤖 **Advanced AI Content Generation**
-- **Twitter Posts**: Generate single tweets with character counting
-- **Twitter Threads**: Create numbered thread cards with copy functionality
+- **Twitter Posts**: Generate single tweets with tone presets, character counting, and regeneration support
+- **Twitter Threads**: Create numbered thread cards with copy, save-to-gallery, and image prompt options
 - **Content Analysis**: 8 analysis types including summaries, key points, FAQs, and fact-checking
-- **Smart Length Control**: Interactive slider (50-2000 characters) with presets
-- **Unicode-Aware**: Proper emoji and special character handling
+- **Smart Length Control**: Interactive slider (50-2000 characters) with presets and emoji-safe counting
+- **Unicode-Aware**: Proper emoji and special character handling for clean publishing
 
 ### 💡 **Intelligent Features**
-- **Demo Mode**: Full functionality without API key for testing
+- **Demo Mode**: Full functionality without API key for testing and demos
+- **Tone Presets**: Original post styles plus dedicated reply/repost tones with AI instructions
 - **Character Counter**: Real-time counting with emoji support
 - **Content Sanitization**: Removes AI artifacts and formatting noise
 - **Auto-Resize Text Areas**: Smart containers that adapt to content
 - **Progress Indicators**: Visual feedback during AI processing
 
 ### 🔧 **Professional Tools**
-- **Quick Actions**: One-click generation for Twitter, Blog, Summary, and Analysis
+- **Quick Actions**: One-click generation for Twitter post, repost, thread, summary, analysis, and click-farming flows
 - **Individual Card Copy**: Copy each tweet or thread card separately
+- **Gallery & History**: Save, read, edit, and delete generated content from a redesigned library
 - **Regenerate Options**: Refine content with different length settings
 - **Export Functionality**: Save conversations and content
-- **Settings Management**: Persistent preferences and API key storage
+- **Settings Management**: Persistent preferences, API key storage, and dark/light theme toggle
 
 ## 📸 Screenshots
 
@@ -286,6 +313,51 @@ Fibr-4-Tweeter/
 - Verify `manifest.json` syntax is correct
 - Check browser console for JavaScript errors
 - Ensure all required files present in `dist/extension/`
+
+## 🛒 Chrome Web Store Launch Kit
+
+Use this section when preparing your Chrome Web Store listing or marketing assets.
+
+### 1. Listing Snapshot
+- **Tagline (short description):** "Turn any page into scroll-stopping Twitter posts in one tap."
+- **Long description starter:**
+  > Fibr is a speed-first AI copilot for X/Twitter creators. Capture insights from any article, video, or research page and instantly generate ready-to-post tweets, threads, or repost replies. Powered by Google Gemini, Fibr keeps your voice authentic, adds expert research, and ships publish-ready content in seconds.
+- **Primary call-to-action:** "Generate viral-ready posts from any webpage."
+- **Key value pillars:** Speed-first workflow • Authentic tone presets • Research-backed outputs • Gallery & memory system • Works with free Gemini API key
+
+### 2. Feature Bullets for Store Listing
+1. 🔁 **Repost like a pro** – Dedicated modal with curated reply tones and optional AI image prompts.
+2. 🧵 **Thread generator** – Topic input, AI knowledge packs, and automatic gallery save of every thread.
+3. ⚡ **One-tap quick actions** – Post, Repost, Thread, Memory Builder, Gallery, and viral Click Farming all within a two-click flow.
+4. 🧠 **Context-aware analysis** – Summaries, fact checks, FAQs, and research insights before you post.
+5. 🗂️ **Creator workspace** – Gallery, history, and memory builder keep your best ideas organized.
+
+### 3. Screenshot & Video Storyboard
+Capture these states (light & dark themes) for 1280×800 screenshots:
+1. **Home + quick actions** – show glassmorphism UI with quick action bar.
+2. **Tone selector** – highlight original post tones and custom mix builder.
+3. **Repost modal** – showcase reply tone grid, image prompt toggle, and "Generate" button.
+4. **Thread generator** – illustrate topic input, knowledge pack toggle, and results card.
+5. **Gallery view** – demonstrate saved cards with read/edit modal.
+Optional promo video (30–45s) should walk through the same flow with callouts.
+
+### 4. Asset Checklist
+- 128×128 icon (already provided in `icons/`).
+- Screenshots (at least 3, max 5) in PNG/JPG.
+- Optional 920×680 promotional tile using the same rebrand color palette.
+- Privacy statement referencing the "Privacy & Security" section below.
+- Support contact: link to GitHub issues or dedicated email.
+
+### 5. Categories, Keywords & Compliance
+- **Category:** Productivity → Blogging or Social & Communication.
+- **Keywords:** AI Twitter writer, X thread generator, repost assistant, Gemini AI, social media automation.
+- **Permissions to list:** `activeTab`, `storage`, `scripting`, `tabs` (explain usage in submission form).
+- **Data disclosure:** No personal data collected; API key stored locally; only communicates with Google Gemini via user-provided key.
+
+### 6. FAQ Snippets for Listing
+- **Does Fibr store my data?** No, content stays on your device. Gemini API calls run using your key.
+- **Do I need to pay for Gemini?** Free-tier Gemini key works out of the box.
+- **Can I customize tone?** Yes—original post presets, reply/repost presets, and custom tone mixes are built in.
 
 ## 🤝 Contributing
 
