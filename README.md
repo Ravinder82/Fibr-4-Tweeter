@@ -41,7 +41,7 @@ Transform lengthy articles, blog posts, or research into engaging Twitter conten
 - Intuitive navigation with horizontal scrolling action bar
 
 ### ⚡ **One-Tap Quick Actions**
-- Quick access buttons for Post, Repost, Thread, Memory Builder, Gallery, and viral Click Farming flows
+- Quick access buttons for Post, Repost, Thread, Gallery, and viral Click Farming flows
 - Repost modal mirrors Twitter native UX with tone presets, image prompt toggle, and instant generation
 - Thread generator launches a focused modal with topic inputs, AI knowledge packs, and optional image prompts
 
@@ -328,9 +328,9 @@ Use this section when preparing your Chrome Web Store listing or marketing asset
 ### 2. Feature Bullets for Store Listing
 1. 🔁 **Repost like a pro** – Dedicated modal with curated reply tones and optional AI image prompts.
 2. 🧵 **Thread generator** – Topic input, AI knowledge packs, and automatic gallery save of every thread.
-3. ⚡ **One-tap quick actions** – Post, Repost, Thread, Memory Builder, Gallery, and viral Click Farming all within a two-click flow.
+3. ⚡ **One-tap quick actions** – Post, Repost, Thread, Gallery, and viral Click Farming all within a two-click flow.
 4. 🧠 **Context-aware analysis** – Summaries, fact checks, FAQs, and research insights before you post.
-5. 🗂️ **Creator workspace** – Gallery, history, and memory builder keep your best ideas organized.
+5. 🗂️ **Creator workspace** – Gallery and history keep your best ideas organized.
 
 ### 3. Screenshot & Video Storyboard
 Capture these states (light & dark themes) for 1280×800 screenshots:
