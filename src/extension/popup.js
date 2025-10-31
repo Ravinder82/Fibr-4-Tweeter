@@ -5,6 +5,7 @@ import './modules/navigation.js';
 import './modules/ui-render.js';
 import './modules/twitter.js';
 import './modules/repost-modal.js';
+import './modules/comments-modal.js';
 import './modules/thread-generator.js';
 import './modules/scroll.js';
 import './modules/gallery.js';
@@ -34,6 +35,7 @@ import './modules/topic-enhancer.js';
           (this.quickTwitterBtn = document.getElementById("quick-twitter")),
           (this.quickRepostBtn = document.getElementById("quick-repost")),
           (this.quickTwitterThreadBtn = document.getElementById("quick-twitter-thread")),
+          (this.quickCommentsBtn = document.getElementById("quick-comments")),
           (this.quickCreateBtn = document.getElementById("quick-create")),
           (this.welcomeView = document.getElementById("welcome-view")),
           (this.apiSetupView = document.getElementById("api-setup-view")),
@@ -250,6 +252,7 @@ import './modules/topic-enhancer.js';
             quickTwitterBtn: !!this.quickTwitterBtn,
             quickRepostBtn: !!this.quickRepostBtn,
             quickTwitterThreadBtn: !!this.quickTwitterThreadBtn,
+            quickCommentsBtn: !!this.quickCommentsBtn,
             quickCreateBtn: !!this.quickCreateBtn
           }),
           this.quickTwitterBtn &&
@@ -283,6 +286,27 @@ import './modules/topic-enhancer.js';
               console.log('Thread button clicked - showing tone selector for thread generation');
               (this.resetScreenForGeneration && this.resetScreenForGeneration(),
                 await this.generateSocialContent("thread"));
+            }),
+          this.quickCommentsBtn &&
+            this.quickCommentsBtn.addEventListener("click", async () => {
+              if (
+                !window.TabTalkCommentsModal ||
+                typeof window.TabTalkCommentsModal.showWithContentLoading !== "function"
+              ) {
+                console.warn("TabTalk AI: Comments modal module not available");
+                this.showToast
+                  ? this.showToast('❌ Comments flow unavailable. Please reload the extension.', 4000)
+                  : alert('❌ Comments flow unavailable. Please reload the extension.');
+                return;
+              }
+              try {
+                await window.TabTalkCommentsModal.showWithContentLoading(this);
+              } catch (error) {
+                console.error('TabTalk AI: Failed to open comments modal', error);
+                this.showToast
+                  ? this.showToast(`❌ Comments setup failed: ${error.message}`, 4000)
+                  : alert(`❌ Comments setup failed: ${error.message}`);
+              }
             }),
           this.quickCreateBtn &&
             this.quickCreateBtn.addEventListener("click", () => {
