@@ -197,6 +197,71 @@ WHAT NOT TO DO:
 - Do NOT add your own analysis or commentary`,
         keywords: ['rephrase', 'enhance', 'improve', 'professional', 'polished']
       },
+      'content-like-this': {
+        id: 'content-like-this',
+        name: 'Content like this',
+        icon: '🎭',
+        color: 'var(--accent-medium)',
+        category: 'original',
+        subcategory: 'creative',
+        description: 'Create similar content in the same style',
+        example: 'Here\'s more content like this...',
+        aiInstructions: `TONE: Content like this
+
+MISSION: Analyze the webpage content to understand its essence, then create entirely NEW content that captures the same spirit, style, and approach. You are NOT rephrasing - you are creating fresh, original content inspired by the source.
+
+CONTENT ANALYSIS PHASE:
+1. Identify the content type and format (blog post, tutorial, opinion piece, case study, etc.)
+2. Detect the writing style (conversational, formal, technical, storytelling, etc.)
+3. Understand the core purpose (educate, entertain, persuade, inspire, etc.)
+4. Note the structure and flow patterns
+5. Identify the target audience and expertise level
+
+CONTENT CREATION RULES:
+1. CREATE ENTIRELY NEW CONTENT - Do NOT copy or rephrase the original
+2. Match the STYLE and FORMAT, not the specific words
+3. Use the same TONE and VOICE as the original
+4. Apply the same STRUCTURE and organization patterns
+5. Target the same AUDIENCE with similar complexity
+6. Maintain the same PURPOSE and intent
+7. Use analogous examples and scenarios (not the same ones)
+8. Keep similar length and depth
+
+STYLE MATCHING:
+- If original is conversational → Write conversationally
+- If original is technical → Use technical language appropriately
+- If original is storytelling → Create a new story with similar structure
+- If original is data-driven → Use data and examples in your new content
+- If original is inspirational → Write inspiring content with fresh examples
+
+CONTENT TYPES TO RECOGNIZE AND REPLICATE:
+• Tutorials → Create new tutorial with different steps/examples
+• Opinion pieces → Write new opinion on related topic with same stance
+• Case studies → Create new case study with different scenario
+• Listicles → Make new list with different items but same theme
+• How-to guides → Create new guide for different but related task
+• Personal stories → Share new personal story with same emotional arc
+• Educational content → Teach new concept with same teaching style
+• Promotional content → Create new promotion for different but related product/service
+
+ABSOLUTE REQUIREMENTS:
+✓ MUST be entirely new content - no copying sentences
+✓ MUST capture the same essence and spirit
+✓ MUST match the writing style perfectly
+✓ MUST serve the same purpose for the same audience
+✓ MUST feel like it was written by the same author
+✓ MUST impress with creativity while maintaining style consistency
+
+OUTPUT REQUIREMENTS:
+✓ Generate exactly ONE complete piece of content
+✓ Make it substantial and comprehensive (not just a brief mention)
+✓ Focus all creative energy on making this single piece exceptional
+✓ Do not provide multiple options or variations
+✓ Deliver one polished, ready-to-use result
+
+THE GOAL: Create ONE impressive piece of content that perfectly matches the original's style and voice, making people say "Wow, this is exactly like [original content] but completely fresh and new!"`,
+        keywords: ['emulate', 'style-match', 'create-similar', 'replicate-style', 'fresh-content']
+      },
       'hypocrite-buster': {
         id: 'hypocrite-buster',
         name: 'Hypocrite Buster',
@@ -269,17 +334,8 @@ WHAT NOT TO DO:
               <button class="tone-modal-close" aria-label="Close">&times;</button>
             </div>
 
-            <!-- AI Recommendations Section -->
-            <div id="tone-recommendations" class="tone-recommendations hidden">
-              <div class="recommendations-header">
-                <span class="recommendations-title">✨ AI Suggested Tones</span>
-              </div>
-              <div id="recommended-tones" class="recommended-tones-list"></div>
-            </div>
-
             <!-- Tone Grid -->
             <div class="modal-section">
-              <label class="section-label">Choose Your Tone</label>
               <div class="tone-grid" role="radiogroup" aria-label="Select content tone">
                 ${this.renderToneGrid()}
               </div>
@@ -366,17 +422,17 @@ WHAT NOT TO DO:
 
     // Render tone grid with categories
     renderToneGrid: function() {
-      const originalTones = Object.values(this.toneDefinitions).filter(tone => tone.category === 'original');
-      const replyTones = Object.values(this.toneDefinitions).filter(tone => tone.category === 'reply');
-      
-      const renderToneSection = (tones, title, icon) => `
+      const originalTones = Object.values(this.toneDefinitions)
+        .filter(tone => tone.category === 'original');
+
+      return `
         <div class="tone-category">
           <div class="category-header">
-            <span class="category-icon">${icon}</span>
-            <span class="category-title">${title}</span>
+            <span class="category-icon">✍️</span>
+            <span class="category-title">Original Post</span>
           </div>
           <div class="tone-grid-row">
-            ${tones.map(tone => `
+            ${originalTones.map(tone => `
               <div class="tone-option" 
                    data-tone-id="${tone.id}" 
                    data-category="${tone.category}"
@@ -394,11 +450,6 @@ WHAT NOT TO DO:
             `).join('')}
           </div>
         </div>
-      `;
-      
-      return `
-        ${renderToneSection(originalTones, 'Original Post', '✍️')}
-        ${renderToneSection(replyTones, 'Reply/Repost', '💬')}
       `;
     },
 
@@ -484,10 +535,6 @@ WHAT NOT TO DO:
       const firstTone = modal.querySelector('.tone-option');
       firstTone?.focus();
 
-      // Generate AI recommendations
-      await this.generateRecommendations(pageContent);
-
-      // Load saved custom tones
       this.renderSavedCustomTones();
     },
 
@@ -518,150 +565,16 @@ WHAT NOT TO DO:
 
       // Store selection
       this.selectedToneId = option.dataset.toneId;
+      console.log('TabTalkToneSelector: Selected tone ID:', this.selectedToneId);
+      console.log('TabTalkToneSelector: Available tone IDs:', Object.keys(this.toneDefinitions));
       this.selectedTone = this.toneDefinitions[this.selectedToneId];
+      console.log('TabTalkToneSelector: Selected tone object:', this.selectedTone);
 
       // Enable generate button
       const generateBtn = document.getElementById('tone-generate-btn');
       if (generateBtn) {
         generateBtn.disabled = false;
       }
-
-      // Cache selection
-      this.sessionCache.lastSelectedTone = this.selectedToneId;
-    },
-
-    // Generate AI recommendations based on content
-    generateRecommendations: async function(pageContent) {
-      const recommendationsSection = document.getElementById('tone-recommendations');
-      const recommendedList = document.getElementById('recommended-tones');
-      
-      if (!recommendationsSection || !recommendedList) return;
-
-      try {
-        // Show loading state
-        recommendationsSection.classList.remove('hidden');
-        recommendedList.innerHTML = '<div class="recommendations-loading">Analyzing content...</div>';
-
-        // Analyze content for tone recommendations
-        const recommendations = await this.analyzeContentForTones(pageContent);
-
-        // Render recommendations
-        if (recommendations.length > 0) {
-          recommendedList.innerHTML = recommendations.map(rec => `
-            <div class="recommended-tone" data-tone-id="${rec.toneId}">
-              <div class="rec-badge">Recommended</div>
-              <div class="rec-tone-icon" style="color: ${rec.color}">${rec.icon}</div>
-              <div class="rec-tone-info">
-                <div class="rec-tone-name">${rec.name}</div>
-                <div class="rec-reason">${rec.reason}</div>
-                <div class="rec-confidence">Match: ${rec.confidence}%</div>
-              </div>
-            </div>
-          `).join('');
-
-          // Add click handlers to recommended tones
-          const recTones = recommendedList.querySelectorAll('.recommended-tone');
-          recTones.forEach(recTone => {
-            recTone.addEventListener('click', () => {
-              const toneId = recTone.dataset.toneId;
-              const toneOption = document.querySelector(`.tone-option[data-tone-id="${toneId}"]`);
-              if (toneOption) {
-                this.selectTone(toneOption);
-                toneOption.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }
-            });
-          });
-        } else {
-          recommendedList.innerHTML = '<div class="no-recommendations">All tones work well for this content!</div>';
-        }
-      } catch (error) {
-        console.error('Error generating recommendations:', error);
-        recommendedList.innerHTML = '<div class="recommendations-error">Could not analyze content</div>';
-      }
-    },
-
-    // Analyze content and recommend tones
-    analyzeContentForTones: async function(pageContent) {
-      // Context-aware analysis using content keywords and patterns
-      const contentLower = pageContent.toLowerCase();
-      const recommendations = [];
-
-      // Analyze content characteristics
-      const hasControversy = /controversy|debate|disagree|conflict|dispute/i.test(pageContent);
-      const hasData = /data|statistics|study|research|evidence|percent|number/i.test(pageContent);
-      const hasClaims = /claim|assert|state|argue|maintain/i.test(pageContent);
-      const hasPositive = /success|achievement|breakthrough|innovation|progress/i.test(pageContent);
-      const hasNegative = /problem|issue|concern|risk|danger|failure/i.test(pageContent);
-      const hasHumor = /funny|joke|ironic|amusing|hilarious/i.test(pageContent);
-      const hasFuture = /future|upcoming|next|will|plan|forecast/i.test(pageContent);
-      const hasWarning = /warning|caution|beware|careful|risk/i.test(pageContent);
-
-      // Calculate content length
-      const contentLength = pageContent.length;
-      const wordCount = pageContent.split(/\s+/).length;
-
-      // Recommendation logic
-      if (hasControversy && hasData) {
-        recommendations.push({
-          toneId: 'contradictory',
-          ...this.toneDefinitions.contradictory,
-          reason: 'Content contains controversial claims with data - perfect for evidence-based contradiction',
-          confidence: 92
-        });
-      }
-
-      if (hasClaims && !hasData) {
-        recommendations.push({
-          toneId: 'fact-check',
-          ...this.toneDefinitions['fact-check'],
-          reason: 'Multiple claims detected without strong evidence - ideal for fact-checking',
-          confidence: 88
-        });
-      }
-
-      if (hasPositive && hasData) {
-        recommendations.push({
-          toneId: 'agreeing',
-          ...this.toneDefinitions.agreeing,
-          reason: 'Positive developments backed by data - great for supportive agreement',
-          confidence: 90
-        });
-      }
-
-      if (hasControversy && hasHumor) {
-        recommendations.push({
-          toneId: 'trolling',
-          ...this.toneDefinitions.trolling,
-          reason: 'Controversial topic with humorous elements - perfect for playful fact-based trolling',
-          confidence: 85
-        });
-      }
-
-      if (hasNegative && !hasControversy) {
-        recommendations.push({
-          toneId: 'funny',
-          ...this.toneDefinitions.funny,
-          reason: 'Issues present without heated debate - ideal for humorous take',
-          confidence: 83
-        });
-      }
-
-
-      
-      if (hasData && contentLength > 2000) {
-        recommendations.push({
-          toneId: 'deeper-insights',
-          ...this.toneDefinitions['deeper-insights'],
-          reason: 'Substantial content with data - perfect for deeper insights analysis',
-          confidence: 86
-        });
-      }
-
-
-      // Sort by confidence and return top 3
-      return recommendations
-        .sort((a, b) => b.confidence - a.confidence)
-        .slice(0, 3);
     },
 
     // Toggle custom builder
@@ -897,7 +810,14 @@ INTEGRATION RULES:
 
     // Handle generate
     handleGenerate: function() {
-      if (!this.selectedTone) return;
+      console.log('TabTalkToneSelector: handleGenerate called');
+      console.log('TabTalkToneSelector: selectedToneId:', this.selectedToneId);
+      console.log('TabTalkToneSelector: selectedTone:', this.selectedTone);
+      
+      if (!this.selectedTone) {
+        console.warn('TabTalkToneSelector: No tone selected, cannot generate');
+        return;
+      }
 
       // Check if image prompt is requested
       const imagePromptCheckbox = document.getElementById('include-image-prompt');
@@ -905,6 +825,7 @@ INTEGRATION RULES:
 
       // Store callback and hide modal
       if (this.onGenerateCallback) {
+        console.log('TabTalkToneSelector: Calling callback with tone:', this.selectedTone);
         this.onGenerateCallback(this.selectedTone, this.currentPlatform, includeImagePrompt);
       }
 
