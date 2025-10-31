@@ -1,0 +1,22 @@
+{
+  "category": "sports",
+  "facts": [
+    "Michael Jordan was cut from his high school basketball team before becoming the greatest player of all time.",
+    "The fastest recorded tennis serve was 163.7 mph by Sam Groth in 2012.",
+    "Usain Bolt's top speed during his world record 100m run was 27.8 mph, faster than most people can drive in a school zone.",
+    "The longest tennis match in history lasted 11 hours and 5 minutes at Wimbledon 2010.",
+    "Muhammad Ali's original name was Cassius Clay, and he changed it after converting to Islam in 1964."
+  ],
+  "hooks": [
+    "This athlete did the impossible and everyone said it couldn't be done.",
+    "The [number]-second moment that changed sports forever.",
+    "What [athlete] did before becoming a legend will surprise you.",
+    "This record has stood for [number] years and here's why it'll never be broken:",
+    "The greatest comeback in [sport] history that nobody talks about.",
+    "Behind every champion is a story of failure. Here's [athlete]'s:",
+    "This [sport] moment was so incredible, people thought it was staged.",
+    "The rivalry between [athlete 1] and [athlete 2] was more than just competition.",
+    "[Athlete] was told they'd never make it. Here's what happened next:",
+    "The science behind why [athlete] dominated [sport] for [number] years."
+  ]
+}

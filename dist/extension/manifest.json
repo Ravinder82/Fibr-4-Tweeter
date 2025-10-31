@@ -2,7 +2,7 @@
     "name": "Fibr — Threads for the Web",
     "short_name": "Fibr",
     "description": "Generate premium Twitter/X threads from any page. Local-only keys. No external fonts.",
-    "version": "1.0.4",
+    "version": "2.0.0",
     "manifest_version": 3,
     "background": {
         "service_worker": "background.js"
@@ -22,6 +22,8 @@
         "storage",
         "tabs"
     ],
+    "homepage_url": "https://github.com/Ravinder82/Fibr-4-Tweeter",
+    "privacy_policy": "https://ravinder82.github.io/Fibr-4-Tweeter/privacy-policy.html",
     "icons": {
         "16": "icons/icon16.png",
         "32": "icons/icon32.png",

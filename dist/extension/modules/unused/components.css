@@ -1,0 +1,21 @@
+/* src/shared/styles/components.css */
+/* Content Container Styles */
+.messages-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* High contrast mode adjustments */
+body.high-contrast .content {
+    border: 2px solid #fff !important;
+}
+
+body.high-contrast .content code,
+body.high-contrast .content pre {
+    background: #000 !important;
+    border: 1px solid #fff !important;
+}

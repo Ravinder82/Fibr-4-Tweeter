@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TabTalk AI - Conversational Web Assistant</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- HEADER: Always visible -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">🤖</div>
+                <h1>TabTalk AI</h1>
+            </div>
+            <div class="header-controls">
+                <button id="menu-button" class="menu-button" title="Menu">☰</button>
+            </div>
+        </header>
+
+        <!-- QUICK ACTIONS: Summary & Key Points -->
+        <div id="quick-actions" class="quick-actions hidden" aria-label="Quick actions">
+            <button id="quick-summary" class="quick-btn" title="Generate summary">📝 Summary</button>
+            <button id="quick-keypoints" class="quick-btn" title="Generate key points">🔑 Key Points</button>
+            <button id="quick-analysis" class="quick-btn" title="Generate analysis">📊 Analysis</button>
+            <button id="quick-faq" class="quick-btn" title="Generate FAQ">❓ FAQ</button>
+        </div>
+
+        <!-- SIDEBAR: Hidden by default -->
+        <div id="sidebar" class="sidebar hidden">
+            <a href="#" id="menu-summary-link">📝 Summary</a>
+            <a href="#" id="menu-keypoints-link">🔑 Key Points</a>
+            <a href="#" id="menu-analysis-link">📊 Analysis Report</a>
+            <a href="#" id="menu-faq-link">❓ FAQ Generator</a>
+            <div class="sidebar-divider"></div>
+            <a href="#" id="menu-settings-link">⚙️ Gemini API Setup</a>
+            <a href="#" id="menu-refresh-link">🗑️ Clear Chat</a>
+            <a href="#" id="menu-url-input-link">🌐 Enter URL</a>
+        </div>
+
+        <!-- MAIN CONTENT: This holds all our different views -->
+        <main id="main-content">
+
+            <!-- VIEW 1: SETTINGS (For entering the API Key) -->
+            <div id="settings-view" class="view hidden">
+                <h2>Gemini API Setup</h2>
+                <div class="settings-container">
+                    <div class="form-group api-key">
+                        <label for="api-key-input">Gemini API Key</label>
+                        <input type="text" id="api-key-input" placeholder="Paste your key here">
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="help-link">Get key</a>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button id="settings-cancel-button" class="button-secondary">Cancel</button>
+                    <button id="settings-save-button" class="button-primary">Save</button>
+                </div>
+                <div class="onboarding-info">
+                    <h3>Get started in 3 quick steps</h3>
+                    <ol>
+                        <li>Visit <strong>ai.google.com/studio</strong></li>
+                        <li>Create an API key & enable <strong>Gemini API</strong></li>
+                        <li>Paste the key into TabTalk AI</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- VIEW 2: URL INPUT -->
+            <div id="url-input-view" class="view hidden">
+                <h2>Enter Website URL</h2>
+                <div class="url-input-container">
+                    <div class="form-group">
+                        <label for="url-input">Website URL</label>
+                        <input type="url" id="url-input" placeholder="https://example.com/article">
+                        <small class="help-text">Enter the URL of the webpage you want to analyze</small>
+                    </div>
+                    <div class="button-group">
+                        <button id="url-cancel-button" class="button-secondary">Cancel</button>
+                        <button id="url-analyze-button" class="button-primary">Analyze Page</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- VIEW 3: CHAT (The main interface) -->
+            <div id="chat-view" class="view hidden">
+                <div class="page-info">
+                    <p id="page-title">Ready to analyze content</p>
+                    <div id="page-status" class="page-status">Enter a URL or paste content to get started</div>
+                </div>
+                <div id="messages-container" class="messages-container">
+                    <!-- Chat messages will be added here by JavaScript -->
+                </div>
+                <div id="empty-state" class="empty-state" aria-hidden="true">
+                    <div class="hero">🤖</div>
+                    <h2>Welcome to TabTalk AI</h2>
+                    <p>Get started by:</p>
+                    <ol>
+                        <li>Setting up your <strong>Gemini API key</strong></li>
+                        <li>Entering a <strong>website URL</strong> to analyze</li>
+                        <li>Or pasting <strong>content directly</strong> in the chat</li>
+                    </ol>
+                </div>
+                <div class="input-area">
+                    <div class="input-bar">
+                        <textarea id="message-input" placeholder="Ask about content, paste a URL, or enter text to analyze..." rows="1" aria-label="Message input"></textarea>
+                        <div class="formatting-toolbar">
+                            <button class="format-button" title="Code" aria-label="Code block">{}</button>
+                            <button class="format-button" title="Link" aria-label="Insert link">🔗</button>
+                            <button class="tool-button" id="clear-chat-button" title="Clear chat" aria-label="Clear chat">🗑️</button>
+                            <button class="tool-button" id="export-chat-button" title="Export chat" aria-label="Export chat">⬇️</button>
+                        </div>
+                        <button id="send-button" title="Send message" aria-label="Send message" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855a.5.5 0 0 0-.09.89l4.736 3.14L13 5.5V9l2.25-3.25L13 2.5v3.75L4.159 9.25l4.776 3.175a.5.5 0 0 0 .75-.225l6.229-10.889a.5.5 0 0 0 .25-.625Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="input-footer">
+                        <span class="char-count" aria-live="polite">0/2000</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 4: STATUS (For loading or critical errors) -->
+            <div id="status-view" class="view">
+                <div class="spinner"></div>
+                <p id="status-text">Initializing...</p>
+            </div>
+            
+        </main>
+    </div>
+
+    <!-- Demo Content Modal -->
+    <div id="demo-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Demo Mode</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>This is a demo version of TabTalk AI. To use the full functionality:</p>
+                <ol>
+                    <li>Get a free API key from <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a></li>
+                    <li>Start chatting with any webpage content!</li>
+                </ol>
+                <p><strong>For now, you can try the interface with simulated responses.</strong></p>
+            </div>
+            <div class="modal-footer">
+               <button id="demo-continue" class="button-primary">Continue Demo</button>
+               <button id="demo-setup" class="button-secondary">Setup API Key</button>
+           </div>
+       </div>
+   </div>
+
+    <script src="marked.min.js"></script>
+    <script src="app.js"></script>
+    <div id="aria-status" class="visually-hidden" aria-live="polite"></div>
+</body>
+</html>
