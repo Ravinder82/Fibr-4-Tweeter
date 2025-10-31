@@ -26,7 +26,7 @@
     "web-app"
   ],
   "author": "Fibr Team",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "devDependencies": {
     "esbuild": "^0.19.12",
     "knip": "^5.27.0",
