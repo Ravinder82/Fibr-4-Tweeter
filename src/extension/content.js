@@ -42,17 +42,59 @@ function extractAndReturnContent() {
         if (!mainContent || mainContent.length < 200) {
             const bodyClone = document.body.cloneNode(true);
             const selectorsToRemove = [
-                'script', 'style', 'noscript', 'iframe', 'embed', 'object', 'svg', 'canvas', 'img', 'video', 'audio',
+                'script', 'style', 'noscript', 'iframe', 'embed', 'object', 'canvas', 'img', 'video', 'audio',
                 'nav', 'header', 'footer', 'aside',
                 '.nav', '.navbar', '.menu', '.sidebar',
                 '.advertisement', '.ads', '.popup', '.modal', '[role="dialog"]',
                 '.cookie-notice', '.cookie-banner', '.gdpr',
                 '[aria-hidden="true"]', '[data-nosnippet]'
             ];
+            
+            // Remove SVG elements separately with extra error handling
+            try {
+                const svgs = bodyClone.querySelectorAll('svg');
+                svgs.forEach(el => {
+                    try {
+                        el.remove();
+                    } catch (svgError) {
+                        // If individual SVG removal fails, try to remove its parent
+                        try {
+                            if (el.parentNode) {
+                                el.parentNode.removeChild(el);
+                            }
+                        } catch (parentError) {
+                            // Last resort: replace with empty text node
+                            el.replaceWith(document.createTextNode(''));
+                        }
+                    }
+                });
+            } catch (svgQueryError) {
+                // If SVG query fails completely, try a different approach
+                try {
+                    const allElements = bodyClone.getElementsByTagName('*');
+                    for (let i = allElements.length - 1; i >= 0; i--) {
+                        const el = allElements[i];
+                        if (el.tagName && el.tagName.toLowerCase() === 'svg') {
+                            try {
+                                el.remove();
+                            } catch (removeError) {
+                                // Replace with empty text node as fallback
+                                el.replaceWith(document.createTextNode(''));
+                            }
+                        }
+                    }
+                } catch (fallbackError) {
+                    console.warn('TabTalk AI: Could not remove SVG elements, continuing anyway');
+                }
+            }
+            
+            // Remove other elements with error handling
             selectorsToRemove.forEach(selector => {
                 try {
                     bodyClone.querySelectorAll(selector).forEach(el => el.remove());
-                } catch (e) {}
+                } catch (e) {
+                    // Silently continue if removal fails
+                }
             });
             mainContent = bodyClone.innerText;
         }

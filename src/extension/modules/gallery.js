@@ -187,11 +187,12 @@
 
     renderCard(item) {
       const card = document.createElement('div');
-      // Determine card type for dynamic sizing
-      const isThread = (item.platform || '').toLowerCase() === 'thread' || 
-                       (item.title || '').toLowerCase().includes('thread') ||
-                       (item.content || '').includes('1/') || 
-                       (item.content || '').includes('🧵');
+      
+      // BULLETPROOF THREAD DETECTION - Use centralized detection
+      const isThread = window.TabTalkTwitter && window.TabTalkTwitter.isThreadContent 
+        ? window.TabTalkTwitter.isThreadContent(item)
+        : this.fallbackThreadDetection(item);
+      
       const isLongContent = (item.content || '').length > 500;
       
       // Apply appropriate class for sizing
@@ -234,20 +235,23 @@
       const editBtn = card.querySelector('.btn-action.edit');
       const deleteBtn = card.querySelector('.btn-action.delete');
 
-      // Copy (no image prompts in saved content)
+      // BULLETPROOF COPY FUNCTIONALITY - Handle all thread formats
       copyBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
         try {
           let textToCopy = '';
-          const isThread = (item.platform || '').toLowerCase() === 'thread' && Array.isArray(item.tweets) && item.tweets.length > 0;
+          
+          // Use centralized thread detection
+          const isThread = window.TabTalkTwitter && window.TabTalkTwitter.isThreadContent 
+            ? window.TabTalkTwitter.isThreadContent(item)
+            : this.fallbackThreadDetection(item);
+          
           if (isThread) {
-            textToCopy = item.tweets.map((t, index) => {
-              const header = t.number || `${index + 1}/${item.tweets.length}:`;
-              return `${header}\n${t.content || ''}`;
-            }).join('\n\n---\n\n');
+            textToCopy = this.extractThreadContent(item);
           } else {
             textToCopy = item.content || '';
           }
+          
           await navigator.clipboard.writeText(textToCopy);
           const span = copyBtn.querySelector('span');
           span.textContent = '✓';
@@ -419,6 +423,66 @@
         clearTimeout(t);
         t = setTimeout(() => fn.apply(this, args), ms);
       };
+    },
+
+    fallbackThreadDetection(item) {
+      if (!item) return false;
+      
+      // Check 1: Explicit platform/type markers
+      if ((item.platform || '').toLowerCase() === 'thread') return true;
+      if ((item.type || '').toLowerCase() === 'thread') return true;
+      
+      // Check 2: Title contains thread indicators
+      const title = (item.title || '').toLowerCase();
+      if (title.includes('thread')) return true;
+      
+      // Check 3: Content has structured thread indicators
+      const content = (item.content || '').toLowerCase();
+      
+      // Look for numbered thread patterns (most reliable)
+      if (content.includes('1/') && content.includes('2/')) return true;
+      if (content.includes('1/8') || content.includes('1/7') || content.includes('1/6') || 
+          content.includes('1/5') || content.includes('1/4') || content.includes('1/3')) return true;
+      
+      // Look for thread emoji
+      if (content.includes('🧵')) return true;
+      
+      // Check 4: Has structured tweets array (definitive proof)
+      if (Array.isArray(item.tweets) && item.tweets.length > 1) return true;
+      
+      // Check 5: Total tweets metadata
+      if (item.totalTweets && item.totalTweets > 1) return true;
+      
+      return false;
+    },
+
+    extractThreadContent(item) {
+      // Method 1: Use structured tweets array if available (most reliable)
+      if (Array.isArray(item.tweets) && item.tweets.length > 0) {
+        return item.tweets.map((t, index) => {
+          const header = t.number || `${index + 1}/${item.tweets.length}:`;
+          return `${header}\n${t.content || ''}`;
+        }).join('\n\n---\n\n');
+      }
+      
+      // Method 2: Parse from combined content using enhanced parsing
+      if (item.content) {
+        // Use Twitter module's enhanced parsing if available
+        if (window.TabTalkTwitter && window.TabTalkTwitter.parseTwitterThread) {
+          const parsedTweets = window.TabTalkTwitter.parseTwitterThread(item.content);
+          if (parsedTweets.length > 1) {
+            return parsedTweets.map((tweet, index) => {
+              return `${index + 1}/${parsedTweets.length}:\n${tweet}`;
+            }).join('\n\n---\n\n');
+          }
+        }
+        
+        // Fallback: Return combined content as-is
+        return item.content;
+      }
+      
+      // Method 3: Last resort fallback
+      return item.content || '';
     },
 
     getAccurateCharacterCount(text) {

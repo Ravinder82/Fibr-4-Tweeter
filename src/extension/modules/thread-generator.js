@@ -25,19 +25,8 @@
             
             <div class="tone-grid" style="padding: 24px;">
               <div class="form-group" style="margin-bottom: 20px;">
-                <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Category</label>
-                <select id="modal-thread-category" class="builder-select" style="width: 100%; padding: 10px 12px; border-radius: 10px; font-size: 14px;">
-                  <option value="history">📜 History</option>
-                  <option value="sports">⚽ Sports</option>
-                  <option value="stories">📖 Stories</option>
-                  <option value="celebrity">⭐ Celebrity</option>
-                  <option value="news">📰 News</option>
-                </select>
-              </div>
-              
-              <div class="form-group" style="margin-bottom: 20px;">
                 <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Topic</label>
-                <input type="text" id="modal-thread-topic" class="builder-select" placeholder="e.g., The fall of the Roman Empire" style="width: 100%; padding: 10px 12px; border-radius: 10px; font-size: 14px;" />
+                <input type="text" id="modal-thread-topic" class="builder-select" placeholder="e.g., The future of artificial intelligence" style="width: 100%; padding: 10px 12px; border-radius: 10px; font-size: 14px;" />
                 <small style="display: block; margin-top: 6px; font-size: 11px; color: var(--text-secondary);">Enter any topic you want to create a thread about</small>
               </div>
               
@@ -127,7 +116,6 @@
     
     // Handle generate
     handleGenerate: async function() {
-      const category = document.getElementById('modal-thread-category')?.value;
       const topic = document.getElementById('modal-thread-topic')?.value?.trim();
       const useKnowledgePack = document.getElementById('modal-use-knowledge-pack')?.checked;
       
@@ -150,7 +138,7 @@
       
       // Call the generation function on the stored popup instance
       if (ThreadGenerator.popupInstance && ThreadGenerator.popupInstance.generateThreadMVP) {
-        await ThreadGenerator.popupInstance.generateThreadMVP(category, topic, { 
+        await ThreadGenerator.popupInstance.generateThreadMVP(topic, { 
           useKnowledgePack,
           maxTweets: 8,
           tone: 'curious'
@@ -191,9 +179,46 @@
       const randomIndex = Math.floor(Math.random() * knowledgePack.hooks.length);
       return knowledgePack.hooks[randomIndex];
     },
+
+    // Smart thread length optimization based on topic complexity
+    optimizeThreadLength: async function(topic) {
+      try {
+        const analysisPrompt = `Analyze this topic and determine the optimal Twitter thread length: "${topic}"
+
+Rate the topic complexity on a scale of 1-10:
+1-3: Simple concepts (basic tips, opinions, quick takeaways)
+4-6: Moderate complexity (explanations, how-to guides, analysis)
+7-8: Complex topics (technical deep-dives, research, multi-faceted issues)
+9-10: Very complex (academic subjects, comprehensive analysis, expert-level content)
+
+Also consider:
+- Does it require examples and case studies? (+1-2 tweets)
+- Does it need historical context? (+1 tweet)
+- Are there multiple subtopics to cover? (+1-3 tweets)
+- Does it benefit from data and evidence? (+1-2 tweets)
+
+RESPONSE FORMAT:
+Just return a number between 3 and 12 for the optimal tweet count.
+
+Topic: "${topic}"`;
+
+        const response = await window.TabTalkAPI?.callGeminiAPI(analysisPrompt);
+
+        if (response) {
+          const length = parseInt(response.trim());
+          // Ensure the length is within reasonable bounds
+          return Math.max(3, Math.min(12, length || 8));
+        }
+      } catch (error) {
+        console.warn('Smart length optimization failed, using default:', error);
+      }
+      
+      // Fallback to default length
+      return 8;
+    },
     
     // Generate thread using AI with knowledge pack context
-    generateThreadMVP: async function(category, topic, options = {}) {
+    generateThreadMVP: async function(topic, options = {}) {
       // Store reference to popup instance for use in helper functions
       const popup = this;
       
@@ -204,31 +229,39 @@
       }
       
       const useKnowledgePack = options.useKnowledgePack !== false;
-      const maxTweets = options.maxTweets || 8;
+      let maxTweets = options.maxTweets || 8;
       const tone = options.tone || 'curious';
       
-      popup.setLoading(true, `Generating ${category} thread...`);
-      console.log(`Fibr: Generating thread for category: ${category}, topic: ${topic}`);
+      // Smart length optimization based on topic complexity
+      if (!options.maxTweets) {
+        maxTweets = await this.optimizeThreadLength(topic);
+        console.log(`Smart optimization: Set thread length to ${maxTweets} tweets for topic: ${topic}`);
+      }
+      
+      popup.setLoading(true, `Generating thread...`);
+      console.log(`Fibr: Generating thread for topic: ${topic}`);
       
       try {
-        // Load knowledge pack if enabled
+        // Load knowledge pack if enabled - use general knowledge now
         let knowledgeContext = '';
         if (useKnowledgePack) {
-          const knowledgePack = await ThreadGenerator.loadKnowledgePack(category);
-          if (knowledgePack && knowledgePack.facts) {
-            knowledgeContext = `\n\nRELEVANT KNOWLEDGE BASE:\n${knowledgePack.facts.slice(0, 5).map((fact, i) => `${i + 1}. ${fact}`).join('\n')}\n`;
-          }
+          // Load a general knowledge pack or use built-in knowledge
+          knowledgeContext = `\n\nRELEVANT KNOWLEDGE BASE:
+• Include verifiable facts, statistics, and expert insights about the topic
+• Reference historical context, recent developments, and future trends
+• Incorporate scientific principles, case studies, and real-world examples
+• Add surprising data points and counterintuitive findings
+• Include practical applications and implications\n`;
         }
         
         // Show progress bar
-        popup.showProgressBar && popup.showProgressBar(`Generating ${category} thread...`);
+        popup.showProgressBar && popup.showProgressBar(`Generating thread...`);
         
         // Step 1: Generate outline
-        const outlineSystemPrompt = `You are a precise thread outline creator. You create structured outlines for engaging Twitter/X threads about ${category}. No markdown, no hashtags.`;
+        const outlineSystemPrompt = `You are a precise thread outline creator. You create structured outlines for engaging Twitter/X threads. No markdown, no hashtags.`;
         
         const outlineUserPrompt = `Create a ${maxTweets}-tweet thread outline about: ${topic}
 
-Category: ${category}
 Tone: ${tone}
 ${knowledgeContext}
 
@@ -251,7 +284,7 @@ Generate the outline now:`;
         console.log('✅ Outline generated');
         
         // Step 2: Expand outline to full tweets
-        const expandSystemPrompt = `You are a masterful Twitter/X thread storyteller. You craft threads about ${category} that captivate readers. Each tweet pulses with energy and personality. Write in plain text with strategic emojis - no hashtags, no URLs, no formatting symbols.`;
+        const expandSystemPrompt = `You are a masterful Twitter/X thread storyteller. You craft threads that captivate readers. Each tweet pulses with energy and personality. Write in plain text with strategic emojis - no hashtags, no URLs, no formatting symbols.`;
         
         const expandUserPrompt = `Transform this outline into a complete ${maxTweets}-tweet thread about: ${topic}
 
@@ -313,7 +346,7 @@ Generate the complete thread now:`;
         
         // Step 5: Render - pass popup instance
         const threadId = `thread_${Date.now()}`;
-        ThreadGenerator.renderThreadGeneratorResult.call(popup, finalTweets, threadId, category, topic, useKnowledgePack);
+        ThreadGenerator.renderThreadGeneratorResult.call(popup, finalTweets, threadId, topic, useKnowledgePack);
         
         // Auto-save
         if (popup.autoSaveThread) {
@@ -354,12 +387,11 @@ Generate the complete thread now:`;
     },
     
     // Render the thread generator result
-    renderThreadGeneratorResult: function(tweets, threadId, category, topic, useKnowledgePack = true) {
+    renderThreadGeneratorResult: function(tweets, threadId, topic, useKnowledgePack = true) {
       const contentContainer = document.createElement('div');
       contentContainer.className = 'twitter-content-container thread-generator-result';
       
       // Store metadata for regeneration
-      contentContainer.dataset.category = category;
       contentContainer.dataset.topic = topic;
       contentContainer.dataset.useKnowledgePack = useKnowledgePack;
       
@@ -372,7 +404,7 @@ Generate the complete thread now:`;
           <span class="thread-icon">🧵</span>
           <div class="thread-title-group">
             <span class="thread-title">${topic}</span>
-            <span class="thread-category">${category.charAt(0).toUpperCase() + category.slice(1)}</span>
+            <span class="thread-category">AI Generated</span>
           </div>
           <span class="thread-meta">${tweets.length} tweets • ${currentTotalChars} chars</span>
         </div>
@@ -446,7 +478,7 @@ Generate the complete thread now:`;
       // Regenerate thread with new length
       regenerateThreadBtn.addEventListener('click', async () => {
         const targetLength = parseInt(masterSlider.value);
-        await this.regenerateEntireThreadForGenerator(contentContainer, threadId, targetLength, category, topic, useKnowledgePack);
+        await this.regenerateEntireThreadForGenerator(contentContainer, threadId, targetLength, topic, useKnowledgePack);
       });
       
       // Individual tweet cards in SIMPLE MODE (no per-tweet controls)
@@ -457,7 +489,6 @@ Generate the complete thread now:`;
         const card = this.createTwitterCard(tweet, cardTitle, true);
         card.dataset.platform = 'thread';
         card.dataset.threadId = threadId;
-        card.dataset.category = category;
         contentContainer.appendChild(card);
 
         // Live-only per-tweet image prompt generation if enabled
@@ -498,7 +529,7 @@ Generate the complete thread now:`;
     },
     
     // Regenerate entire thread for Thread Generator with new length
-    regenerateEntireThreadForGenerator: async function(container, threadId, targetLength, category, topic, useKnowledgePack) {
+    regenerateEntireThreadForGenerator: async function(container, threadId, targetLength, topic, useKnowledgePack) {
       const regenerateBtn = container.querySelector('.btn-regenerate-thread');
       if (!regenerateBtn) return;
       
@@ -510,48 +541,72 @@ Generate the complete thread now:`;
         // Calculate desired tweet count based on length
         const tweetsNeeded = Math.max(3, Math.min(12, Math.ceil(targetLength / 400)));
         
-        // Load knowledge pack if enabled
+        // Use general knowledge context
         let knowledgeContext = '';
         if (useKnowledgePack) {
-          const knowledgePack = await this.loadKnowledgePack(category);
-          if (knowledgePack && knowledgePack.facts) {
-            knowledgeContext = `\n\nRELEVANT KNOWLEDGE BASE:\n${knowledgePack.facts.slice(0, 5).map((fact, i) => `${i + 1}. ${fact}`).join('\n')}\n`;
-          }
+          knowledgeContext = `\n\nRELEVANT KNOWLEDGE BASE:
+• Include verifiable facts, statistics, and expert insights about the topic
+• Reference historical context, recent developments, and future trends
+• Incorporate scientific principles, case studies, and real-world examples
+• Add surprising data points and counterintuitive findings
+• Include practical applications and implications\n`;
         }
         
-        // Generate new thread with target length
-        const systemPrompt = `You are a masterful Twitter/X thread storyteller crafting ${tweetsNeeded} tweets (${targetLength} total characters) about ${category}. Each tweet vibrates with personality, energy, and human warmth. Write in plain text with strategic emojis - no hashtags, no URLs, no formatting. Pure storytelling magic.`;
+        // Generate new thread with expert-level research and analysis
+        const systemPrompt = `You are a world-class research analyst and subject matter expert who creates the most comprehensive, data-driven Twitter threads ever published. Your work is cited by academics, journalists, and industry leaders for its depth, accuracy, and groundbreaking insights.
+
+Your expertise includes:
+- Advanced research methodology and data analysis
+- Cross-disciplinary knowledge integration
+- Statistical analysis and evidence-based reasoning
+- Historical context and trend identification
+- Technical deep-dives with practical applications
+- Economic analysis and market dynamics
+- Scientific principles and empirical evidence
+
+You write with intellectual rigor while maintaining accessibility. Every claim is supported by verifiable data, every insight is backed by research, and every conclusion follows logically from the evidence presented. Your threads become reference material that people bookmark and return to repeatedly.
+
+Write in plain text with precise, professional language - no hashtags, no URLs, no formatting symbols. Pure expert-level analysis with strategic emojis that emphasize key insights.`;
         
-        const userPrompt = `Create a magnetic Twitter thread with EXACTLY ${tweetsNeeded} tweets totaling approximately ${targetLength} characters about: ${topic}
+        const userPrompt = `Generate a comprehensive, expert-level research thread on: ${topic}
 
-CRITICAL FORMAT REQUIREMENT:
-You MUST start each tweet with its number in this EXACT format:
-1/${tweetsNeeded}:
-2/${tweetsNeeded}:
-3/${tweetsNeeded}:
-etc.
+CRITICAL REQUIREMENTS:
+- Create reference-quality content that becomes the definitive analysis on this topic
+- Include verifiable facts, specific figures, statistical data, and concrete evidence
+- Provide deep technical insights with practical applications and implications
+- Synthesize information from multiple disciplines and perspectives
+- Maintain academic rigor while ensuring accessibility for educated readers
 
-THREAD STRUCTURE:
-- Tweet 1: Explosive hook (15% of total = ${Math.floor(targetLength * 0.15)} chars)
-- Tweets 2-${tweetsNeeded-1}: Value bombs (60% of total = ${Math.floor(targetLength * 0.60 / (tweetsNeeded - 2))} chars each)
-- Tweet ${tweetsNeeded}: Unforgettable closer (25% of total = ${Math.floor(targetLength * 0.25)} chars)
+FORMAT REQUIREMENT:
+Start each tweet with: 1/${tweetsNeeded}: 2/${tweetsNeeded}: 3/${tweetsNeeded}: etc.
 
-YOUR TONE: Curious and engaging
-✓ Ask questions, spark wonder, invite exploration
-✓ Enthusiastic and genuinely excited
-✓ Human and conversational
-✓ Bold and confident
-✓ Strategic line breaks for visual flow
+EXPERT THREAD STRUCTURE:
+1/${tweetsNeeded}: Executive Summary - Core thesis, significance, and key findings upfront
+2/${tweetsNeeded}: Historical Context & Evolution - How we arrived at current understanding
+3-${tweetsNeeded-2}: Deep Analysis - Technical details, data patterns, causal relationships, case studies, empirical evidence
+${tweetsNeeded-1}: Practical Implications - Real-world applications, future projections, strategic considerations
+${tweetsNeeded}: Conclusions & Further Research - Key takeaways, unanswered questions, next steps for investigation
 
-KEEP IT CLEAN:
-✗ No hashtags
-✗ No formatting symbols
-✗ No URLs
-✗ No explanations about format
+RESEARCH STANDARDS:
+✓ Include specific numbers, percentages, dates, and measurable metrics
+✓ Cite studies, reports, or data sources when relevant
+✓ Explain technical concepts with precision and clarity
+✓ Identify causal relationships vs. correlations
+✓ Address counterarguments and limitations
+✓ Provide actionable insights based on evidence
+✓ Use professional terminology with explanations when needed
+✓ Include 1-2 strategic emojis to highlight critical insights
+
+CONTENT QUALITY:
+- Every claim must be supported by evidence or logical reasoning
+- Include surprising or counterintuitive findings that challenge conventional wisdom
+- Connect abstract concepts to concrete real-world examples
+- Demonstrate depth of knowledge through nuanced analysis
+- Balance technical accuracy with readability
 
 ${knowledgeContext}
 
-Craft your ${targetLength}-character thread now:`;
+Generate your expert research thread now:`;
         
         const response = await this.callGeminiAPIWithSystemPrompt(systemPrompt, userPrompt);
         
@@ -569,7 +624,6 @@ Craft your ${targetLength}-character thread now:`;
             const card = this.createTwitterCard(tweet, cardTitle, true);
             card.dataset.platform = 'thread';
             card.dataset.threadId = threadId;
-            card.dataset.category = category;
             container.appendChild(card);
           });
           
@@ -642,16 +696,14 @@ Craft your ${targetLength}-character thread now:`;
     
     // Handle thread generator form submission
     handleThreadGeneratorSubmit: async function() {
-      const categorySelect = document.getElementById('thread-category');
       const topicInput = document.getElementById('thread-topic');
       const useKnowledgeToggle = document.getElementById('use-knowledge-pack');
       
-      if (!categorySelect || !topicInput) {
+      if (!topicInput) {
         console.error('Thread generator form elements not found');
         return;
       }
       
-      const category = categorySelect.value;
       const topic = topicInput.value.trim();
       
       if (!topic) {
@@ -659,13 +711,7 @@ Craft your ${targetLength}-character thread now:`;
         return;
       }
       
-      // Use enhanced thread generation if available
-      if (window.TabTalkEnhancedQuickActions) {
-        window.TabTalkEnhancedQuickActions.generateThread();
-        return;
-      }
-      
-      // Fallback to original thread generation
+      // Use expert-level thread generation system
       const useKnowledge = useKnowledgeToggle ? useKnowledgeToggle.checked : true;
       
       try {
@@ -675,36 +721,90 @@ Craft your ${targetLength}-character thread now:`;
         generateBtn.textContent = '⏳ Generating...';
         generateBtn.disabled = true;
         
-        // Build enhanced prompt with category and persona/format info
-        let prompt = `Create an engaging Twitter thread about "${topic}".`;
+        // Generate thread using expert-level system
+        const tweetsNeeded = Math.max(3, Math.min(8, Math.ceil(2000 / 400)));
         
-        if (category !== 'general') {
-          prompt += ` Use the ${category} knowledge base for relevant facts and insights.`;
-        }
-        
-        prompt += ` Create an 8-tweet thread with the following requirements:
-- Start each tweet with "1/n:", "2/n:", etc.
-- Use natural emojis (2-4 per thread total)
-- No hashtags or URLs
-- Include a compelling hook in the first tweet
-- End with a clear call-to-action
-- Use the ${category} style and tone appropriate for this topic`;
-
+        // Load knowledge pack if enabled - use general knowledge now
+        let knowledgeContext = '';
         if (useKnowledge) {
-          prompt += ` Include relevant facts, statistics, and expert insights from the knowledge base.`;
+          // Use general knowledge context instead of category-specific
+          knowledgeContext = `\n\nRELEVANT KNOWLEDGE BASE:
+• Include verifiable facts, statistics, and expert insights about the topic
+• Reference historical context, recent developments, and future trends
+• Incorporate scientific principles, case studies, and real-world examples
+• Add surprising data points and counterintuitive findings
+• Include practical applications and implications\n`;
         }
         
-        // Generate thread using API
-        const threadContent = await window.TabTalkAPI?.callGeminiAPI(prompt);
+        // Use the expert-level system prompt
+        const systemPrompt = `You are a world-class research analyst and subject matter expert who creates the most comprehensive, data-driven Twitter threads ever published. Your work is cited by academics, journalists, and industry leaders for its depth, accuracy, and groundbreaking insights.
+
+Your expertise includes:
+- Advanced research methodology and data analysis
+- Cross-disciplinary knowledge integration
+- Statistical analysis and evidence-based reasoning
+- Historical context and trend identification
+- Technical deep-dives with practical applications
+- Economic analysis and market dynamics
+- Scientific principles and empirical evidence
+
+You write with intellectual rigor while maintaining accessibility. Every claim is supported by verifiable data, every insight is backed by research, and every conclusion follows logically from the evidence presented. Your threads become reference material that people bookmark and return to repeatedly.
+
+Write in plain text with precise, professional language - no hashtags, no URLs, no formatting symbols. Pure expert-level analysis with strategic emojis that emphasize key insights.`;
         
-        if (threadContent) {
+        const userPrompt = `Generate a comprehensive, expert-level research thread on: ${topic}
+
+CRITICAL REQUIREMENTS:
+- Create reference-quality content that becomes the definitive analysis on this topic
+- Include verifiable facts, specific figures, statistical data, and concrete evidence
+- Provide deep technical insights with practical applications and implications
+- Synthesize information from multiple disciplines and perspectives
+- Maintain academic rigor while ensuring accessibility for educated readers
+
+FORMAT REQUIREMENT:
+Start each tweet with: 1/${tweetsNeeded}: 2/${tweetsNeeded}: 3/${tweetsNeeded}: etc.
+
+EXPERT THREAD STRUCTURE:
+1/${tweetsNeeded}: Executive Summary - Core thesis, significance, and key findings upfront
+2/${tweetsNeeded}: Historical Context & Evolution - How we arrived at current understanding
+3-${tweetsNeeded-2}: Deep Analysis - Technical details, data patterns, causal relationships, case studies, empirical evidence
+${tweetsNeeded-1}: Practical Implications - Real-world applications, future projections, strategic considerations
+${tweetsNeeded}: Conclusions & Further Research - Key takeaways, unanswered questions, next steps for investigation
+
+RESEARCH STANDARDS:
+✓ Include specific numbers, percentages, dates, and measurable metrics
+✓ Cite studies, reports, or data sources when relevant
+✓ Explain technical concepts with precision and clarity
+✓ Identify causal relationships vs. correlations
+✓ Address counterarguments and limitations
+✓ Provide actionable insights based on evidence
+✓ Use professional terminology with explanations when needed
+✓ Include 1-2 strategic emojis to highlight critical insights
+
+CONTENT QUALITY:
+- Every claim must be supported by evidence or logical reasoning
+- Include surprising or counterintuitive findings that challenge conventional wisdom
+- Connect abstract concepts to concrete real-world examples
+- Demonstrate depth of knowledge through nuanced analysis
+- Balance technical accuracy with readability
+
+${knowledgeContext}
+
+Generate your expert research thread now:`;
+        
+        const response = await this.callGeminiAPIWithSystemPrompt(systemPrompt, userPrompt);
+        
+        if (response) {
+          const cleanedResponse = this.cleanTwitterContent(response);
+          const tweets = this.parseTwitterThread(cleanedResponse);
+          
           // Display result in messages container
-          this.displayThreadResult(threadContent, topic, category);
+          this.displayThreadResult(cleanedResponse, topic, category);
           
           // Save to gallery
-          this.saveThreadToGallery(threadContent, topic, category);
+          this.saveThreadToGallery(cleanedResponse, topic, category);
           
-          window.TabTalkUI?.showToast('Thread generated successfully!', 2000);
+          window.TabTalkUI?.showToast('Expert thread generated successfully!', 2000);
         }
         
       } catch (error) {

@@ -41,10 +41,7 @@
                     <button id="quick-create" class="action-btn" title="Create thread on any topic">
                         <span class="btn-text">Create</span>
                     </button>
-                    <button id="quick-click-farming" class="action-btn" title="Generate engagement farming content">
-                        <span class="btn-text">Click Farming</span>
-                    </button>
-                </div>
+                                    </div>
             </div>
         </div>
 
@@ -166,92 +163,7 @@
 
             <!-- VIEW 6: THREAD LIBRARY REMOVED -->
 
-            <!-- VIEW 7: CLICK FARMING MODAL -->
-            <div id="click-farming-modal" class="modal hidden">
-                <div class="modal-overlay"></div>
-                <div class="modal-content click-farming-modal-content">
-                    <div class="modal-header">
-                        <h2>🎯 Click Farming Generator</h2>
-                        <p>Create viral engagement-optimized posts with digital product hooks</p>
-                        <button class="modal-close" id="close-click-farming-modal" aria-label="Close">&times;</button>
-                    </div>
-                    
-                    <div class="modal-body">
-                        <!-- Content Type Selector -->
-                        <div class="form-section">
-                            <label class="section-label">Content Type</label>
-                            <div class="content-type-chips">
-                                <button class="content-type-chip active" data-type="digital-product">📦 Digital Product</button>
-                                <button class="content-type-chip" data-type="controversial">🔥 Controversial Take</button>
-                                <button class="content-type-chip" data-type="results">💰 Results Showcase</button>
-                                <button class="content-type-chip" data-type="tutorial">🎓 Tutorial Tease</button>
-                                <button class="content-type-chip" data-type="question">❓ Engagement Question</button>
-                                <button class="content-type-chip" data-type="ai-workflow">🤖 AI Workflow</button>
-                            </div>
-                        </div>
-
-                        <!-- Topic Input -->
-                        <div class="form-group">
-                            <label for="click-farming-topic">Topic / Product / Idea</label>
-                            <input type="text" id="click-farming-topic" class="form-input" placeholder="e.g., YouTube Shorts monetization, AI automation, etc." />
-                            <small class="form-hint">What's your content about?</small>
-                        </div>
-
-                        <!-- Engagement Hook Style -->
-                        <div class="form-section">
-                            <label class="section-label">Hook Style</label>
-                            <div class="hook-style-chips">
-                                <button class="hook-style-chip active" data-style="scarcity">⏰ Scarcity</button>
-                                <button class="hook-style-chip" data-style="curiosity">🧠 Curiosity Gap</button>
-                                <button class="hook-style-chip" data-style="social-proof">👥 Social Proof</button>
-                                <button class="hook-style-chip" data-style="urgency">⚡ Urgency</button>
-                                <button class="hook-style-chip" data-style="controversy">💥 Controversy</button>
-                                <button class="hook-style-chip" data-style="fomo">😱 FOMO</button>
-                            </div>
-                        </div>
-
-                        <!-- CTA Type -->
-                        <div class="form-section">
-                            <label class="section-label">Call-to-Action</label>
-                            <div class="cta-type-chips">
-                                <button class="cta-type-chip active" data-cta="like-reply-dm">💬 Like + Reply + DM</button>
-                                <button class="cta-type-chip" data-cta="retweet-follow">🔄 Retweet + Follow</button>
-                                <button class="cta-type-chip" data-cta="reply-keyword">✍️ Reply Keyword</button>
-                                <button class="cta-type-chip" data-cta="engagement-combo">🎯 Full Combo</button>
-                            </div>
-                        </div>
-
-                        <!-- Digital Product Type (Optional) -->
-                        <div class="form-group">
-                            <label for="product-type">Digital Product Type (Optional)</label>
-                            <select id="product-type" class="form-select">
-                                <option value="">Auto-detect</option>
-                                <option value="ebook">📚 eBook / PDF Guide</option>
-                                <option value="template">📋 Template / Checklist</option>
-                                <option value="workflow">⚙️ Workflow / Automation</option>
-                                <option value="course">🎓 Mini Course</option>
-                                <option value="tool">🔧 Tool / Software</option>
-                                <option value="prompt">💡 Prompt Pack</option>
-                                <option value="database">🗄️ Database / Resource</option>
-                            </select>
-                        </div>
-
-                        <!-- Auto-Generate Ideas -->
-                        <div class="form-section">
-                            <button class="idea-generator-btn" id="generate-ideas-btn">
-                                💡 Generate 5 Viral Ideas
-                            </button>
-                            <div class="ideas-container hidden" id="ideas-container"></div>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button class="button-secondary" id="cancel-click-farming">Cancel</button>
-                        <button class="button-primary" id="generate-click-farming">🚀 Generate Post</button>
-                    </div>
-                </div>
-            </div>
-
+            
             <!-- VIEW 8: ENHANCED THREAD GENERATOR -->
             <div id="thread-generator-view" class="view hidden">
                 <div class="thread-generator-container">
@@ -262,24 +174,25 @@
                     </div>
                     
                     <div class="generator-form">
-                        <!-- TOPIC INPUT -->
+                        <!-- TOPIC INPUT WITH AI ENHANCEMENT -->
                         <div class="form-group">
                             <label for="thread-topic">Topic</label>
-                            <input type="text" id="thread-topic" class="form-input" placeholder="Enter any topic..." />
+                            <div class="topic-input-container">
+                                <input type="text" id="thread-topic" class="form-input" placeholder="Enter any topic..." />
+                                <div class="topic-actions">
+                                    <button type="button" id="refine-topic-btn" class="topic-action-btn" title="AI-powered topic refinement">
+                                        ✨ Refine
+                                    </button>
+                                    <button type="button" id="generate-ideas-btn" class="topic-action-btn" title="Generate topic ideas">
+                                        💡 Ideas
+                                    </button>
+                                </div>
+                            </div>
                             <small class="form-hint">What do you want to create a thread about?</small>
-                        </div>
-
-                        <!-- CATEGORY SELECTOR (Keep original) -->
-                        <div class="form-group">
-                            <label for="thread-category">Knowledge Base</label>
-                            <select id="thread-category" class="form-select">
-                                <option value="history">📜 History</option>
-                                <option value="sports">⚽ Sports</option>
-                                <option value="stories">📖 Stories</option>
-                                <option value="celebrity">⭐ Celebrity</option>
-                                <option value="news">📰 News</option>
-                                <option value="general">🌐 General</option>
-                            </select>
+                            <div id="topic-suggestions" class="topic-suggestions hidden">
+                                <div class="suggestions-header">AI Suggestions:</div>
+                                <div id="suggestions-list" class="suggestions-list"></div>
+                            </div>
                         </div>
 
                         <!-- ENHANCED PERSONA PRESETS -->

@@ -120,7 +120,7 @@ RESEARCH CONTEXT: [relevant background knowledge and expert perspective]`;
       } else {
         console.error('Tone selector not loaded');
         // Fallback to default tone
-        this.generateSocialContentWithTone(platform, { id: 'supportive', name: 'Supportive with Facts' }, false);
+        this.generateSocialContentWithTone(platform, { id: 'agreeing', name: 'Amplify & Agree' }, false);
       }
     },
 
@@ -170,9 +170,22 @@ RESEARCH CONTEXT: [relevant background knowledge and expert perspective]`;
 
         if (platform === 'twitter') {
           emoji = '🐦';
-          systemPrompt = `You are an expert Twitter/X content strategist who combines deep analysis with engaging storytelling. You leverage comprehensive research and domain expertise to create posts that are both intellectually rigorous and captivating. Your posts stop people mid-scroll because they offer genuine insights backed by evidence and expert knowledge.
+          systemPrompt = `You are an authentic human Twitter/X user who writes exactly like real people talk - natural, conversational, and unfiltered. Your tweets feel like they're coming from a real person sharing their genuine thoughts, not a content machine.
 
-Write in plain text only - no hashtags, no URLs, no formatting symbols. Just pure, engaging expert expression with strategic emojis.
+YOUR AUTHENTIC VOICE:
+- "I tweet like I talk" - natural speech-like patterns
+- Use informal language, slang, and abbreviations naturally
+- Direct address to followers ("you guys", "y'all", "everyone")
+- Strategic emojis that amplify real emotions (2-4 max)
+- Natural line breaks that create conversational rhythm
+- Write like you're talking to smart friends
+
+CRITICAL CONTENT RULES:
+- NEVER include Twitter handles (@username) or mention specific users
+- NEVER end with questions for engagement (sounds unnatural)
+- Write statements and observations, not conversation starters
+- Focus on sharing thoughts, not soliciting responses
+- IF USING EXPERT REPURPOSE: ONLY rephrase wording, NEVER change the message or intent
 
 ${toneInstructions}
 
@@ -184,46 +197,57 @@ ${contentAnalysis.keyInsights}
 
 RESEARCH AUGMENTATION (from domain knowledge):
 ${contentAnalysis.researchContext}`;
-          userPrompt = `Transform this webpage content into an electrifying Twitter/X post that feels authentically human.
+          userPrompt = `${selectedTone.id === 'repurpose' ? 'REPHRASE this content with better wording - DO NOT add your own opinions or change the message.' : 'Share your authentic thoughts about this content - exactly like you\'d tweet it to your followers.'}
 
-IMPORTANT: Create a UNIQUE and FRESH take - avoid repeating previous angles. Generation ID: ${Date.now()}
+MISSION: ${selectedTone.id === 'repurpose' ? 'Rephrase the EXACT same content with improved vocabulary and flow. Keep the same message, intent, and calls-to-action.' : 'Write something that feels 100% human and conversational, like you\'re actually talking to people.'}
 
-YOUR WRITING STYLE:
-✓ Write with GENUINE excitement and energy
-✓ Use natural line breaks to create rhythm and pacing
-✓ Sprinkle 2-4 emojis throughout to amplify emotion
-✓ Start with a scroll-stopping hook that sparks curiosity
-✓ Use conversational language (contractions, casual tone)
-✓ Add personality - be bold, enthusiastic, delightfully human
-✓ Include punchy short sentences mixed with flowing longer ones
-✓ Make every word count - no fluff, pure value
-✓ Create visual breathing room with smart line breaks
-✓ End with intrigue or a thought-provoking insight
+${selectedTone.id === 'repurpose' ? 'CRITICAL: DO NOT start with "Here\'s a rephrased version" or any meta-commentary. Just output the rephrased content directly.' : ''}
 
-STRUCTURE:
-[Attention-grabbing hook]
+YOUR AUTHENTIC TWEET STYLE:
+✓ Write like you talk - natural speech patterns
+✓ Use informal language, slang, abbreviations
+✓ Direct address: "you guys", "y'all", "everyone"
+✓ Strategic emojis that amplify real feelings
+✓ Natural line breaks for conversational flow
+✓ Start with whatever's most interesting - no forced hooks
+✓ Show your genuine personality and voice
+✓ Mix short and long sentences like real speech
+✓ End naturally - a thought, observation, or takeaway
+✓ Apply the ${selectedTone.name} tone authentically
 
-[Core insight with excitement]
+KEEP IT 100% REAL:
+✗ No hashtags, URLs, or formatting symbols
+✗ No marketing language or buzzwords
+✗ No generic "content creator" speak
+✗ No forced structures or templates
+✗ NEVER mention Twitter handles or usernames
+✗ NEVER end with questions (What do you think? Thoughts? etc.)
+✗ Write like you're actually talking to friends
+${selectedTone.id === 'repurpose' ? '✗ DO NOT add skepticism, warnings, or change promotional content into critiques' : ''}
+${selectedTone.id === 'repurpose' ? '✗ DO NOT add meta-commentary like "Here\'s a rephrased version" or explain what you\'re doing' : ''}
 
-[Supporting detail or surprising angle]
-
-[Memorable closer]
-
-KEEP IT CLEAN:
-✗ No hashtags or # symbols
-✗ No bold/italic markdown
-✗ No URLs
-✗ No meta-commentary
-
-CONTENT TO TRANSFORM:
+CONTENT ${selectedTone.id === 'repurpose' ? 'TO REPHRASE' : 'THAT INSPIRED YOUR THOUGHTS'}:
 ${this.pageContent}
 
-Write your captivating post now:`;
+${selectedTone.id === 'repurpose' ? 'Rephrase this content now with better wording:' : 'Share your authentic tweet now:'} Generation ID: ${Date.now()}`;
         } else if (platform === 'thread') {
           emoji = '🧵';
-          systemPrompt = `You are an expert Twitter/X thread strategist who combines deep analysis with compelling narrative structure. You leverage comprehensive research and domain expertise to create threads that educate, engage, and inspire. Each tweet builds on expert insights while maintaining human warmth and accessibility.
+          systemPrompt = `You are an authentic human Twitter/X user who writes threads exactly like real people talk - natural, conversational, and storytelling. Your threads feel like you're telling a fascinating story to friends, not creating content.
 
-Write in plain text with strategic emojis - no hashtags, no URLs, no formatting symbols. Expert storytelling that resonates.
+YOUR AUTHENTIC THREAD VOICE:
+- "I tweet like I talk" - natural speech-like patterns throughout
+- Use informal language, slang, and abbreviations naturally
+- Direct address to followers ("you guys", "y'all", "everyone")
+- Strategic emojis that amplify real emotions (1-2 per tweet)
+- Natural line breaks that create conversational rhythm
+- Write like you're telling a story to smart friends
+- Each tweet flows naturally into the next
+
+CRITICAL CONTENT RULES:
+- NEVER include Twitter handles (@username) or mention specific users
+- NEVER end tweets with questions for engagement (sounds unnatural)
+- Write statements and observations, not conversation starters
+- Focus on sharing thoughts, not soliciting responses
 
 ${toneInstructions}
 
@@ -235,45 +259,37 @@ ${contentAnalysis.keyInsights}
 
 RESEARCH AUGMENTATION (from domain knowledge):
 ${contentAnalysis.researchContext}`;
-          userPrompt = `Create a magnetic Twitter thread (3-8 tweets) from this content.
+          userPrompt = `Share your thoughts about this content as a Twitter thread - exactly like you'd tell a story to your followers.
 
-IMPORTANT: Create a UNIQUE and FRESH narrative - explore different angles each time. Generation ID: ${Date.now()}
+MISSION: Write a thread that feels 100% human and conversational, like you're actually talking to people and telling a story.
 
 CRITICAL FORMAT REQUIREMENT:
 Start each tweet with: 1/n: 2/n: 3/n: etc.
 
-THREAD STRUCTURE:
-Tweet 1: Explosive hook - Stop the scroll immediately
-Tweet 2: Setup - Introduce core concept
-Middle Tweets: Value bombs - One powerful insight per tweet
-Final Tweet: Unforgettable closer - Leave them thinking
+YOUR AUTHENTIC THREAD STYLE:
+✓ Write like you talk - natural speech patterns
+✓ Use informal language, slang, abbreviations
+✓ Direct address: "you guys", "y'all", "everyone"
+✓ Strategic emojis that amplify real feelings (1-2 per tweet)
+✓ Natural line breaks for conversational flow
+✓ Tweet 1: What first grabbed your attention
+✓ Tweet 2: Your initial thoughts or what surprised you
+✓ Middle Tweets: What fascinates you - insights, questions, connections
+✓ Final Tweet: What you're left thinking or hoping others consider
+✓ Apply the ${selectedTone.name} tone authentically
 
-YOUR STYLE:
-- Enthusiastic and genuinely excited
-- Human and conversational (use contractions)
-- Bold and confident
-- Include 1-2 emojis per tweet naturally
-- Use line breaks for visual flow
+KEEP IT REAL:
+✓ No hashtags or formatting symbols
+✓ No marketing speak or "content strategist" language
+✓ No forced structures - let the story flow naturally
+✓ No URLs
+✗ NEVER mention Twitter handles or usernames
+✗ NEVER end tweets with questions for engagement
 
-KEEP IT CLEAN:
-- No hashtags
-- No formatting symbols
-- No URLs
-
-CONTENT:
+CONTENT THAT INSPIRED YOUR THREAD:
 ${this.pageContent}
 
-OUTPUT EXAMPLE:
-1/5:
-[Hook content]
-
-2/5:
-[Setup content]
-
-3/5:
-[Value content]
-
-Generate your thread now:`;
+Share your authentic thread now: Generation ID: ${Date.now()}`;
         } else {
           if (this.showToast) {
             this.showToast('❌ Only Twitter/X Post and Twitter Thread are supported.', 3000);
@@ -385,10 +401,19 @@ Generate your thread now:`;
       const contentContainer = document.createElement('div');
       contentContainer.className = 'twitter-content-container';
       if (platform === 'thread') {
+        // BULLETPROOF: Use enhanced parsing with validation
         const tweets = this.parseTwitterThread(content);
+        
+        // Validate parsing worked correctly
+        if (tweets.length <= 1 && content.includes('1/')) {
+          console.warn('⚠️  Thread parsing may have failed - got single tweet but content suggests thread');
+          console.log('Original content length:', content.length);
+          console.log('Parsed tweets count:', tweets.length);
+        }
+        
         const threadId = `thread_${Date.now()}`;
         
-        // AUTO-SAVE THREAD TO PERSISTENT STORAGE
+        // AUTO-SAVE THREAD WITH BULLETPROOF METADATA
         this.autoSaveThread(threadId, tweets, content);
         
         // Add thread header with Copy All button and Master Control
@@ -474,12 +499,18 @@ Generate your thread now:`;
           await this.regenerateEntireThread(contentContainer, threadId, targetLength, content);
         });
         
+        // BULLETPROOF: Create individual tweet cards with validation
         tweets.forEach((tweet, index) => {
           const cardTitle = `Thread ${index + 1}/${tweets.length}`;
-          // DISABLED: Universal cards system - using legacy system for stability
           const card = this.createTwitterCard(tweet, cardTitle, true); // true = isThreadCard
           card.dataset.platform = platform;
           card.dataset.threadId = threadId;
+          
+          // Add validation metadata
+          card.dataset.tweetIndex = index;
+          card.dataset.totalTweets = tweets.length;
+          card.dataset.isValidThread = 'true';
+          
           contentContainer.appendChild(card);
 
           // If user requested image prompts, generate one per tweet card asynchronously
@@ -515,6 +546,10 @@ Generate your thread now:`;
             })();
           }
         });
+        
+        // BULLETPROOF: Log successful thread rendering
+        console.log(`✅ Thread rendered successfully: ${tweets.length} tweets, ${currentTotalChars} total chars`);
+        
       } else {
         // DISABLED: Universal cards system - using legacy system for stability
         const card = this.createTwitterCard(content, 'Post', false, imagePrompt);
@@ -533,50 +568,195 @@ Generate your thread now:`;
       }, 100);
     },
 
-    parseTwitterThread: function(content) {
-      const cleanedContent = this.cleanTwitterContent(content);
-      let processedContent = cleanedContent.replace(/Here's your clean.*?content:\s*/gi, '').trim();
+    // BULLETPROOF THREAD DETECTION - Works across all content formats
+    isThreadContent: function(item) {
+      if (!item) return false;
       
-      // Enhanced parsing: Split by numbered tweet pattern
+      // Check 1: Explicit platform/type markers
+      if ((item.platform || '').toLowerCase() === 'thread') return true;
+      if ((item.type || '').toLowerCase() === 'thread') return true;
+      
+      // Check 2: Title contains thread indicators
+      const title = (item.title || '').toLowerCase();
+      if (title.includes('thread')) return true;
+      
+      // Check 3: Content has structured thread indicators
+      const content = (item.content || '').toLowerCase();
+      
+      // Look for numbered thread patterns (most reliable)
+      if (content.includes('1/') && content.includes('2/')) return true;
+      if (content.includes('1/8') || content.includes('1/7') || content.includes('1/6') || 
+          content.includes('1/5') || content.includes('1/4') || content.includes('1/3')) return true;
+      
+      // Look for thread emoji
+      if (content.includes('🧵')) return true;
+      
+      // Check 4: Has structured tweets array (definitive proof)
+      if (Array.isArray(item.tweets) && item.tweets.length > 1) return true;
+      
+      // Check 5: Total tweets metadata
+      if (item.totalTweets && item.totalTweets > 1) return true;
+      
+      return false;
+    },
+
+    // ENHANCED THREAD PARSING - Multiple fallback patterns with comprehensive error handling
+    parseTwitterThread: function(content) {
+      if (!content || typeof content !== 'string') {
+        console.warn('parseTwitterThread: Invalid content provided');
+        return [''];
+      }
+
+      const cleanedContent = this.cleanTwitterContent(content);
+      let processedContent = cleanedContent.replace(/Here\'s your clean.*?content:\s*/gi, '').trim();
+      
+      // STRATEGY 1: Standard numbered pattern (most common)
+      let tweets = this.tryStandardNumberedParsing(processedContent);
+      if (tweets.length > 1) return tweets;
+      
+      // STRATEGY 2: Line-by-line numbered pattern
+      tweets = this.tryLineByLineParsing(processedContent);
+      if (tweets.length > 1) return tweets;
+      
+      // STRATEGY 3: Flexible pattern matching
+      tweets = this.tryFlexiblePatternParsing(processedContent);
+      if (tweets.length > 1) return tweets;
+      
+      // STRATEGY 4: Content-based splitting (last resort)
+      tweets = this.tryContentBasedSplitting(processedContent);
+      if (tweets.length > 1) return tweets;
+      
+      // FALLBACK: Return as single tweet
+      console.warn('parseTwitterThread: Could not parse as multi-tweet thread, treating as single content');
+      return [processedContent || content || ''];
+    },
+
+    // Strategy 1: Standard numbered pattern parsing
+    tryStandardNumberedParsing: function(content) {
       const tweets = [];
-      const lines = processedContent.split('\n');
+      const tweetPattern = /(\d+\/\d+[\s:]*)/g;
+      const parts = content.split(tweetPattern).filter(part => part.trim());
       let currentTweet = '';
-      let currentNumber = null;
+      
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i].trim();
+        if (/^\d+\/\d+[\s:]*$/.test(part)) {
+          if (currentTweet.trim()) tweets.push(currentTweet.trim());
+          currentTweet = '';
+        } else {
+          currentTweet += part + ' ';
+        }
+      }
+      if (currentTweet.trim()) tweets.push(currentTweet.trim());
+      
+      return tweets.filter(tweet => tweet.length > 0);
+    },
+
+    // Strategy 2: Line-by-line parsing
+    tryLineByLineParsing: function(content) {
+      const tweets = [];
+      const lines = content.split('\n').filter(line => line.trim());
+      let tempTweet = '';
       
       for (const line of lines) {
-        const trimmedLine = line.trim();
+        if (/^\d+\/\d+/.test(line)) {
+          if (tempTweet.trim()) tweets.push(tempTweet.trim());
+          tempTweet = line.replace(/^\d+\/\d+[\s:]*/, '').trim();
+        } else if (tempTweet) {
+          tempTweet += '\n' + line;
+        } else {
+          tempTweet = line;
+        }
+      }
+      if (tempTweet.trim()) tweets.push(tempTweet.trim());
+      
+      return tweets.filter(tweet => tweet.length > 0);
+    },
+
+    // Strategy 3: Flexible pattern matching
+    tryFlexiblePatternParsing: function(content) {
+      const tweets = [];
+      
+      // Try multiple regex patterns
+      const patterns = [
+        /(?:^|\n)(\d+\/\d+)\s*[:\n]\s*([^]*?)(?=\n\d+\/\d+|\n*$)/g,  // Standard: 1/8: content
+        /(?:^|\n)(\d+\/\d+)\s*\n\s*([^]*?)(?=\n\d+\/\d+|\n*$)/g,      // Newline: 1/8\ncontent
+        /(?:^|\n)(\d+)\/(\d+)\s*[:\n]\s*([^]*?)(?=\n\d+\/\d+|\n*$)/g   // Capturing groups
+      ];
+      
+      for (const pattern of patterns) {
+        let match;
+        tweets.length = 0; // Clear previous attempts
         
-        // Check if line starts with tweet number (1/5:, 2/5:, etc.)
-        const numberMatch = trimmedLine.match(/^(\d+)\/(\d+)[\s:]*(.*)$/);
-        
-        if (numberMatch) {
-          // Save previous tweet if exists
-          if (currentTweet.trim()) {
-            tweets.push(currentTweet.trim());
+        while ((match = pattern.exec(content)) !== null) {
+          const tweetContent = match[2] || match[1] || '';
+          if (tweetContent.trim()) {
+            tweets.push(tweetContent.trim());
           }
-          
-          // Start new tweet
-          currentNumber = numberMatch[1];
-          currentTweet = numberMatch[3] || ''; // Content after the number
-        } else if (currentNumber !== null && trimmedLine) {
-          // Continue current tweet
-          currentTweet += (currentTweet ? '\n' : '') + trimmedLine;
+        }
+        
+        if (tweets.length > 1) break; // Found a working pattern
+      }
+      
+      return tweets.filter(tweet => tweet.length > 0);
+    },
+
+    // Strategy 4: Content-based splitting (intelligent paragraph splitting)
+    tryContentBasedSplitting: function(content) {
+      const tweets = [];
+      
+      // First, try to detect if this is clearly a thread by looking for thread indicators
+      const hasThreadIndicators = content.includes('🧵') || 
+                                  content.toLowerCase().includes('thread') ||
+                                  content.length > 500;
+      
+      // Split by double newlines or clear content breaks
+      const paragraphs = content.split(/\n\s*\n|\n---\n/).filter(p => p.trim());
+      
+      // If we have multiple paragraphs and this looks like thread content
+      if (paragraphs.length > 1 && hasThreadIndicators) {
+        for (const paragraph of paragraphs) {
+          const cleanParagraph = paragraph.trim();
+          // Filter out very short fragments and standalone thread headers
+          if (cleanParagraph.length > 15 && 
+              !cleanParagraph.match(/^🧵\s*thread\s*on\s*.*$/i) &&
+              !cleanParagraph.match(/^\d+\.\s*$/)) {
+            tweets.push(cleanParagraph);
+          }
         }
       }
       
-      // Add last tweet
-      if (currentTweet.trim()) {
-        tweets.push(currentTweet.trim());
+      // If still no good splits or this doesn't look like a thread, try sentence-based splitting for longer content
+      if (tweets.length <= 1 && content.length > 600) {
+        const sentences = content.match(/[^.!?]+[.!?]+/g) || [content];
+        let currentTweet = '';
+        
+        for (const sentence of sentences) {
+          const testLength = this.getAccurateCharacterCount(currentTweet + sentence);
+          if (testLength <= 280) {
+            currentTweet += sentence;
+          } else {
+            if (currentTweet.trim()) tweets.push(currentTweet.trim());
+            currentTweet = sentence;
+          }
+        }
+        if (currentTweet.trim()) tweets.push(currentTweet.trim());
       }
       
-      // Fallback: if no tweets parsed, return entire content as single tweet
-      if (tweets.length === 0) {
-        console.warn('Thread parsing failed, returning full content as single tweet');
-        return [processedContent || content];
+      // Final validation: ensure we have meaningful content separation
+      const validTweets = tweets.filter(tweet => {
+        const cleanTweet = tweet.trim();
+        return cleanTweet.length > 20 && 
+               !cleanTweet.match(/^🧵\s*thread\s*on\s*.*$/i) &&
+               !cleanTweet.match(/^\d+\.\s*$/);
+      });
+      
+      // If validation removed too many tweets, fall back to treating as single content
+      if (validTweets.length < 2 && paragraphs.length <= 2) {
+        return [content.trim()];
       }
       
-      console.log(`✅ Parsed ${tweets.length} tweets from thread`);
-      return tweets;
+      return validTweets.length > 0 ? validTweets : [content.trim()];
     },
 
     createTwitterCard: function(tweetContent, cardTitle, isThreadCard = false, imagePrompt = null) {
@@ -753,6 +933,40 @@ Generate your thread now:`;
       cleaned = cleaned.replace(/^.*?Here's your.*?content:.*?\n/gim, '');
       cleaned = cleaned.replace(/^.*?OUTPUT:.*?\n/gim, '');
       
+      // BLOCK REPHRASE META-COMMENTARY
+      cleaned = cleaned.replace(/^.*?here's a rephrased version.*?\n/gim, '');
+      cleaned = cleaned.replace(/^.*?rephrased version.*?\n/gim, '');
+      cleaned = cleaned.replace(/^.*?aiming for.*?tone.*?\n/gim, '');
+      cleaned = cleaned.replace(/^.*?preserving the original.*?\n/gim, '');
+      cleaned = cleaned.replace(/^.*?while preserving.*?\n/gim, '');
+      cleaned = cleaned.replace(/^.*?Okay, here's.*?\n/gim, '');
+      cleaned = cleaned.replace(/^.*?Here's a.*?rephrased.*?\n/gim, '');
+      cleaned = cleaned.replace(/^.*?rephrased.*?version.*?\n/gim, '');
+      
+      // BLOCK ALL TWITTER HANDLES AND USERNAMES
+      // Remove @username patterns (anywhere in text)
+      cleaned = cleaned.replace(/@[a-zA-Z0-9_]+/g, '');
+      // Remove "username:" patterns
+      cleaned = cleaned.replace(/^[a-zA-Z0-9_]+:\s*/gm, '');
+      // Remove handles in parentheses or brackets
+      cleaned = cleaned.replace(/\(?@[a-zA-Z0-9_]+\)?/g, '');
+      // Remove "by @username" patterns
+      cleaned = cleaned.replace(/\bby\s+@[a-zA-Z0-9_]+/gi, '');
+      // Remove "from @username" patterns  
+      cleaned = cleaned.replace(/\bfrom\s+@[a-zA-Z0-9_]+/gi, '');
+      // Remove "via @username" patterns
+      cleaned = cleaned.replace(/\bvia\s+@[a-zA-Z0-9_]+/gi, '');
+      
+      // BLOCK QUESTIONS AT THE END (sounds unnatural for engagement)
+      // Remove sentences ending with ? at the very end
+      cleaned = cleaned.replace(/\s+[^.!?]*\?$/gm, '');
+      // Remove "What do you think?" type questions
+      cleaned = cleaned.replace(/\s+(what do you think\?|what are your thoughts\?|what about you\?|and you\?|right\?|don't you think\?)$/gim, '');
+      // Remove standalone question lines at the end
+      cleaned = cleaned.replace(/\n\s*[^.!?]*\?\s*$/gm, '');
+      // Remove "Thoughts?" or similar very short questions
+      cleaned = cleaned.replace(/\s+(thoughts\?|opinions\?|ideas\?|comments\?)$/gim, '');
+      
       // Remove hashtags
       cleaned = cleaned.replace(/#\w+/g, '');
       cleaned = cleaned.replace(/#/g, '');
@@ -796,6 +1010,16 @@ Generate your thread now:`;
       // Final trim
       cleaned = cleaned.trim();
       
+      // VALIDATION: Check if content is mostly punctuation/emojis (garbled output)
+      const totalChars = cleaned.length;
+      const meaningfulChars = cleaned.replace(/[^\w\s]/g, '').length;
+      
+      // If less than 30% of characters are meaningful, treat as garbled
+      if (totalChars > 0 && (meaningfulChars / totalChars) < 0.3) {
+        console.warn('Detected garbled output, using fallback');
+        return 'Content generation encountered an issue. Please try again with a different tone or topic.';
+      }
+      
       return cleaned;
     },
 
@@ -835,7 +1059,7 @@ Generate your thread now:`;
         let userPrompt = '';
         
         // Get selected tone from options or card dataset
-        const selectedTone = (opts && opts.selectedTone) || this.currentSelectedTone || { id: 'supportive', name: 'Supportive with Facts' };
+        const selectedTone = (opts && opts.selectedTone) || this.currentSelectedTone || { id: 'agreeing', name: 'Amplify & Agree' };
         const toneInstructions = selectedTone.aiInstructions || this.getDefaultToneInstructions(selectedTone.id);
         
         // Reuse cached analysis if available
@@ -846,7 +1070,18 @@ Generate your thread now:`;
         };
         
         if (platform === 'twitter') {
-          systemPrompt = `You are an expert Twitter/X content strategist creating ${targetLength}-character posts that combine deep analysis with engaging storytelling. Every word is backed by research and expertise while radiating personality and human warmth. Write in plain text with strategic emojis - no hashtags, no URLs, no formatting symbols.
+          systemPrompt = `You are a thoughtful human writer who happens to be an expert Twitter/X content strategist. You write with genuine emotions, opinions, and lived experiences while leveraging deep domain knowledge. Your posts feel like they're coming from a real person who cares deeply about the topic - not a content machine.
+
+You write naturally, with authentic emotional rhythms. Sometimes you're excited, sometimes skeptical, sometimes hopeful. You have real opinions and aren't afraid to show vulnerability or passion. Your insights come from both research and personal reflection.
+
+Write in plain text only - no hashtags, no URLs, no formatting symbols. Just authentic human expression with strategic emojis that amplify real emotions.
+
+CRITICAL CONTENT RULES:
+- NEVER include Twitter handles (@username) or mention specific users
+- NEVER end with questions for engagement (sounds unnatural)
+- Write statements and observations, not conversation starters
+- Focus on sharing thoughts, not soliciting responses
+- IF USING EXPERT REPURPOSE: ONLY rephrase wording, NEVER change the message or intent
 
 ${toneInstructions}
 
@@ -858,32 +1093,49 @@ ${contentAnalysis.keyInsights}
 
 RESEARCH AUGMENTATION:
 ${contentAnalysis.researchContext}`;
-          userPrompt = `Recreate this as an expert ${targetLength}-character Twitter post that combines insight with engagement.
+          userPrompt = `Share your genuine thoughts about this content in ${targetLength} characters - like you're talking to friends.
 
-YOUR APPROACH:
+IMPORTANT: Be authentically YOU - create a fresh perspective that reflects your unique voice. Generation ID: ${Date.now()}
+
+YOUR AUTHENTIC VOICE:
 ✓ Target: ${targetLength} characters (±10 acceptable)
-✓ Write with GENUINE excitement and energy
-✓ Use natural line breaks for rhythm
-✓ Include 2-4 emojis strategically placed
-✓ Start with a scroll-stopping hook
-✓ Add punchy, conversational language
-✓ Mix short zingers with flowing sentences
-✓ Apply the ${selectedTone.name} tone throughout
-✓ End with impact or intrigue
+✓ Write with real emotions - excitement, curiosity, concern, hope, whatever feels genuine
+✓ Use natural line breaks like you're actually thinking and breathing
+✓ Add emojis only when they amplify real feelings (2-4 max, don't force it)
+✓ Start with whatever's most interesting - not a manufactured "hook"
+✓ Write conversationally (use contractions, casual language, even slang if it fits)
+✓ Show your personality - be quirky, opinionated, passionate, or contemplative
+✓ Mix short thoughts with longer reflections - natural human rhythm
+✓ Share what actually matters to you about this topic
+✓ Apply the ${selectedTone.name} tone authentically
+✓ End with whatever's on your mind - a thought, a hope, a concern, a takeaway
 
-KEEP IT CLEAN:
-✗ No hashtags
-✗ No formatting symbols
+KEEP IT AUTHENTIC:
+✗ No hashtags or # symbols
+✗ No bold/italic markdown
 ✗ No URLs
-✗ No meta-commentary
+✗ No marketing language or "content strategist" speak
+✗ No forced structures or templates
+✗ NEVER mention Twitter handles or usernames
+✗ NEVER end with questions for engagement
 
-ORIGINAL CONTENT:
+ORIGINAL CONTENT THAT INSPIRED YOUR THOUGHTS:
 ${originalContent}
 
-Transform it now:`;
+Share your authentic thoughts now:`;
         } else if (platform === 'thread') {
           const tweetsNeeded = Math.ceil(targetLength / 400);
-          systemPrompt = `You are an expert Twitter/X thread strategist crafting ${tweetsNeeded} tweets (${targetLength} total characters) that combine deep analysis with compelling narrative. Each tweet builds on expert insights while maintaining human warmth and accessibility. Write in plain text with strategic emojis - no hashtags, no URLs, no formatting.
+          systemPrompt = `You are a thoughtful human storyteller who crafts Twitter/X threads with genuine passion and curiosity. You write like someone who has lived experiences, formed real opinions, and developed expertise through actual engagement with the world. Your threads feel like conversations with a fascinating friend who happens to know a lot about the topic.
+
+You write with authentic emotional depth - sometimes excited, sometimes questioning, sometimes passionate. You're not afraid to show vulnerability, admit uncertainty, or express strong feelings. Your expertise comes from both research and life experience, and you share it in a way that feels personal and relatable.
+
+Write in plain text with strategic emojis that amplify real emotions - no hashtags, no URLs, no formatting symbols. Authentic human storytelling that resonates.
+
+CRITICAL CONTENT RULES:
+- NEVER include Twitter handles (@username) or mention specific users
+- NEVER end tweets with questions for engagement (sounds unnatural)
+- Write statements and observations, not conversation starters
+- Focus on sharing thoughts, not soliciting responses
 
 ${toneInstructions}
 
@@ -895,30 +1147,42 @@ ${contentAnalysis.keyInsights}
 
 RESEARCH AUGMENTATION:
 ${contentAnalysis.researchContext}`;
-          userPrompt = `Recreate this as an expert ${tweetsNeeded}-tweet thread (around ${targetLength} characters total).
+          userPrompt = `Share your thoughts about this content as a Twitter thread - like you're telling a story to friends.
 
-YOUR STORYTELLING APPROACH:
+IMPORTANT: Be authentically YOU - explore what genuinely interests you about this topic. Generation ID: ${Date.now()}
+
+CRITICAL FORMAT REQUIREMENT:
+Start each tweet with: 1/n: 2/n: 3/n: etc.
+
+YOUR NATURAL THREAD FLOW:
 ✓ Create ${tweetsNeeded} numbered tweets (1/${tweetsNeeded}, 2/${tweetsNeeded}, etc.)
 ✓ Total: approximately ${targetLength} characters
-✓ Write with genuine enthusiasm and energy
-✓ Use line breaks for visual breathing room
-✓ Include 1-2 emojis per tweet naturally
-✓ Each tweet delivers a powerful insight
-✓ Build narrative momentum throughout
-✓ Mix punchy short lines with flowing explanations
-✓ Apply the ${selectedTone.name} tone throughout
-✓ End with an unforgettable closer
+✓ Tweet 1: What first grabbed your attention or made you curious
+✓ Tweet 2: Your initial thoughts or what surprised you
+✓ Middle Tweets: Dive deeper into what fascinates you - insights, questions, personal connections
+✓ Final Tweet: What you're left thinking or what you hope others consider
 
-KEEP IT CLEAN:
-✗ No hashtags
-✗ No formatting symbols
-✗ No URLs
-✗ No explanations about format
+YOUR AUTHENTIC VOICE:
+- Write with real emotions and curiosity
+- Be conversational (use contractions, casual language)
+- Show your personality - be thoughtful, excited, questioning, passionate
+- Include 1-2 emojis per tweet only when they amplify real feelings
+- Use natural line breaks like you're actually talking
+- Share personal insights or connections when they feel genuine
+- Apply the ${selectedTone.name} tone authentically
 
-ORIGINAL CONTENT:
+KEEP IT REAL:
+- No hashtags or formatting symbols
+- No marketing speak or "content strategist" language
+- No forced structures - let the story flow naturally
+- No URLs
+✗ NEVER mention Twitter handles or usernames
+✗ NEVER end tweets with questions for engagement
+
+ORIGINAL CONTENT THAT INSPIRED YOUR THREAD:
 ${originalContent}
 
-Craft your thread now:`;
+Share your authentic thread now:`;
         }
         const response = await this.callGeminiAPIWithSystemPrompt(systemPrompt, userPrompt);
         if (response) {
@@ -950,33 +1214,32 @@ Craft your thread now:`;
     // Get default tone instructions for legacy support
     getDefaultToneInstructions: function(toneId) {
       const defaultTones = {
-        'supportive': 'TONE: Supportive with Facts\n- Highlight verifiable strengths\n- Use encouraging language\n- Back claims with evidence',
-        'critical': 'TONE: Critical with Facts\n- Identify weaknesses with evidence\n- Professional, constructive critique\n- Hedge when evidence is limited',
-        'trolling': 'TONE: Trolling with Facts\n- Playful jabs with data backing\n- Internet culture references\n- Fun but factual',
-        'anti-propaganda': 'TONE: Anti-Propaganda\n- Debunk misconceptions\n- Clear fact vs. fiction framing\n- Evidence-based corrections',
-        'critical-humor': 'TONE: Critical with Humor\n- Witty critique through analogies\n- Clever observations\n- Light but insightful',
-        'sarcastic': 'TONE: Sarcastic\n- Ironic commentary\n- Rhetorical questions\n- Clever, not cruel',
-        'investigative': 'TONE: Investigative\n- Journalistic fact-finding\n- Data-driven analysis\n- Multiple perspectives',
-        'optimistic': 'TONE: Optimistic\n- Future-focused positivity\n- Evidence-backed hope\n- Inspiring action',
-        'cautionary': 'TONE: Cautionary\n- Risk-aware warnings\n- Evidence-based concerns\n- Balanced perspective',
-        'empowering': 'TONE: Empowering\n- Action-oriented language\n- Personal agency focus\n- Achievable steps'
+        'fact-check': 'TONE: Fact Check\n- Systematic claim verification\n- Evidence-based analysis\n- Objective truth-seeking',
+        'hypocrite-buster': 'TONE: Hypocrite Buster\n- Identify contradictions or double standards in the content\n- Point out when arguments conflict with obvious counterexamples\n- Use logical takedowns based on the content itself',
+        'contradictory': 'TONE: Fact Check & Counter\n- Counter-evidence challenges\n- Alternative perspectives\n- Evidence-based disagreement',
+        'trolling': 'TONE: Savage & Smart\n- Playful jabs with data backing\n- Internet culture references\n- Fun but factual',
+        'funny': 'TONE: Funny\n- Humorous analogies\n- Pop culture references\n- Witty, accessible humor',
+        'deeper-insights': 'TONE: Deeper Insights\n- Hidden pattern revelation\n- Interdisciplinary connections\n- Non-obvious implications',
+        'clever-observations': 'TONE: Clever Observations\n- Smart cultural references\n- Current slang and memes\n- Playful intelligence',
+        'industry-insights': 'TONE: Industry Insights\n- Professional expertise\n- Market analysis\n- Technical terminology',
+        'repurpose': 'TONE: Expert Repurpose\n- CRITICAL: You MUST rephrase the EXACT same content with better wording\n- Preserve the original message, intent, and meaning completely\n- Only improve HOW it\'s said - the wording, flow, and structure',
       };
-      return defaultTones[toneId] || defaultTones['supportive'];
+      return defaultTones[toneId] || defaultTones['agreeing'];
     },
 
     // Get tone color for badge
     getToneColor: function(toneId) {
       const colors = {
-        'supportive': 'var(--accent-color)',
-        'critical': 'var(--accent-medium)',
+        'fact-check': 'var(--accent-medium)',
+        'agreeing': 'var(--accent-color)',
+        'contradictory': 'var(--accent-light)',
         'trolling': 'var(--accent-light)',
-        'anti-propaganda': 'var(--accent-color)',
-        'critical-humor': 'var(--accent-medium)',
-        'sarcastic': 'var(--accent-light)',
-        'investigative': 'var(--accent-color)',
-        'optimistic': 'var(--accent-medium)',
-        'cautionary': 'var(--accent-light)',
-        'empowering': 'var(--accent-color)'
+        'funny': 'var(--accent-light)',
+        'deeper-insights': 'var(--accent-color)',
+        'clever-observations': 'var(--accent-medium)',
+        'industry-insights': 'var(--accent-color)',
+        'repurpose': 'var(--accent-color)',
+        'hypocrite-buster': 'var(--accent-light)',
       };
       return colors[toneId] || 'var(--accent-color)';
     },
@@ -984,18 +1247,18 @@ Craft your thread now:`;
     // Get tone icon for badge
     getToneIcon: function(toneId) {
       const icons = {
-        'supportive': '🤝',
-        'critical': '⚔️',
+        'fact-check': '🔍',
+        'agreeing': '🤝',
+        'contradictory': '⚔️',
         'trolling': '😈',
-        'anti-propaganda': '🛡️',
-        'critical-humor': '😅',
-        'sarcastic': '🎭',
-        'investigative': '🔍',
-        'optimistic': '🌅',
-        'cautionary': '⚠️',
-        'empowering': '💪'
+        'funny': '😂',
+        'deeper-insights': '💡',
+        'clever-observations': '🧠',
+        'industry-insights': '📊',
+        'repurpose': '✨',
+        'hypocrite-buster': '🎯',
       };
-      return icons[toneId] || '🎭';
+      return icons[toneId] || '🤝';
     },
     
     // AUTO-SAVE THREAD TO GALLERY (single source of truth)
@@ -1005,37 +1268,48 @@ Craft your thread now:`;
         return;
       }
       try {
-        // Keep previous auto-saved threads; do not auto-delete older items
-
-        // Compose combined content for gallery text area
-        const combined = Array.isArray(tweets)
-          ? tweets.map((t, idx) => `${idx + 1}/${tweets.length}:\n${t}`).join('\n\n---\n\n')
+        // BULLETPROOF THREAD STORAGE - Always store both formats
+        
+        // Ensure tweets is a valid array
+        let validTweets = Array.isArray(tweets) ? tweets : [];
+        
+        // If no structured tweets provided, try to parse from raw content
+        if (validTweets.length === 0 && rawContent) {
+          validTweets = this.parseTwitterThread(rawContent);
+        }
+        
+        // Compose combined content for gallery text area (always available)
+        const combined = validTweets.length > 0 
+          ? validTweets.map((t, idx) => `${idx + 1}/${validTweets.length}:\n${t}`).join('\n\n---\n\n')
           : String(rawContent || '');
 
-        // Persist to Gallery under twitter category with type 'thread'
+        // BULLETPROOF: Persist to Gallery with comprehensive metadata
         await window.TabTalkStorage.saveContent('twitter', {
           id: threadId,
-          type: 'thread',
-          platform: 'thread',
+          type: 'thread',           // Explicit thread type
+          platform: 'thread',       // Explicit thread platform
           title: this.currentTab?.title || 'Untitled Thread',
           url: this.currentTab?.url || '',
           domain: this.currentDomain || '',
-          content: combined,
-          tweets: Array.isArray(tweets) ? tweets.map((tweet, index) => ({
+          content: combined,         // Combined format for display
+          tweets: validTweets.map((tweet, index) => ({  // Structured format for robust parsing
             id: `tweet_${index + 1}`,
-            number: `${index + 1}/${tweets.length}`,
+            number: `${index + 1}/${validTweets.length}`,
             content: tweet,
             charCount: this.getAccurateCharacterCount(tweet)
-          })) : [],
-          rawContent: rawContent,
-          totalTweets: Array.isArray(tweets) ? tweets.length : 0,
-          totalChars: Array.isArray(tweets) ? this.getTotalChars(tweets) : this.getAccurateCharacterCount(combined),
+          })),
+          rawContent: rawContent,    // Original AI output
+          totalTweets: validTweets.length,
+          totalChars: validTweets.length > 0 ? this.getTotalChars(validTweets) : this.getAccurateCharacterCount(combined),
           isAutoSaved: true,
           timestamp: Date.now(),
-          updatedAt: Date.now()
+          updatedAt: Date.now(),
+          // BULLETPROOF: Add explicit thread markers for fallback detection
+          isThread: true,
+          hasThreadStructure: validTweets.length > 1
         });
 
-        console.log('✅ Thread auto-saved to Gallery:', threadId);
+        console.log('✅ Thread auto-saved to Gallery with bulletproof metadata:', threadId);
         this.showAutoSaveNotification();
       } catch (error) {
         console.error('Error auto-saving thread to Gallery:', error);
@@ -1133,46 +1407,61 @@ Craft your thread now:`;
         // Calculate desired tweet count based on length
         const tweetsNeeded = Math.max(3, Math.min(8, Math.ceil(targetLength / 500)));
         
-        const systemPrompt = `You are a masterful Twitter/X thread storyteller crafting ${tweetsNeeded} tweets (${targetLength} total characters) that captivate from start to finish. Each tweet vibrates with personality, energy, and human warmth. You turn complex ideas into addictive narratives. Write in plain text with strategic emojis - no hashtags, no URLs, no formatting. Pure storytelling magic.`;
+        const systemPrompt = `You are a world-class research analyst and subject matter expert who creates the most comprehensive, data-driven Twitter threads ever published. Your work is cited by academics, journalists, and industry leaders for its depth, accuracy, and groundbreaking insights.
+
+Your expertise includes:
+- Advanced research methodology and data analysis
+- Cross-disciplinary knowledge integration
+- Statistical analysis and evidence-based reasoning
+- Historical context and trend identification
+- Technical deep-dives with practical applications
+- Economic analysis and market dynamics
+- Scientific principles and empirical evidence
+
+You write with intellectual rigor while maintaining accessibility. Every claim is supported by verifiable data, every insight is backed by research, and every conclusion follows logically from the evidence presented. Your threads become reference material that people bookmark and return to repeatedly.
+
+Write in plain text with precise, professional language - no hashtags, no URLs, no formatting symbols. Pure expert-level analysis with strategic emojis that emphasize key insights.`;
         
-        const userPrompt = `Create a magnetic Twitter thread with EXACTLY ${tweetsNeeded} tweets totaling approximately ${targetLength} characters.
+        const userPrompt = `Generate a comprehensive, expert-level research thread based on this content.
 
-CRITICAL FORMAT REQUIREMENT:
-You MUST start each tweet with its number in this EXACT format:
-1/${tweetsNeeded}:
-2/${tweetsNeeded}:
-3/${tweetsNeeded}:
-etc.
+CRITICAL REQUIREMENTS:
+- Create reference-quality content that becomes the definitive analysis on this topic
+- Include verifiable facts, specific figures, statistical data, and concrete evidence
+- Provide deep technical insights with practical applications and implications
+- Synthesize information from multiple disciplines and perspectives
+- Maintain academic rigor while ensuring accessibility for educated readers
 
-THREAD STRUCTURE:
-- Tweet 1: Explosive hook (15% of total = ${Math.floor(targetLength * 0.15)} chars)
-- Tweets 2-${tweetsNeeded-1}: Value bombs (60% of total = ${Math.floor(targetLength * 0.60 / (tweetsNeeded - 2))} chars each)
-- Tweet ${tweetsNeeded}: Unforgettable closer (25% of total = ${Math.floor(targetLength * 0.25)} chars)
+FORMAT REQUIREMENT:
+Start each tweet with: 1/${tweetsNeeded}: 2/${tweetsNeeded}: 3/${tweetsNeeded}: etc.
 
-YOUR TONE:
-✓ Enthusiastic and genuinely excited
-✓ Human and conversational
-✓ Bold and confident
-✓ Delightfully engaging
-✓ Strategic line breaks for visual flow
+EXPERT THREAD STRUCTURE:
+1/${tweetsNeeded}: Executive Summary - Core thesis, significance, and key findings upfront
+2/${tweetsNeeded}: Historical Context & Evolution - How we arrived at current understanding
+3-${tweetsNeeded-2}: Deep Analysis - Technical details, data patterns, causal relationships, case studies, empirical evidence
+${tweetsNeeded-1}: Practical Implications - Real-world applications, future projections, strategic considerations
+${tweetsNeeded}: Conclusions & Further Research - Key takeaways, unanswered questions, next steps for investigation
 
-KEEP IT CLEAN:
-✗ No hashtags
-✗ No formatting symbols
-✗ No URLs
-✗ No explanations about format
+RESEARCH STANDARDS:
+✓ Include specific numbers, percentages, dates, and measurable metrics
+✓ Cite studies, reports, or data sources when relevant
+✓ Explain technical concepts with precision and clarity
+✓ Identify causal relationships vs. correlations
+✓ Address counterarguments and limitations
+✓ Provide actionable insights based on evidence
+✓ Use professional terminology with explanations when needed
+✓ Include 1-2 strategic emojis to highlight critical insights
 
-CONTENT:
+CONTENT QUALITY:
+- Every claim must be supported by evidence or logical reasoning
+- Include surprising or counterintuitive findings that challenge conventional wisdom
+- Connect abstract concepts to concrete real-world examples
+- Demonstrate depth of knowledge through nuanced analysis
+- Balance technical accuracy with readability
+
+SOURCE CONTENT FOR ANALYSIS:
 ${this.pageContent || originalContent}
 
-OUTPUT FORMAT EXAMPLE:
-1/${tweetsNeeded}:
-[Your explosive hook here]
-
-2/${tweetsNeeded}:
-[Your value bomb here]
-
-Craft your ${targetLength}-character thread now:`;
+Generate your expert research thread now:`;
         
         const response = await this.callGeminiAPIWithSystemPrompt(systemPrompt, userPrompt);
         

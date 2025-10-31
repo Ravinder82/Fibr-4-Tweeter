@@ -2,49 +2,76 @@
   const ToneSelector = {
     // Comprehensive tone definitions with AI instructions
     toneDefinitions: {
-      'supportive': {
-        id: 'supportive',
-        name: 'Supportive with Facts',
+      'fact-check': {
+        id: 'fact-check',
+        name: 'Fact Check',
+        icon: '🔍',
+        color: 'var(--accent-medium)',
+        category: 'reply',
+        subcategory: 'analytical',
+        description: 'Verify claims with evidence and data',
+        example: 'Let\'s fact-check this claim...',
+        aiInstructions: `TONE: Fact Check
+- Systematically verify claims made in the content
+- Use "Claim vs. Reality" or "Fact Check" structure
+- Provide verifiable evidence, data, and sources
+- Highlight inaccuracies without being aggressive
+- Use phrases like "The data shows...", "Independent verification confirms...", "This claim is [supported/refuted] by..."
+- Maintain objective, evidence-based approach
+- Focus on truth and accuracy
+- Cite specific studies or reliable sources`,
+        keywords: ['verification', 'evidence-based', 'accurate', 'objective', 'truth-seeking']
+      },
+      'agreeing': {
+        id: 'agreeing',
+        name: 'Amplify & Agree',
         icon: '🤝',
         color: 'var(--accent-color)',
-        category: 'positive',
-        description: 'Highlight strengths, build confidence',
-        example: 'This is brilliant because...',
-        aiInstructions: `TONE: Supportive with Facts
-- Highlight 2-3 verifiable strengths from the content
-- Use encouraging, confidence-building language
-- Back every positive claim with specific evidence
-- Maintain professional, uplifting tone
-- Focus on potential and possibilities
-- Use phrases like "The data shows...", "Evidence suggests...", "Research confirms..."`,
-        keywords: ['positive', 'encouraging', 'data-driven', 'optimistic', 'factual']
+        category: 'reply',
+        subcategory: 'positive',
+        description: 'Support and amplify the message',
+        example: 'This is absolutely right because...',
+        aiInstructions: `TONE: Agreeing
+- Find common ground and validate the core message
+- Add supporting evidence or personal confirmation
+- Use collaborative and affirming language
+- Share why you agree with specific examples
+- Use phrases like "I completely agree because...", "This resonates because...", "My experience confirms..."
+- Build on the original points with additional insights
+- Show genuine alignment with the message
+- Encourage others to join the agreement`,
+        keywords: ['supportive', 'collaborative', 'affirming', 'aligned', 'validating']
       },
-      'critical': {
-        id: 'critical',
-        name: 'Critical with Facts',
+      'contradictory': {
+        id: 'contradictory',
+        name: 'Fact Check & Counter',
         icon: '⚔️',
-        color: 'var(--accent-medium)',
-        category: 'critical',
-        description: 'Evidence-based critique, constructive',
-        example: 'The data shows this gap...',
-        aiInstructions: `TONE: Critical with Facts
-- Identify 1-2 weaknesses, gaps, or contradictions grounded in the content
-- Use professional, evidence-based wording (no ad hominem)
-- Provide constructive criticism with specific examples
-- If evidence is limited, hedge appropriately (e.g., "may", "appears")
-- Focus on improvement opportunities
-- Use phrases like "However, the data reveals...", "A closer look shows...", "The evidence suggests otherwise..."`,
-        keywords: ['analytical', 'evidence-based', 'constructive', 'professional', 'factual']
+        color: 'var(--accent-light)',
+        category: 'reply',
+        subcategory: 'critical',
+        description: 'Challenge with counter-evidence',
+        example: 'Actually, the evidence suggests otherwise...',
+        aiInstructions: `TONE: Contradictory
+- Directly challenge the main claims with counter-evidence
+- Present opposing data or alternative perspectives
+- Use respectful but firm disagreement
+- Provide specific examples that contradict the content
+- Use phrases like "However, research shows...", "This contradicts...", "An alternative view suggests..."
+- Maintain intellectual honesty and rigor
+- Acknowledge valid points while highlighting disagreements
+- Focus on evidence-based contradiction`,
+        keywords: ['challenging', 'counter-evidence', 'disagreeing', 'alternative', 'critical']
       },
       'trolling': {
         id: 'trolling',
-        name: 'Trolling with Facts',
+        name: 'Savage & Smart',
         icon: '😈',
         color: 'var(--accent-light)',
-        category: 'playful',
+        category: 'reply',
+        subcategory: 'playful',
         description: 'Playful jabs backed by evidence',
         example: 'Don\'t @ me, but the numbers say...',
-        aiInstructions: `TONE: Trolling with Facts
+        aiInstructions: `TONE: Trolling
 - Use playful jabs, memes, and pop culture references
 - Back EVERY claim with verifiable data or facts
 - Maintain humor without being mean-spirited
@@ -54,136 +81,144 @@
 - Keep it fun but factual`,
         keywords: ['playful', 'humorous', 'sassy', 'internet-culture', 'evidence-backed']
       },
-      'anti-propaganda': {
-        id: 'anti-propaganda',
-        name: 'Anti-Propaganda',
-        icon: '🛡️',
-        color: 'var(--accent-color)',
-        category: 'investigative',
-        description: 'Debunk myths with facts & humor',
-        example: 'The claim vs. the reality...',
-        aiInstructions: `TONE: Anti-Propaganda
-- Identify common misconceptions or misleading claims in the content
-- Use clear "Myth vs. Fact" or "Claim vs. Reality" framing
-- Debunk with verifiable evidence and data
-- Add subtle humor to make it engaging
-- Expose logical fallacies or manipulation tactics
-- Use phrases like "Let's fact-check this...", "The truth is...", "Here's what they're not telling you..."
-- Maintain credibility while being entertaining`,
-        keywords: ['fact-checking', 'debunking', 'truth-seeking', 'investigative', 'educational']
-      },
-      'critical-humor': {
-        id: 'critical-humor',
-        name: 'Critical with Humor',
-        icon: '😅',
-        color: 'var(--accent-medium)',
-        category: 'playful',
-        description: 'Clever critique with witty observations',
-        example: 'This is like that time when... but actually...',
-        aiInstructions: `TONE: Critical with Humor
-- Deliver pointed critique through clever analogies and witty observations
-- Use humor to soften criticism while maintaining substance
-- Never be mean-spirited or personal
-- Include relatable comparisons and funny examples
-- Balance entertainment with valid critique
-- Use phrases like "It's like...", "Imagine if...", "This reminds me of..."
-- Keep it light but insightful`,
-        keywords: ['witty', 'clever', 'analogies', 'entertaining', 'insightful']
-      },
-      'sarcastic': {
-        id: 'sarcastic',
-        name: 'Sarcastic',
-        icon: '🎭',
+      'funny': {
+        id: 'funny',
+        name: 'Funny',
+        icon: '😂',
         color: 'var(--accent-light)',
-        category: 'playful',
-        description: 'Ironic commentary with bite',
-        example: 'Oh sure, because that worked so well before...',
-        aiInstructions: `TONE: Sarcastic
-- Use irony and sarcasm to highlight absurdities or contradictions
-- Employ rhetorical questions and exaggerated statements
-- Reference past failures or obvious flaws ironically
-- Keep it clever, not cruel
-- Use phrases like "Oh sure...", "Because that's totally...", "What could possibly go wrong..."
-- Balance sarcasm with actual insights
-- Make the irony obvious but sophisticated`,
-        keywords: ['ironic', 'sarcastic', 'rhetorical', 'clever', 'pointed']
+        category: 'original',
+        subcategory: 'playful',
+        description: 'Humorous take with clever observations',
+        example: 'This is like when your cat tries to code...',
+        aiInstructions: `TONE: Funny
+- Find humor in the content through relatable analogies
+- Use witty observations and clever comparisons
+- Include pop culture references or memes when appropriate
+- Keep jokes light and accessible, not offensive
+- Use phrases like "This reminds me of...", "It's like that time...", "Plot twist..."
+- Balance humor with actual insights
+- Use self-deprecating humor when it fits
+- Make complex topics fun and approachable`,
+        keywords: ['humorous', 'witty', 'entertaining', 'clever', 'relatable']
       },
-      'investigative': {
-        id: 'investigative',
-        name: 'Investigative',
-        icon: '🔍',
+      'deeper-insights': {
+        id: 'deeper-insights',
+        name: 'Deeper Insights',
+        icon: '💡',
         color: 'var(--accent-color)',
-        category: 'analytical',
-        description: 'Deep dive analysis with evidence',
-        example: 'Digging deeper reveals...',
-        aiInstructions: `TONE: Investigative
-- Adopt a journalistic, fact-finding approach
-- Present findings in a structured, logical manner
-- Use data, statistics, and verifiable sources
-- Ask probing questions and explore implications
-- Maintain objectivity while being thorough
-- Use phrases like "Investigation reveals...", "Upon closer examination...", "The evidence shows..."
-- Present multiple angles and perspectives
-- Focus on uncovering hidden truths`,
-        keywords: ['journalistic', 'thorough', 'objective', 'data-driven', 'analytical']
+        category: 'original',
+        subcategory: 'analytical',
+        description: 'Reveal hidden patterns and connections',
+        example: 'What everyone\'s missing is the deeper pattern...',
+        aiInstructions: `TONE: Deeper Insights
+- Go beyond surface-level analysis to reveal hidden patterns
+- Connect seemingly unrelated concepts or trends
+- Provide "aha!" moments that others might miss
+- Use interdisciplinary thinking and synthesis
+- Use phrases like "The deeper pattern here is...", "What connects these is...", "The hidden insight is..."
+- Show how this fits into larger trends or cycles
+- Provide non-obvious connections and implications
+- Offer perspectives that require deeper thinking`,
+        keywords: ['insightful', 'analytical', 'pattern-recognition', 'synthesis', 'profound']
       },
-      'optimistic': {
-        id: 'optimistic',
-        name: 'Optimistic',
-        icon: '🌅',
+      'clever-observations': {
+        id: 'clever-observations',
+        name: 'Clever Observations',
+        icon: '🧠',
         color: 'var(--accent-medium)',
-        category: 'positive',
-        description: 'Future-focused with positive outlook',
-        example: 'The future looks bright because...',
-        aiInstructions: `TONE: Optimistic
-- Focus on positive trends, opportunities, and potential
-- Highlight progress and forward momentum
-- Use hopeful, inspiring language
-- Back optimism with concrete reasons and evidence
-- Acknowledge challenges but emphasize solutions
-- Use phrases like "The future holds...", "This opens doors to...", "We're moving toward..."
-- Inspire action and positive thinking
-- Balance enthusiasm with realism`,
-        keywords: ['hopeful', 'inspiring', 'future-focused', 'positive', 'motivating']
+        category: 'original',
+        subcategory: 'playful',
+        description: 'Quick wit and smart cultural references',
+        example: 'This is giving main character energy...',
+        aiInstructions: `TONE: Clever Observations
+- Make smart, witty observations about the content
+- Use current slang, memes, and pop culture references
+- Include self-deprecating humor when appropriate
+- Keep tone playful but intelligent
+- Use phrases like "This is giving...", "The math is mathing...", "No way...", "It's the... for me"
+- Reference internet culture and trends authentically
+- Balance humor with genuine insights
+- Make connections others might miss but find obvious once pointed out`,
+        keywords: ['witty', 'clever', 'trendy', 'relatable', 'observant']
       },
-      'cautionary': {
-        id: 'cautionary',
-        name: 'Cautionary',
-        icon: '⚠️',
-        color: 'var(--accent-light)',
-        category: 'analytical',
-        description: 'Warn about risks and considerations',
-        example: 'Before you proceed, consider this...',
-        aiInstructions: `TONE: Cautionary
-- Highlight potential risks, pitfalls, or unintended consequences
-- Use warning language without being alarmist
-- Provide specific examples of what could go wrong
-- Suggest precautions and alternative approaches
-- Maintain balanced perspective (not doom-and-gloom)
-- Use phrases like "Be aware that...", "Consider the risks...", "History shows..."
-- Focus on informed decision-making
-- Back warnings with evidence`,
-        keywords: ['warning', 'risk-aware', 'careful', 'balanced', 'informative']
-      },
-      'empowering': {
-        id: 'empowering',
-        name: 'Empowering',
-        icon: '💪',
+      'industry-insights': {
+        id: 'industry-insights',
+        name: 'Industry Insights',
+        icon: '📊',
         color: 'var(--accent-color)',
-        category: 'positive',
-        description: 'Inspire action and personal agency',
-        example: 'You have the power to change this by...',
-        aiInstructions: `TONE: Empowering
-- Focus on reader's ability to take action and create change
-- Use direct, action-oriented language
-- Provide specific, actionable steps
-- Build confidence and self-efficacy
-- Emphasize personal agency and control
-- Use phrases like "You can...", "Take action by...", "Start today with..."
-- Inspire without being preachy
-- Make change feel achievable`,
-        keywords: ['action-oriented', 'motivating', 'empowering', 'practical', 'inspiring']
-      }
+        category: 'original',
+        subcategory: 'professional',
+        description: 'Professional expertise and market analysis',
+        example: 'From an industry perspective, this signals...',
+        aiInstructions: `TONE: Industry Insights
+- Provide professional expertise and insider knowledge
+- Analyze market trends and industry implications
+- Use technical terminology with clear explanations
+- Share insights that come from deep domain experience
+- Use phrases like "From an industry perspective...", "This signals a shift in...", "Professional analysis shows..."
+- Include specific metrics, benchmarks, or industry standards
+- Demonstrate deep understanding of the field
+- Connect content to broader industry context and future trends`,
+        keywords: ['professional', 'expert', 'industry', 'analytical', 'specialized']
+      },
+      'repurpose': {
+        id: 'repurpose',
+        name: 'Expert Repurpose',
+        icon: '✨',
+        color: 'var(--accent-color)',
+        category: 'original',
+        subcategory: 'creative',
+        description: 'Rephrase content with better wording',
+        example: 'Let me rephrase this more effectively...',
+        aiInstructions: `TONE: Expert Repurpose
+
+ABSOLUTE CRITICAL RULES - YOU MUST FOLLOW THESE EXACTLY:
+1. REPHRASE THE EXACT SAME CONTENT - Do NOT create new content
+2. PRESERVE THE ORIGINAL MESSAGE 100% - Same intent, same purpose, same offer
+3. DO NOT add your own opinions, skepticism, or commentary
+4. DO NOT change promotional content into warnings or critiques
+5. If the original is promotional, your output MUST be promotional
+6. If the original has a call-to-action, keep the EXACT same call-to-action
+7. ONLY change the wording, vocabulary, and sentence structure
+8. Think of it as translating to better English, not changing the message
+
+WHAT TO DO:
+- Use stronger, more professional vocabulary
+- Improve sentence flow and transitions
+- Make it sound more polished and compelling
+- Enhance readability while keeping the same meaning
+- Example: "HOLY SH*T" → "This is incredible" (same excitement, better wording)
+
+WHAT NOT TO DO:
+- Do NOT question the content's validity
+- Do NOT add warnings or skepticism
+- Do NOT change the tone from positive to negative
+- Do NOT remove calls-to-action or promotional elements
+- Do NOT add your own analysis or commentary`,
+        keywords: ['rephrase', 'enhance', 'improve', 'professional', 'polished']
+      },
+      'hypocrite-buster': {
+        id: 'hypocrite-buster',
+        name: 'Hypocrite Buster',
+        icon: '🎯',
+        color: 'var(--accent-light)',
+        category: 'reply',
+        subcategory: 'critical',
+        description: 'Point out contradictions and double standards',
+        example: 'Interesting how they ignore their own past stance...',
+        aiInstructions: `TONE: Hypocrite Buster
+- Identify contradictions or double standards in the content
+- Point out when arguments conflict with obvious counterexamples
+- Highlight selective reasoning or convenient inconsistencies
+- Use logical takedowns based on the content itself
+- Focus on "this contradicts that" patterns within the material
+- Use phrases like "Funny how...", "Conveniently ignoring...", "The irony is..."
+- Maintain sharp, critical tone without being aggressive
+- Point out flawed reasoning or selective evidence use
+- Connect dots that show inconsistency in positions
+- Use irony and juxtaposition to highlight contradictions effectively`,
+        keywords: ['contradiction', 'double-standards', 'inconsistency', 'critical', 'exposure']
+      },
     },
 
     // Custom tone combinations
@@ -329,23 +364,42 @@
       }
     },
 
-    // Render tone grid
+    // Render tone grid with categories
     renderToneGrid: function() {
-      return Object.values(this.toneDefinitions).map(tone => `
-        <div class="tone-option" 
-             data-tone-id="${tone.id}" 
-             data-category="${tone.category}"
-             role="radio"
-             aria-checked="false"
-             tabindex="0">
-          <div class="tone-icon">${tone.icon}</div>
-          <div class="tone-info">
-            <div class="tone-name">${tone.name}</div>
-            <div class="tone-description">${tone.description}</div>
+      const originalTones = Object.values(this.toneDefinitions).filter(tone => tone.category === 'original');
+      const replyTones = Object.values(this.toneDefinitions).filter(tone => tone.category === 'reply');
+      
+      const renderToneSection = (tones, title, icon) => `
+        <div class="tone-category">
+          <div class="category-header">
+            <span class="category-icon">${icon}</span>
+            <span class="category-title">${title}</span>
           </div>
-          <div class="tone-check">✓</div>
+          <div class="tone-grid-row">
+            ${tones.map(tone => `
+              <div class="tone-option" 
+                   data-tone-id="${tone.id}" 
+                   data-category="${tone.category}"
+                   data-subcategory="${tone.subcategory}"
+                   role="radio"
+                   aria-checked="false"
+                   tabindex="0">
+                <div class="tone-icon">${tone.icon}</div>
+                <div class="tone-info">
+                  <div class="tone-name">${tone.name}</div>
+                  <div class="tone-description">${tone.description}</div>
+                </div>
+                <div class="tone-check">✓</div>
+              </div>
+            `).join('')}
+          </div>
         </div>
-      `).join('');
+      `;
+      
+      return `
+        ${renderToneSection(originalTones, 'Original Post', '✍️')}
+        ${renderToneSection(replyTones, 'Reply/Repost', '💬')}
+      `;
     },
 
     // Render tone options for custom builder
@@ -549,17 +603,17 @@
       // Recommendation logic
       if (hasControversy && hasData) {
         recommendations.push({
-          toneId: 'critical',
-          ...this.toneDefinitions.critical,
-          reason: 'Content contains controversial claims with data - perfect for evidence-based critique',
+          toneId: 'contradictory',
+          ...this.toneDefinitions.contradictory,
+          reason: 'Content contains controversial claims with data - perfect for evidence-based contradiction',
           confidence: 92
         });
       }
 
       if (hasClaims && !hasData) {
         recommendations.push({
-          toneId: 'anti-propaganda',
-          ...this.toneDefinitions['anti-propaganda'],
+          toneId: 'fact-check',
+          ...this.toneDefinitions['fact-check'],
           reason: 'Multiple claims detected without strong evidence - ideal for fact-checking',
           confidence: 88
         });
@@ -567,9 +621,9 @@
 
       if (hasPositive && hasData) {
         recommendations.push({
-          toneId: 'supportive',
-          ...this.toneDefinitions.supportive,
-          reason: 'Positive developments backed by data - great for supportive commentary',
+          toneId: 'agreeing',
+          ...this.toneDefinitions.agreeing,
+          reason: 'Positive developments backed by data - great for supportive agreement',
           confidence: 90
         });
       }
@@ -585,48 +639,24 @@
 
       if (hasNegative && !hasControversy) {
         recommendations.push({
-          toneId: 'critical-humor',
-          ...this.toneDefinitions['critical-humor'],
-          reason: 'Issues present without heated debate - ideal for witty critique',
+          toneId: 'funny',
+          ...this.toneDefinitions.funny,
+          reason: 'Issues present without heated debate - ideal for humorous take',
           confidence: 83
         });
       }
 
-      if (hasFuture && hasPositive) {
-        recommendations.push({
-          toneId: 'optimistic',
-          ...this.toneDefinitions.optimistic,
-          reason: 'Forward-looking content with positive outlook - great for optimistic framing',
-          confidence: 87
-        });
-      }
 
-      if (hasWarning || (hasNegative && hasData)) {
-        recommendations.push({
-          toneId: 'cautionary',
-          ...this.toneDefinitions.cautionary,
-          reason: 'Risks or concerns identified - suitable for cautionary perspective',
-          confidence: 84
-        });
-      }
-
+      
       if (hasData && contentLength > 2000) {
         recommendations.push({
-          toneId: 'investigative',
-          ...this.toneDefinitions.investigative,
-          reason: 'Substantial content with data - perfect for deep investigative analysis',
+          toneId: 'deeper-insights',
+          ...this.toneDefinitions['deeper-insights'],
+          reason: 'Substantial content with data - perfect for deeper insights analysis',
           confidence: 86
         });
       }
 
-      if (hasPositive && wordCount < 500) {
-        recommendations.push({
-          toneId: 'empowering',
-          ...this.toneDefinitions.empowering,
-          reason: 'Concise positive content - ideal for empowering call-to-action',
-          confidence: 81
-        });
-      }
 
       // Sort by confidence and return top 3
       return recommendations

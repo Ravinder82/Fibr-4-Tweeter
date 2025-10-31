@@ -181,7 +181,6 @@
         proscons: '⚖️',
         timeline: '📅',
         quotes: '💬',
-        'click-farming': '🎯'
       };
       const contentType = options.contentType || 'content';
       const emoji = emojiMap[contentType] || '📄';
@@ -323,8 +322,8 @@
       
       // Check if already saved
       if (window.TabTalkStorage) {
-        // Normalize storage category: store threads and click-farming under 'twitter' so Gallery shows them
-        const initialTargetCategory = (category === 'thread' || category === 'click-farming') ? 'twitter' : category;
+        // Normalize storage category: store threads under 'twitter' so Gallery shows them
+        const initialTargetCategory = category === 'thread' ? 'twitter' : category;
         window.TabTalkStorage.isContentSaved(initialTargetCategory, contentData.id || Date.now().toString())
           .then(isSaved => {
             if (isSaved) {
@@ -339,7 +338,7 @@
         e.stopPropagation();
         const contentId = saveBtn.getAttribute('data-content-id');
         const category = saveBtn.getAttribute('data-category');
-        const targetCategory = (category === 'thread' || category === 'click-farming') ? 'twitter' : category;
+        const targetCategory = category === 'thread' ? 'twitter' : category;
         
         if (!window.TabTalkStorage) return;
         

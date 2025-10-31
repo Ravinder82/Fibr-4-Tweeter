@@ -44,6 +44,16 @@ test('parseTwitterThread splits on 1/n, 2/n style numbering', () => {
   assert(/First tweet/.test(tweets[0]), 'first tweet content should match');
 });
 
+test('parseTwitterThread handles real thread format with spaces', () => {
+  const input = '1/3: This is the first tweet with some content 🧵\n2/3: This is the second tweet that continues the story\n3/3: This is the final tweet with a conclusion ✨';
+  const tweets = parseTwitterThread(input);
+  assert(Array.isArray(tweets), 'should return an array');
+  assert(tweets.length === 3, 'should split into three tweets');
+  assert(/This is the first tweet/.test(tweets[0]), 'first tweet should contain expected content');
+  assert(/second tweet/.test(tweets[1]), 'second tweet should contain expected content');
+  assert(/final tweet/.test(tweets[2]), 'third tweet should contain expected content');
+});
+
 test('parseTwitterThread falls back to single tweet when no numbering present', () => {
   const input = 'No numbering present here, just a single tweet-like text.';
   const tweets = parseTwitterThread(input);
