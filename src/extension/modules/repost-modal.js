@@ -184,6 +184,11 @@
 
       const preservedTone = selectedTone;
 
+      // CRITICAL FIX: Clear previous repost outputs BEFORE generation starts
+      if (window.TabTalkTwitter && window.TabTalkTwitter.clearPreviousRepostOutputs) {
+        window.TabTalkTwitter.clearPreviousRepostOutputs.call(this.appInstance);
+      }
+
       // Generate content using the Twitter module directly (same as tone selector)
       // The tone selector callback passes: (selectedTone, selectedPlatform, includeImagePrompt)
       // But generateSocialContentWithTone expects: (platform, selectedTone, includeImagePrompt)

@@ -4014,7 +4014,9 @@ body.dark-mode .copy-all-status {
   padding: 16px 24px;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
   max-height: none;
   overflow: visible;
 }
@@ -4041,8 +4043,8 @@ body.dark-mode .copy-all-status {
 .tone-option {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 14px;
+  gap: 16px;
+  padding: 16px;
   background: var(--secondary-bg);
   border: 2px solid var(--border-color);
   border-radius: 14px;
@@ -4050,6 +4052,8 @@ body.dark-mode .copy-all-status {
   transition: all 0.2s ease;
   position: relative;
   outline: none;
+  width: 100%;
+  box-sizing: border-box;
 }
 .tone-option:hover {
   background: var(--tertiary-bg);

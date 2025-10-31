@@ -38,6 +38,9 @@
                     <button id="quick-repost" class="action-btn" title="Generate reply/repost content">
                         <span class="btn-text">Repost</span>
                     </button>
+                    <button id="quick-comments" class="action-btn" title="Generate comment replies">
+                        <span class="btn-text">Comments</span>
+                    </button>
                     <button id="quick-twitter-thread" class="action-btn" title="Generate Twitter/X thread">
                         <span class="btn-text">Thread</span>
                     </button>
@@ -310,6 +313,32 @@
                 <div class="tone-modal-actions">
                     <button id="repost-cancel-btn" class="tone-btn tone-btn-secondary">Cancel</button>
                     <button id="repost-generate-btn" class="tone-btn tone-btn-primary" disabled>
+                        Generate
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- COMMENTS MODAL -->
+        <div id="comments-modal" class="tone-modal hidden" role="dialog" aria-labelledby="comments-modal-title" aria-modal="true">
+            <div class="tone-modal-overlay"></div>
+            <div class="tone-modal-content">
+                <div class="tone-modal-header">
+                    <h2 id="comments-modal-title">Select Comment Tone</h2>
+                    <button class="tone-modal-close comments-modal-close" aria-label="Close">&times;</button>
+                </div>
+
+                <!-- Comment Tone Grid -->
+                <div class="modal-section">
+                    <div class="tone-grid" role="radiogroup" aria-label="Select comment tone">
+                        <!-- Comment tones will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="tone-modal-actions">
+                    <button id="comments-cancel-btn" class="tone-btn tone-btn-secondary">Cancel</button>
+                    <button id="comments-generate-btn" class="tone-btn tone-btn-primary" disabled>
                         Generate
                     </button>
                 </div>

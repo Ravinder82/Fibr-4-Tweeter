@@ -1,24 +1,10 @@
 (function() {
   const Twitter = {
     // Deep analysis and research of content
-    analyzeAndResearchContent: async function(pageContent, selectedTone) {
-      // Generate cache key from URL + tone + content hash
-      const contentHash = this.simpleHash(pageContent.substring(0, 500));
-      const cacheKey = `analysis_${this.currentTab?.url}_${selectedTone.id}_${contentHash}`;
-      
-      try {
-        // Check cache first (30 min TTL)
-        const cached = await chrome.storage.local.get(cacheKey);
-        if (cached[cacheKey]) {
-          const age = Date.now() - cached[cacheKey].timestamp;
-          if (age < 30 * 60 * 1000) { // 30 minutes
-            console.log('Using cached content analysis');
-            return cached[cacheKey].analysis;
-          }
-        }
-      } catch (error) {
-        console.warn('Cache check failed:', error);
-      }
+    analyzeAndResearchContent: async function(pageContent, selectedTone, platform = 'twitter') {
+      // CRITICAL FIX: Disable caching to ensure unique content every generation
+      // Each generation should produce fresh, unique content based on the current context
+      console.log('Performing fresh content analysis for unique generation');
 
       // Perform deep analysis
       const analysisPrompt = `You are an expert content analyst and researcher. Analyze this webpage content and provide:
@@ -49,18 +35,7 @@ RESEARCH CONTEXT: [relevant background knowledge and expert perspective]`;
         // Parse the response
         const analysis = this.parseAnalysisResponse(analysisResponse);
         
-        // Cache the result
-        try {
-          const cacheData = {};
-          cacheData[cacheKey] = {
-            analysis: analysis,
-            timestamp: Date.now()
-          };
-          await chrome.storage.local.set(cacheData);
-        } catch (error) {
-          console.warn('Failed to cache analysis:', error);
-        }
-
+        // CACHING DISABLED: Each generation gets fresh analysis for unique content
         return analysis;
       } catch (error) {
         console.error('Analysis failed:', error);
@@ -80,6 +55,22 @@ RESEARCH CONTEXT: [relevant background knowledge and expert perspective]`;
         const isComment = container.querySelector('.twitter-card-title')?.textContent?.toLowerCase().includes('comment');
         if (isComment) {
           container.remove();
+        }
+      });
+    },
+
+    clearPreviousRepostOutputs: function() {
+      if (!this.messagesContainer) return;
+      const existingRepostContainers = this.messagesContainer.querySelectorAll('.twitter-content-container');
+      existingRepostContainers.forEach(container => {
+        const card = container.querySelector('.twitter-card');
+        const platform = card?.dataset?.platform;
+        // Clear repost outputs (twitter platform but not threads or comments)
+        if (platform === 'twitter' && !container.querySelector('.thread-header')) {
+          const isComment = container.querySelector('.twitter-card-title')?.textContent?.toLowerCase().includes('comment');
+          if (!isComment) {
+            container.remove();
+          }
         }
       });
     },
@@ -164,7 +155,7 @@ RESEARCH CONTEXT: [relevant background knowledge and expert perspective]`;
       try {
         // PHASE 1: Deep Analysis & Research
         this.showProgressBar('Analyzing content...');
-        const contentAnalysis = await this.analyzeAndResearchContent(this.pageContent, selectedTone);
+        const contentAnalysis = await this.analyzeAndResearchContent(this.pageContent, selectedTone, platform);
         
         // Store analysis for regeneration
         this.currentContentAnalysis = contentAnalysis;
@@ -191,11 +182,13 @@ YOUR AUTHENTIC VOICE:
 - Natural line breaks that create conversational rhythm
 - Write like you're talking to smart friends
 
-CRITICAL CONTENT RULES:
+CRITICAL CONTENT RULES FOR ORIGINAL POSTS:
 - NEVER include Twitter handles (@username) or mention specific users
+- NEVER include engagement metrics (likes, views, retweets, follower counts)
+- NEVER reference "this post" or "the author" - write as if YOU are the original creator
 - NEVER end with questions for engagement (sounds unnatural)
 - Write statements and observations, not conversation starters
-- Focus on sharing thoughts, not soliciting responses
+- Focus on sharing YOUR thoughts, not commenting on someone else's
 - IF USING EXPERT REPURPOSE: ONLY rephrase wording, NEVER change the message or intent
 
 ${toneInstructions}
@@ -232,6 +225,8 @@ KEEP IT 100% REAL:
 ✗ No generic "content creator" speak
 ✗ No forced structures or templates
 ✗ NEVER mention Twitter handles or usernames
+✗ NEVER include stats like "1.5M views" or "10K likes" - this is YOUR original post
+✗ NEVER reference "this post" or "the author" - YOU are the creator
 ✗ NEVER end with questions (What do you think? Thoughts? etc.)
 ✗ Write like you're actually talking to friends
 ${selectedTone.id === 'repurpose' ? '✗ DO NOT add skepticism, warnings, or change promotional content into critiques' : ''}
@@ -388,6 +383,8 @@ Share your authentic thread now: Generation ID: ${Date.now()}`;
       this.currentSelectedTone = selectedTone;
       this.currentIncludeImagePrompt = false;
 
+      // Note: Clearing now happens BEFORE generation in comments-modal.js
+      // Keeping this as safety fallback for direct calls
       this.clearPreviousCommentOutputs();
 
       this.setLoading(true, 'Researching the discussion...');
@@ -399,7 +396,7 @@ Share your authentic thread now: Generation ID: ${Date.now()}`;
 
       try {
         this.showProgressBar('Analyzing conversation context...');
-        const contentAnalysis = await this.analyzeAndResearchContent(this.pageContent, selectedTone);
+        const contentAnalysis = await this.analyzeAndResearchContent(this.pageContent, selectedTone, 'comment');
         this.currentContentAnalysis = contentAnalysis;
 
         this.showProgressBar('Drafting high-signal comment...');
@@ -688,6 +685,8 @@ Produce the final comment now in plain text only. Fresh run ID: ${Date.now()}`;
         }
         contentContainer.appendChild(card);
       }
+      // Note: Clearing now happens BEFORE generation in repost-modal.js and comments-modal.js
+      // Only clear comments here as a safety fallback
       if (platform === 'comment') {
         this.clearPreviousCommentOutputs();
       }
