@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fibr Privacy & Security Policy</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top, #f0f4ff, #eef2ff 35%, #f9fafb 100%);
+      color: #111827;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 24px 72px;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 28px;
+      border-radius: 20px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.82), rgba(241,245,255,0.75));
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(59, 130, 246, 0.15);
+    }
+
+    header h1 {
+      font-size: 2.35rem;
+      margin: 0;
+      color: #0f172a;
+      letter-spacing: -0.03em;
+    }
+
+    header p {
+      margin: 0;
+      font-size: 1.05rem;
+      color: #1e293b;
+      max-width: 640px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(37, 99, 235, 0.1);
+      color: #1d4ed8;
+      font-weight: 600;
+      width: fit-content;
+    }
+
+    section {
+      margin-top: 32px;
+      padding: 28px;
+      border-radius: 20px;
+      background: linear-gradient(160deg, rgba(255,255,255,0.9), rgba(248,250,252,0.82));
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      border: 1px solid rgba(186, 230, 253, 0.3);
+    }
+
+    section h2 {
+      margin-top: 0;
+      margin-bottom: 18px;
+      font-size: 1.5rem;
+      color: #0f172a;
+      letter-spacing: -0.01em;
+    }
+
+    section ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    section li {
+      margin-bottom: 10px;
+      color: #1f2937;
+    }
+
+    a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .footnote {
+      font-size: 0.92rem;
+      color: #475569;
+      margin-top: 12px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: radial-gradient(circle at top, #111827, #0f172a 40%, #020617 100%);
+        color: #e2e8f0;
+      }
+
+      header {
+        background: linear-gradient(155deg, rgba(30, 41, 59, 0.82), rgba(15, 23, 42, 0.8));
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        box-shadow: 0 16px 45px rgba(2, 6, 23, 0.45);
+      }
+
+      header h1 {
+        color: #f8fafc;
+      }
+
+      header p {
+        color: #cbd5f5;
+      }
+
+      .badge {
+        background: rgba(59, 130, 246, 0.2);
+        color: #93c5fd;
+      }
+
+      section {
+        background: linear-gradient(165deg, rgba(15, 23, 42, 0.92), rgba(17, 24, 39, 0.85));
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        box-shadow: 0 14px 40px rgba(2, 6, 23, 0.55);
+      }
+
+      section h2 {
+        color: #e2e8f0;
+      }
+
+      section li {
+        color: #e2e8f0;
+      }
+
+      a {
+        color: #93c5fd;
+      }
+
+      .footnote {
+        color: #94a3b8;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <span class="badge">🔒 Effective date: October 31, 2025</span>
+      <h1>Fibr Privacy &amp; Security Policy</h1>
+      <p>
+        Fibr ("we," "us," or "our") respects your privacy. This policy explains what information is stored and processed by the
+        Fibr Chrome extension and how you remain in full control of your data.
+      </p>
+    </header>
+
+    <section>
+      <h2>Information We Collect</h2>
+      <ul>
+        <li><strong>Gemini API Key:</strong> Stored securely in <code>chrome.storage.local</code> and never transmitted to any Fibr-controlled server.</li>
+        <li><strong>No personal data:</strong> Fibr does not collect browsing history, personal info, or page content unless you explicitly choose to analyze it.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>How We Use Information</h2>
+      <ul>
+        <li>Your API key solely authenticates requests that go directly from your browser to Google's Gemini API.</li>
+        <li>All AI processing occurs on Google infrastructure; Fibr does not proxy or inspect the requests.</li>
+        <li>Generated content (posts, threads, notes) can be saved locally to power the in-app gallery and history features.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Information Sharing</h2>
+      <ul>
+        <li>We do <strong>not</strong> sell, share, or transfer any data to third parties.</li>
+        <li>All API calls are client-side and communicate directly with Google Gemini.</li>
+        <li>No analytics, advertising beacons, or third-party trackers are embedded in the extension.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Data Security</h2>
+      <ul>
+        <li>Chrome's encrypted storage protects your API key; you can remove it anytime from the extension.</li>
+        <li>All traffic to Gemini uses HTTPS with TLS encryption end-to-end.</li>
+        <li>Wherever possible, data processing happens entirely inside your browser; only the Gemini completion requests leave the device.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>User Rights &amp; Controls</h2>
+      <ul>
+        <li>You may delete your API key and any saved content at any time via the extension settings.</li>
+        <li>You choose when to run content analysis; nothing is sent without user action.</li>
+        <li>For privacy questions or removal requests, email <a href="mailto:grow.with.fibr@gmail.com">grow.with.fibr@gmail.com</a>.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Chrome Extension Permissions</h2>
+      <ul>
+        <li><code>activeTab</code> — Reads the current tab only after you initiate a generation.</li>
+        <li><code>storage</code> — Saves your API key plus generated drafts locally on your device.</li>
+        <li><code>scripting</code> — Injects a lightweight content extraction script on demand to capture the selected page text.</li>
+      </ul>
+      <p class="footnote">We request the minimum permissions necessary to deliver core functionality.</p>
+    </section>
+
+    <section>
+      <h2>Policy Updates</h2>
+      <p>
+        We may revise this policy to reflect new features, security improvements, or regulatory changes. Significant updates will be highlighted in the extension changelog and repository release notes.
+      </p>
+    </section>
+
+    <section>
+      <h2>Contact</h2>
+      <p>
+        Questions, concerns, or feedback? Email us at
+        <a href="mailto:grow.with.fibr@gmail.com">grow.with.fibr@gmail.com</a>.
+      </p>
+    </section>
+  </div>
+</body>
+</html>
