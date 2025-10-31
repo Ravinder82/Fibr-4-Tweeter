@@ -59,10 +59,11 @@
       if (viewName === 'history') targetId = 'history-view';
       if (viewName === 'gallery') targetId = 'gallery-view';
       if (viewName === 'thread-generator') targetId = 'thread-generator-view';
+      if (viewName === 'privacy') targetId = 'privacy-view';
       const target = document.getElementById(targetId);
       if (target) {
         target.classList.remove('hidden');
-        
+
         // Special handling for history view
         if (viewName === 'history' && window.historyManager) {
           this.loadHistoryView();
@@ -79,6 +80,13 @@
         // Special handling for thread-generator view
         if (viewName === 'thread-generator' && this.initializeHowItWorksToggle) {
           this.initializeHowItWorksToggle();
+        }
+        if (viewName === 'privacy' && window.TabTalkPrivacyPolicy) {
+          const container = document.getElementById('privacy-policy-container');
+          if (container && !container.dataset.initialized) {
+            window.TabTalkPrivacyPolicy.render(container);
+            container.dataset.initialized = 'true';
+          }
         }
       } else {
         console.warn(`showView: target view not found for "${viewName}" (id "${targetId}")`);

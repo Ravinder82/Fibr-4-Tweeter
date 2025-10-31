@@ -16,6 +16,7 @@ import './modules/bottom-nav.js';
 import './modules/enhanced-quick-actions.js';
 import './modules/image-prompt-generator.js';
 import './modules/topic-enhancer.js';
+import './modules/privacy-policy.js';
 
 (() => {
   (() => {
@@ -41,6 +42,8 @@ import './modules/topic-enhancer.js';
           (this.apiSetupView = document.getElementById("api-setup-view")),
           (this.chatView = document.getElementById("chat-view")),
           (this.settingsView = document.getElementById("settings-view")),
+          (this.privacyView = document.getElementById("privacy-view")),
+          (this.privacyContainer = document.getElementById("privacy-policy-container")),
           (this.menuButton = document.getElementById("menu-button")),
           (this.apiKeyInput =
             document.getElementById("api-key-input") ||
@@ -55,6 +58,7 @@ import './modules/topic-enhancer.js';
             "api-setup": this.apiSetupView,
             chat: this.chatView,
             settings: this.settingsView,
+            privacy: this.privacyView,
           }));
       }
       async init() {
@@ -180,6 +184,13 @@ import './modules/topic-enhancer.js';
           ig.addEventListener("click", (s) => {
             s.preventDefault();
             this.showView("gallery");
+          });
+        const privacyLink = document.getElementById("menu-privacy-link");
+        privacyLink &&
+          privacyLink.addEventListener("click", (s) => {
+            s.preventDefault();
+            this.showView("privacy");
+            this.sidebar && this.sidebar.classList.add("hidden");
           });
         // Removed: Thread Library link (Threads feature deprecated)
         let r = document.getElementById("welcome-get-started");

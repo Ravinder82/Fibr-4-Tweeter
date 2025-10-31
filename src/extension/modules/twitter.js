@@ -61,18 +61,50 @@ RESEARCH CONTEXT: [relevant background knowledge and expert perspective]`;
 
     clearPreviousRepostOutputs: function() {
       if (!this.messagesContainer) return;
+      
+      console.log('🧹 Clearing previous repost outputs...');
+      
       const existingRepostContainers = this.messagesContainer.querySelectorAll('.twitter-content-container');
+      let removedCount = 0;
+      
       existingRepostContainers.forEach(container => {
         const card = container.querySelector('.twitter-card');
-        const platform = card?.dataset?.platform;
-        // Clear repost outputs (twitter platform but not threads or comments)
+        if (!card) return;
+        
+        // STRATEGY 1: Check explicit repost marker (most reliable)
+        if (container.dataset.generationType === 'repost') {
+          container.remove();
+          removedCount++;
+          return;
+        }
+        
+        // STRATEGY 2: Check platform dataset
+        const platform = card.dataset?.platform;
         if (platform === 'twitter' && !container.querySelector('.thread-header')) {
-          const isComment = container.querySelector('.twitter-card-title')?.textContent?.toLowerCase().includes('comment');
+          const cardTitle = container.querySelector('.twitter-card-title')?.textContent?.toLowerCase() || '';
+          const isComment = cardTitle.includes('comment');
           if (!isComment) {
             container.remove();
+            removedCount++;
+            return;
           }
         }
+        
+        // STRATEGY 3: Defensive - check for single twitter card without thread/comment markers
+        // This catches cards that may not have proper dataset attributes
+        const hasThreadHeader = container.querySelector('.thread-header');
+        const hasThreadMasterControl = container.querySelector('.thread-master-control');
+        const cardTitle = container.querySelector('.twitter-card-title')?.textContent?.toLowerCase() || '';
+        const isComment = cardTitle.includes('comment');
+        const isSinglePost = cardTitle === 'post' || (!cardTitle.includes('thread') && !isComment);
+        
+        if (!hasThreadHeader && !hasThreadMasterControl && isSinglePost) {
+          container.remove();
+          removedCount++;
+        }
       });
+      
+      console.log(`🧹 Removed ${removedCount} previous repost card(s)`);
     },
 
     // Simple hash function for cache keys
@@ -521,6 +553,17 @@ Produce the final comment now in plain text only. Fresh run ID: ${Date.now()}`;
     renderTwitterContent: function(content, platform, imagePrompt = null) {
       const contentContainer = document.createElement('div');
       contentContainer.className = 'twitter-content-container';
+      
+      // CRITICAL: Mark generation type for reliable clearing
+      // This must be set BEFORE appending to DOM
+      if (platform === 'twitter') {
+        contentContainer.dataset.generationType = 'repost';
+        contentContainer.dataset.generationTimestamp = Date.now().toString();
+      } else if (platform === 'thread') {
+        contentContainer.dataset.generationType = 'thread';
+      } else if (platform === 'comment') {
+        contentContainer.dataset.generationType = 'comment';
+      }
       if (platform === 'thread') {
         // BULLETPROOF: Use enhanced parsing with validation
         const tweets = this.parseTwitterThread(content);
@@ -675,7 +718,11 @@ Produce the final comment now in plain text only. Fresh run ID: ${Date.now()}`;
         // DISABLED: Universal cards system - using legacy system for stability
         const cardTitle = platform === 'comment' ? 'Comment Reply' : 'Post';
         const card = this.createTwitterCard(content, cardTitle, false, imagePrompt);
+        
+        // CRITICAL: Set platform dataset BEFORE appending
         card.dataset.platform = platform;
+        card.dataset.generationTimestamp = Date.now().toString();
+        
         if (imagePrompt) {
           card.dataset.imagePrompt = encodeURIComponent(imagePrompt);
         }
@@ -685,10 +732,14 @@ Produce the final comment now in plain text only. Fresh run ID: ${Date.now()}`;
         }
         contentContainer.appendChild(card);
       }
-      // Note: Clearing now happens BEFORE generation in repost-modal.js and comments-modal.js
-      // Only clear comments here as a safety fallback
+      
+      // SAFETY: Clear previous outputs of same type BEFORE appending new content
+      // This is a defensive fallback in case modal clearing didn't work
       if (platform === 'comment') {
         this.clearPreviousCommentOutputs();
+      } else if (platform === 'twitter') {
+        // Don't clear here for repost - already cleared in modal
+        // This prevents race conditions
       }
       this.messagesContainer.appendChild(contentContainer);
       setTimeout(() => {
