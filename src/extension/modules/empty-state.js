@@ -2,7 +2,9 @@
  * Empty State Module - Board Animation for Home Page
  * Displays "Grow with Fibr" marquee when messages container is empty
  */
-(function() {
+// Removed Empty State animation module - replaced by CursorTrails
+
+/*
   const EmptyState = {
     container: null,
     isVisible: false,
@@ -62,3 +64,4 @@
   window.FibrEmptyState = EmptyState;
   window.TabTalkEmptyState = EmptyState;
 })();
+*/

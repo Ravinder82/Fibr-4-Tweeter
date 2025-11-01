@@ -152,7 +152,7 @@
     },
 
     updateEmptyState: function() {
-      if (!window.FibrEmptyState) return;
+      if (!window.FibrCursorTrails) return;
       
       const messagesContainer = document.getElementById('messages-container');
       if (!messagesContainer) return;
@@ -162,7 +162,7 @@
       const isChatViewActive = chatView && !chatView.classList.contains('hidden');
       
       if (!isChatViewActive) {
-        window.FibrEmptyState.hide();
+        window.FibrCursorTrails.hide();
         return;
       }
       
@@ -170,9 +170,9 @@
       const hasContent = messagesContainer.querySelector('.twitter-content-container, .twitter-card, .progress-container');
       
       if (hasContent || this.isLoading) {
-        window.FibrEmptyState.hide();
+        window.FibrCursorTrails.hide();
       } else {
-        window.FibrEmptyState.show();
+        window.FibrCursorTrails.show();
       }
     },
 

@@ -16,7 +16,7 @@ import './modules/bottom-nav.js';
 import './modules/image-prompt-generator.js';
 import './modules/topic-enhancer.js';
 import './modules/privacy-policy.js';
-import './modules/empty-state.js';
+import './modules/cursor-trails.js';
 
 (() => {
   (() => {

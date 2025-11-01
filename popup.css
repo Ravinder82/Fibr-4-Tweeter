@@ -5574,10 +5574,12 @@ main {
 }
 
 /* ========================================
-   EMPTY STATE BOARD ANIMATION
+   CURSOR TRAILS GRID ANIMATION
    ======================================== */
 
-.empty-state-board {
+.cursor-trails-board {
+  width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -5585,6 +5587,33 @@ main {
   padding: 40px 20px;
   animation: fadeIn 0.4s ease-in;
 }
+
+/* Grid cells that create a cursor-trail illusion */
+.cursor-trails-grid {
+  --cell-size: 14px;
+  width: 100%;
+  max-width: 100%;
+  --cell-size: 14px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--cell-size), var(--cell-size)));
+  gap: 4px;
+}
+
+.cursor-trails-grid div {
+  aspect-ratio: 1 / 1;
+  width: var(--cell-size);
+  height: var(--cell-size);
+  background: var(--accent-color);
+  opacity: var(--o, 0.2);
+  transition: opacity 0.8s, transform 0.4s;
+}
+
+.cursor-trails-grid div:hover {
+  transition-duration: 0s;
+  transform: rotate(calc(var(--r, 0) * 90deg));
+  opacity: 1;
+}
+
 
 @keyframes fadeIn {
   from {
@@ -5671,15 +5700,6 @@ main {
   }
 }
 
-/* Dark theme adjustments */
-:root[data-theme="dark"] .board {
-  filter: contrast(2) brightness(1.5) saturate(2);
-}
-
-:root[data-theme="dark"] .text-track .text {
-  filter: blur(1.5px) drop-shadow(0 0 3px rgba(180, 188, 200, 0.7))
-    contrast(2.8) brightness(1.4);
-}
 
 
 
