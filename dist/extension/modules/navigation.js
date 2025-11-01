@@ -45,10 +45,10 @@
         if (bottomNav) {
           bottomNav.style.display = 'flex';
           bottomNav.style.visibility = 'visible';
-          bottomNav.style.height = '45px';
+          bottomNav.style.height = '32px';
         }
-        if (mainContent) mainContent.style.paddingBottom = '45px';
-        if (container) container.style.paddingBottom = '66px'; // Restore bottom padding for nav
+        if (mainContent) mainContent.style.paddingBottom = '60px';
+        if (container) container.style.paddingBottom = '60px'; // Restore bottom padding for floating nav
       }
       
       let targetId = `${viewName}-view`;
@@ -63,6 +63,11 @@
       const target = document.getElementById(targetId);
       if (target) {
         target.classList.remove('hidden');
+        
+        // Update empty state when switching to chat view
+        if (viewName === 'chat' && window.FibrUI && window.FibrUI.updateEmptyState) {
+          setTimeout(() => window.FibrUI.updateEmptyState(), 50);
+        }
 
         // Special handling for history view
         if (viewName === 'history' && window.historyManager) {
@@ -81,10 +86,10 @@
         if (viewName === 'thread-generator' && this.initializeHowItWorksToggle) {
           this.initializeHowItWorksToggle();
         }
-        if (viewName === 'privacy' && window.TabTalkPrivacyPolicy) {
+        if (viewName === 'privacy' && window.FibrPrivacyPolicy) {
           const container = document.getElementById('privacy-policy-container');
           if (container && !container.dataset.initialized) {
-            window.TabTalkPrivacyPolicy.render(container);
+            window.FibrPrivacyPolicy.render(container);
             container.dataset.initialized = 'true';
           }
         }
@@ -145,4 +150,5 @@
   };
   
   window.TabTalkNavigation = Navigation;
+  window.FibrNavigation = Navigation; // Fibr alias
 })();

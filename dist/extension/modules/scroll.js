@@ -55,4 +55,5 @@
     }
   };
   window.TabTalkScroll = Scroll;
+  window.FibrScroll = Scroll; // Fibr alias
 })();

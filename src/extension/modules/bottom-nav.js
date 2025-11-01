@@ -1,69 +1,73 @@
 (function() {
-  const BottomNav = {
+  const FloatingNav = {
     currentView: 'chat',
+    buttons: null,
+    container: null,
 
     init() {
+      this.container = document.getElementById('floating-nav');
+      this.buttons = Array.from(document.querySelectorAll('.floating-nav-btn'));
+
+      if (!this.container || this.buttons.length === 0) {
+        return;
+      }
+
       this.bindEvents();
-      this.updateActiveState('chat');
+      this.updateActiveState(this.currentView);
     },
 
     bindEvents() {
-      const navItems = document.querySelectorAll('.nav-item');
-      
-      navItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-          e.preventDefault();
-          const view = item.getAttribute('data-view');
-          this.navigateToView(view);
+      this.buttons.forEach(button => {
+        button.addEventListener('click', (event) => {
+          event.preventDefault();
+          const view = button.getAttribute('data-view');
+          if (view) {
+            this.navigateToView(view);
+          }
         });
       });
     },
 
     navigateToView(viewName) {
-      // Use the existing navigation system
-      if (window.TabTalkNavigation && window.TabTalkNavigation.showView) {
+      if (window.TabTalkNavigation && typeof window.TabTalkNavigation.showView === 'function') {
         window.TabTalkNavigation.showView(viewName);
       }
-      
+
       this.updateActiveState(viewName);
       this.currentView = viewName;
     },
 
     updateActiveState(viewName) {
-      const navItems = document.querySelectorAll('.nav-item');
-      
-      navItems.forEach(item => {
-        const itemView = item.getAttribute('data-view');
-        if (itemView === viewName) {
-          item.classList.add('active');
+      if (!this.buttons) return;
+
+      this.buttons.forEach(button => {
+        const buttonView = button.getAttribute('data-view');
+        if (buttonView === viewName) {
+          button.classList.add('active');
         } else {
-          item.classList.remove('active');
+          button.classList.remove('active');
         }
       });
     },
 
-    // Show/hide bottom nav based on current view
     toggleVisibility(show) {
-      const bottomNav = document.getElementById('bottom-nav');
-      if (bottomNav) {
-        bottomNav.style.display = show ? 'flex' : 'none';
-      }
+      if (!this.container) return;
+      this.container.style.display = show ? 'flex' : 'none';
+      this.container.style.visibility = show ? 'visible' : 'hidden';
+      this.container.style.opacity = show ? '1' : '0';
     },
 
-    // Update active state from external navigation
     setActive(viewName) {
       this.updateActiveState(viewName);
       this.currentView = viewName;
     }
   };
 
-  // Initialize when DOM is ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => BottomNav.init());
+    document.addEventListener('DOMContentLoaded', () => FloatingNav.init());
   } else {
-    BottomNav.init();
+    FloatingNav.init();
   }
 
-  // Make it globally available
-  window.BottomNav = BottomNav;
+  window.BottomNav = FloatingNav;
 })();

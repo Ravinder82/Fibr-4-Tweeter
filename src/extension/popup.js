@@ -13,10 +13,10 @@ import './modules/validation.js';
 import './modules/validation-handlers.js';
 import './modules/tone-selector.js';
 import './modules/bottom-nav.js';
-import './modules/enhanced-quick-actions.js';
 import './modules/image-prompt-generator.js';
 import './modules/topic-enhancer.js';
 import './modules/privacy-policy.js';
+import './modules/cursor-trails.js';
 
 (() => {
   (() => {
@@ -78,11 +78,11 @@ import './modules/privacy-policy.js';
 
           await this.loadState();
 
-          // Initialize theme from storage, default to dark mode
+          // Initialize theme from storage, default to light mode
           try {
             let theme = await this.getStorageItem ? await this.getStorageItem("theme") : null;
             if (!theme) {
-              theme = 'dark'; // Default to dark mode
+              theme = 'light'; // Default to light mode
             }
             document.documentElement.setAttribute('data-theme', theme);
           } catch (e) {}
@@ -92,10 +92,24 @@ import './modules/privacy-policy.js';
           }
           this.bindEvents();
 
-          const hasSeenWelcome = await this.getStorageItem("hasSeenWelcome");
+          // ROBUST: Check hasSeenWelcome with fallback
+          let hasSeenWelcome = false;
+          try {
+            if (this.getStorageItem) {
+              hasSeenWelcome = await this.getStorageItem("hasSeenWelcome");
+            } else {
+              const data = await chrome.storage.local.get(["hasSeenWelcome"]);
+              hasSeenWelcome = data.hasSeenWelcome;
+            }
+          } catch (error) {
+            console.error("Error checking hasSeenWelcome:", error);
+            hasSeenWelcome = false;
+          }
 
           if (this.apiKey) {
             this.showView("chat");
+            // CRITICAL FIX: Load page content immediately when API key exists
+            // This ensures content is available for quick actions
             await this.getAndCachePageContent();
           } else if (hasSeenWelcome) {
             this.showView("api-setup");
@@ -196,14 +210,32 @@ import './modules/privacy-policy.js';
         let r = document.getElementById("welcome-get-started");
         r &&
           r.addEventListener("click", async () => {
-            (await this.setStorageItem("hasSeenWelcome", !0),
-              this.showView("api-setup"));
+            try {
+              if (this.setStorageItem) {
+                await this.setStorageItem("hasSeenWelcome", true);
+              } else {
+                await chrome.storage.local.set({ hasSeenWelcome: true });
+              }
+              this.showView("api-setup");
+            } catch (error) {
+              console.error("Error in welcome-get-started:", error);
+              this.showView("api-setup");
+            }
           });
         let o = document.getElementById("welcome-start");
         o &&
           o.addEventListener("click", async () => {
-            (await this.setStorageItem("hasSeenWelcome", !0),
-              this.showView("api-setup"));
+            try {
+              if (this.setStorageItem) {
+                await this.setStorageItem("hasSeenWelcome", true);
+              } else {
+                await chrome.storage.local.set({ hasSeenWelcome: true });
+              }
+              this.showView("api-setup");
+            } catch (error) {
+              console.error("Error in welcome-start:", error);
+              this.showView("api-setup");
+            }
           });
         let u = document.getElementById("api-setup-back");
         u &&
@@ -268,11 +300,18 @@ import './modules/privacy-policy.js';
           }),
           this.quickTwitterBtn &&
             this.quickTwitterBtn.addEventListener("click", async () => {
+              // DEFENSIVE LAYER 1: Ensure content is loaded before generation
+              await this.ensurePageContentLoaded();
               (this.resetScreenForGeneration && this.resetScreenForGeneration(),
                 await this.generateSocialContent("twitter"));
             }),
           this.quickRepostBtn &&
             this.quickRepostBtn.addEventListener("click", async () => {
+              // DEFENSIVE LAYER 2: Ensure content is loaded before repost
+              await this.ensurePageContentLoaded();
+              // Clear previous content before opening modal
+              this.resetScreenForGeneration && this.resetScreenForGeneration();
+              
               if (
                 !window.FibrRepostModal ||
                 typeof window.FibrRepostModal.showWithContentLoading !== "function"
@@ -294,6 +333,8 @@ import './modules/privacy-policy.js';
             }),
           this.quickCommentsBtn &&
             this.quickCommentsBtn.addEventListener("click", async () => {
+              // DEFENSIVE LAYER 3: Ensure content is loaded before comments
+              await this.ensurePageContentLoaded();
               this.resetScreenForGeneration && this.resetScreenForGeneration();
               if (window.FibrCommentsModal?.showWithContentLoading) {
                 try {
@@ -314,28 +355,28 @@ import './modules/privacy-policy.js';
           this.quickTwitterThreadBtn &&
             this.quickTwitterThreadBtn.addEventListener("click", async () => {
               console.log('Thread button clicked - showing tone selector for thread generation');
+              // DEFENSIVE LAYER 4: Ensure content is loaded before thread
+              await this.ensurePageContentLoaded();
               (this.resetScreenForGeneration && this.resetScreenForGeneration(),
                 await this.generateSocialContent("thread"));
             }),
           this.quickCreateBtn &&
             this.quickCreateBtn.addEventListener("click", () => {
+              // Clear previous content before opening thread generator
+              this.resetScreenForGeneration && this.resetScreenForGeneration();
+              
               if (
                 window.FibrThreadGenerator &&
                 window.FibrThreadGenerator.showModal
               ) {
                 window.FibrThreadGenerator.showModal(this);
               } else {
-                this.showView("thread-generator");
+                console.error('Fibr: Thread Generator modal not available');
+                this.showToast
+                  ? this.showToast('❌ Thread Generator unavailable. Please reload the extension.', 4000)
+                  : alert('❌ Thread Generator unavailable. Please reload the extension.');
               }
             }));
-        // Thread Generator button
-        let generateThreadBtn = document.getElementById("generate-thread-btn");
-        generateThreadBtn &&
-          generateThreadBtn.addEventListener("click", async () => {
-            if (this.handleThreadGeneratorSubmit) {
-              await this.handleThreadGeneratorSubmit();
-            }
-          });
         this.initializeHorizontalScroll();
 
         // Initialize modules that need the DOM now that it's safe
@@ -346,10 +387,12 @@ import './modules/privacy-policy.js';
       }
       async testApiKey(t) {
         try {
+          console.log("Fibr: Testing API key...");
           let e = await chrome.runtime.sendMessage({
-            action: "testApiKey",
+            action: "validateApiKey",
             apiKey: t,
           });
+          console.log("Fibr: API key test result:", e);
           return e && e.success;
         } catch (e) {
           return (console.error("Error testing API key:", e), !1);
@@ -375,6 +418,8 @@ import './modules/privacy-policy.js';
           (this.setLoading(!0, "Reading page..."),
             (this.pageStatus.textContent = "Injecting script to read page..."));
           try {
+            if (!this.currentTab.url || (!this.currentTab.url.startsWith("http://") && !this.currentTab.url.startsWith("https://")))
+              throw new Error("Unsupported page protocol.");
             if (
               this.currentTab.url?.startsWith("chrome://") ||
               this.currentTab.url?.startsWith(
@@ -406,6 +451,50 @@ import './modules/privacy-policy.js';
         }
       }
       
+      // CRASH-PROOF HELPER: Ensures page content is loaded with retry mechanism
+      async ensurePageContentLoaded() {
+        // If content already loaded, return immediately
+        if (this.pageContent && this.pageContent.length > 0) {
+          console.log('Fibr: Page content already loaded, skipping reload');
+          return true;
+        }
+        
+        console.log('Fibr: Page content not loaded, loading now...');
+        
+        // Check API key first
+        if (!this.apiKey) {
+          const errorMsg = '❌ Please set up your Gemini API key first.';
+          if (this.showToast) {
+            this.showToast(errorMsg, 3000);
+          } else {
+            alert(errorMsg);
+          }
+          return false;
+        }
+        
+        // Attempt to load content
+        try {
+          await this.getAndCachePageContent();
+          
+          // Verify content was loaded
+          if (this.pageContent && this.pageContent.length > 0) {
+            console.log('Fibr: Page content loaded successfully');
+            return true;
+          } else {
+            throw new Error('Content extraction returned empty result');
+          }
+        } catch (error) {
+          console.error('Fibr: Failed to load page content:', error);
+          const errorMsg = '❌ Failed to load page content. Please refresh the page and try again.';
+          if (this.showToast) {
+            this.showToast(errorMsg, 4000);
+          } else {
+            alert(errorMsg);
+          }
+          return false;
+        }
+      }
+      
     };
     
     // Store the original init for later wrapping
@@ -419,7 +508,35 @@ import './modules/privacy-policy.js';
       window.TabTalkThreadGenerator && Object.assign(l.prototype, window.TabTalkThreadGenerator);
       window.TabTalkContentAnalysis && Object.assign(l.prototype, window.TabTalkContentAnalysis);
       window.TabTalkSocialMedia && Object.assign(l.prototype, window.TabTalkSocialMedia);
-      window.TabTalkStorage && Object.assign(l.prototype, window.TabTalkStorage);
+      
+      // ROBUST: Ensure storage methods are available from either FibrStorage or TabTalkStorage
+      const storageModule = window.TabTalkStorage || window.FibrStorage;
+      if (storageModule) {
+        Object.assign(l.prototype, storageModule);
+        console.log('Fibr: Storage module loaded successfully');
+      } else {
+        console.error('Fibr: Storage module not found! Adding fallback methods.');
+        // Add fallback storage methods
+        l.prototype.getStorageItem = async function(key) {
+          try {
+            const data = await chrome.storage.local.get([key]);
+            return data ? data[key] : undefined;
+          } catch (error) {
+            console.error('getStorageItem fallback error:', error);
+            return undefined;
+          }
+        };
+        l.prototype.setStorageItem = async function(key, value) {
+          try {
+            await chrome.storage.local.set({ [key]: value });
+            return true;
+          } catch (error) {
+            console.error('setStorageItem fallback error:', error);
+            return false;
+          }
+        };
+      }
+      
       window.TabTalkUI && Object.assign(l.prototype, window.TabTalkUI);
       window.TabTalkScroll && Object.assign(l.prototype, window.TabTalkScroll);
       window.TabTalkNavigation && Object.assign(l.prototype, window.TabTalkNavigation);

@@ -230,5 +230,7 @@
       }
     }
   };
+  // Export as both names for backward compatibility
   window.FibrStorage = Storage;
+  window.TabTalkStorage = Storage;
 })();

@@ -151,6 +151,31 @@
       }
     },
 
+    updateEmptyState: function() {
+      if (!window.FibrCursorTrails) return;
+      
+      const messagesContainer = document.getElementById('messages-container');
+      if (!messagesContainer) return;
+      
+      // Check if chat view is active
+      const chatView = document.getElementById('chat-view');
+      const isChatViewActive = chatView && !chatView.classList.contains('hidden');
+      
+      if (!isChatViewActive) {
+        window.FibrCursorTrails.hide();
+        return;
+      }
+      
+      // Check if there's any content
+      const hasContent = messagesContainer.querySelector('.twitter-content-container, .twitter-card, .progress-container');
+      
+      if (hasContent || this.isLoading) {
+        window.FibrCursorTrails.hide();
+      } else {
+        window.FibrCursorTrails.show();
+      }
+    },
+
     resetScreenForGeneration: function() {
       if (this.sidebar) {
         this.sidebar.classList.add('hidden');
@@ -160,6 +185,8 @@
         this.messagesContainer.innerHTML = '';
       }
       this.updateQuickActionsVisibility();
+      // Show empty state after clearing
+      this.updateEmptyState();
     },
 
     renderCard: function(title, bodyHtml, options = {}) {
@@ -260,6 +287,8 @@
           target.scrollTo({ top: target.scrollHeight, behavior: 'smooth' });
         }
       }
+      // Hide empty state when content is added
+      this.updateEmptyState();
       return card;
     },
 
@@ -284,11 +313,15 @@
         const fill = progressContainer.querySelector('.progress-fill');
         if (fill) fill.style.width = '100%';
       }, 100);
+      // Hide empty state when progress is shown
+      this.updateEmptyState();
     },
 
     hideProgressBar: function() {
       const existing = document.getElementById('global-progress');
       if (existing) existing.remove();
+      // Update empty state after hiding progress
+      this.updateEmptyState();
     },
     
     // NEW: Add save button to content cards
@@ -400,4 +433,5 @@
     },
   };
   window.FibrUI = UI;
+  window.TabTalkUI = UI;
 })();

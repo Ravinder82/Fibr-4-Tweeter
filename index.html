@@ -3,158 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TabTalk AI - Conversational Web Assistant</title>
+    <meta name="description" content="Fibr is the AI copilot that turns any article or webpage into ready-to-post tweets, threads, and analysis in seconds.">
+    <title>Fibr – AI-Powered Twitter Content Copilot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="app-container">
-        <!-- HEADER: Always visible -->
-        <header class="header">
-            <div class="logo">
-                <div class="logo-icon">🤖</div>
-                <h1>TabTalk AI</h1>
-            </div>
-            <div class="header-controls">
-                <button id="menu-button" class="menu-button" title="Menu">☰</button>
+    <div class="page-shell">
+        <header class="site-header">
+            <div class="container header-inner">
+                <a class="brand" href="#top" aria-label="Fibr home">
+                    <img src="icons/fibr.svg" alt="Fibr logo" class="brand-mark">
+                    <span class="brand-name">Fibr</span>
+                </a>
+                <nav class="site-nav" aria-label="Primary">
+                    <a href="#features">Features</a>
+                    <a href="#workflow">Workflow</a>
+                    <a href="#why">Why Fibr</a>
+                    <a href="#privacy">Privacy</a>
+                </nav>
+                <a class="header-cta" href="https://github.com/Ravinder82/Fibr-4-Tweeter#-installation" target="_blank" rel="noopener noreferrer">Install from Source</a>
             </div>
         </header>
 
-        <!-- QUICK ACTIONS: Summary & Key Points -->
-        <div id="quick-actions" class="quick-actions hidden" aria-label="Quick actions">
-            <button id="quick-summary" class="quick-btn" title="Generate summary">📝 Summary</button>
-            <button id="quick-keypoints" class="quick-btn" title="Generate key points">🔑 Key Points</button>
-            <button id="quick-analysis" class="quick-btn" title="Generate analysis">📊 Analysis</button>
-            <button id="quick-faq" class="quick-btn" title="Generate FAQ">❓ FAQ</button>
-        </div>
-
-        <!-- SIDEBAR: Hidden by default -->
-        <div id="sidebar" class="sidebar hidden">
-            <a href="#" id="menu-summary-link">📝 Summary</a>
-            <a href="#" id="menu-keypoints-link">🔑 Key Points</a>
-            <a href="#" id="menu-analysis-link">📊 Analysis Report</a>
-            <a href="#" id="menu-faq-link">❓ FAQ Generator</a>
-            <div class="sidebar-divider"></div>
-            <a href="#" id="menu-settings-link">⚙️ Gemini API Setup</a>
-            <a href="#" id="menu-refresh-link">🗑️ Clear Chat</a>
-            <a href="#" id="menu-url-input-link">🌐 Enter URL</a>
-        </div>
-
-        <!-- MAIN CONTENT: This holds all our different views -->
-        <main id="main-content">
-
-            <!-- VIEW 1: SETTINGS (For entering the API Key) -->
-            <div id="settings-view" class="view hidden">
-                <h2>Gemini API Setup</h2>
-                <div class="settings-container">
-                    <div class="form-group api-key">
-                        <label for="api-key-input">Gemini API Key</label>
-                        <input type="text" id="api-key-input" placeholder="Paste your key here">
-                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="help-link">Get key</a>
-                    </div>
-                </div>
-                <div class="button-group">
-                    <button id="settings-cancel-button" class="button-secondary">Cancel</button>
-                    <button id="settings-save-button" class="button-primary">Save</button>
-                </div>
-                <div class="onboarding-info">
-                    <h3>Get started in 3 quick steps</h3>
-                    <ol>
-                        <li>Visit <strong>ai.google.com/studio</strong></li>
-                        <li>Create an API key & enable <strong>Gemini API</strong></li>
-                        <li>Paste the key into TabTalk AI</li>
-                    </ol>
-                </div>
-            </div>
-
-            <!-- VIEW 2: URL INPUT -->
-            <div id="url-input-view" class="view hidden">
-                <h2>Enter Website URL</h2>
-                <div class="url-input-container">
-                    <div class="form-group">
-                        <label for="url-input">Website URL</label>
-                        <input type="url" id="url-input" placeholder="https://example.com/article">
-                        <small class="help-text">Enter the URL of the webpage you want to analyze</small>
-                    </div>
-                    <div class="button-group">
-                        <button id="url-cancel-button" class="button-secondary">Cancel</button>
-                        <button id="url-analyze-button" class="button-primary">Analyze Page</button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- VIEW 3: CHAT (The main interface) -->
-            <div id="chat-view" class="view hidden">
-                <div class="page-info">
-                    <p id="page-title">Ready to analyze content</p>
-                    <div id="page-status" class="page-status">Enter a URL or paste content to get started</div>
-                </div>
-                <div id="messages-container" class="messages-container">
-                    <!-- Chat messages will be added here by JavaScript -->
-                </div>
-                <div id="empty-state" class="empty-state" aria-hidden="true">
-                    <div class="hero">🤖</div>
-                    <h2>Welcome to TabTalk AI</h2>
-                    <p>Get started by:</p>
-                    <ol>
-                        <li>Setting up your <strong>Gemini API key</strong></li>
-                        <li>Entering a <strong>website URL</strong> to analyze</li>
-                        <li>Or pasting <strong>content directly</strong> in the chat</li>
-                    </ol>
-                </div>
-                <div class="input-area">
-                    <div class="input-bar">
-                        <textarea id="message-input" placeholder="Ask about content, paste a URL, or enter text to analyze..." rows="1" aria-label="Message input"></textarea>
-                        <div class="formatting-toolbar">
-                            <button class="format-button" title="Code" aria-label="Code block">{}</button>
-                            <button class="format-button" title="Link" aria-label="Insert link">🔗</button>
-                            <button class="tool-button" id="clear-chat-button" title="Clear chat" aria-label="Clear chat">🗑️</button>
-                            <button class="tool-button" id="export-chat-button" title="Export chat" aria-label="Export chat">⬇️</button>
+        <main id="top">
+            <section class="hero">
+                <div class="container hero-grid">
+                    <div class="hero-copy">
+                        <div class="badge">Chrome Extension · AI Twitter Copilot</div>
+                        <h1>Turn any page into scroll-stopping Twitter content.</h1>
+                        <p>Fibr captures insights from articles, research, and videos, then drafts ready-to-post tweets, threads, and reposts that sound like you. Built on Google Gemini, optimized for speed.</p>
+                        <div class="hero-actions">
+                            <a class="button primary" href="https://github.com/Ravinder82/Fibr-4-Tweeter#-installation" target="_blank" rel="noopener noreferrer">Get Fibr</a>
+                            <a class="button ghost" href="docs/development/API_KEY_FIX.md" target="_blank" rel="noopener noreferrer">View Documentation</a>
                         </div>
-                        <button id="send-button" title="Send message" aria-label="Send message" disabled>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855a.5.5 0 0 0-.09.89l4.736 3.14L13 5.5V9l2.25-3.25L13 2.5v3.75L4.159 9.25l4.776 3.175a.5.5 0 0 0 .75-.225l6.229-10.889a.5.5 0 0 0 .25-.625Z"/>
-                            </svg>
-                        </button>
+                        <ul class="hero-highlights" role="list">
+                            <li>⚡ One-tap quick actions for posts, threads, analysis, and reposts.</li>
+                            <li>🧵 Smart tone presets with emoji-aware character counting.</li>
+                            <li>🗂️ Gallery & history to organize every generated idea.</li>
+                        </ul>
                     </div>
-                    <div class="input-footer">
-                        <span class="char-count" aria-live="polite">0/2000</span>
+                    <div class="hero-preview" aria-label="Fibr preview">
+                        <div class="preview-card">
+                            <header>
+                                <div>
+                                    <span class="chip positive">Live Demo</span>
+                                    <h2>Thread Generator</h2>
+                                </div>
+                                <span class="chip neutral">2.0.0</span>
+                            </header>
+                            <p class="preview-lead">Topic: “What creators learned from the 2024 AI boom.”</p>
+                            <ul class="preview-list" role="list">
+                                <li>
+                                    <span class="preview-step">1</span>
+                                    Hook tweet crafted with tone presets and emoji pacing.
+                                </li>
+                                <li>
+                                    <span class="preview-step">2</span>
+                                    Supporting tweets grounded in key takeaways from the page.
+                                </li>
+                                <li>
+                                    <span class="preview-step">3</span>
+                                    Call-to-action with optional image prompt ready to copy.
+                                </li>
+                            </ul>
+                            <div class="preview-footer">
+                                <span class="chip accent">Save to Gallery</span>
+                                <span class="chip subtle">Emoji safe · 280 char</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- VIEW 4: STATUS (For loading or critical errors) -->
-            <div id="status-view" class="view">
-                <div class="spinner"></div>
-                <p id="status-text">Initializing...</p>
-            </div>
-            
+            <section class="section" id="features">
+                <div class="container">
+                    <div class="section-head">
+                        <h2>Creator-first features, built for speed.</h2>
+                        <p>Fibr keeps everything in one glassmorphism-inspired workspace so you can generate, refine, and publish without leaving the page.</p>
+                    </div>
+                    <div class="feature-grid">
+                        <article class="feature-card">
+                            <h3>Quick Actions Bar</h3>
+                            <p>Generate posts, reposts, threads, click-farming hooks, summaries, and FAQs in two clicks. Each flow remembers your tone and length preferences.</p>
+                        </article>
+                        <article class="feature-card">
+                            <h3>Smart Formatting</h3>
+                            <p>Emoji-aware character counting, pacing hints, and tone presets keep every tweet authentic. Use the builder to mix custom tones that feel human.</p>
+                        </article>
+                        <article class="feature-card">
+                            <h3>Gallery & History</h3>
+                            <p>Save your best content, edit inline, and export when you’re ready to publish. Fibr stores everything locally—your voice stays yours.</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section alt" id="workflow">
+                <div class="container workflow-grid">
+                    <div class="section-head compact">
+                        <h2>How Fibr works</h2>
+                        <p>Go from inspiration to publish-ready copy in three streamlined steps.</p>
+                    </div>
+                    <ol class="workflow-steps">
+                        <li>
+                            <span class="step-index">1</span>
+                            <h3>Capture context</h3>
+                            <p>Open the extension on any page. Fibr instantly grabs the key arguments, statistics, or quotes in the background.</p>
+                        </li>
+                        <li>
+                            <span class="step-index">2</span>
+                            <h3>Pick a flow</h3>
+                            <p>Choose the quick action that matches your goal: post, thread, analysis, fact check, or gallery save.</p>
+                        </li>
+                        <li>
+                            <span class="step-index">3</span>
+                            <h3>Ship in seconds</h3>
+                            <p>Review AI drafts, tweak copy directly, then copy or save to gallery. Regenerate with different tones anytime.</p>
+                        </li>
+                    </ol>
+                </div>
+            </section>
+
+            <section class="section" id="why">
+                <div class="container">
+                    <div class="section-head">
+                        <h2>Why creators choose Fibr</h2>
+                        <p>High-signal content, zero fluff. Whether you’re a newsletter writer, researcher, or social strategist, Fibr lets you publish more while staying on-brand.</p>
+                    </div>
+                    <div class="why-grid">
+                        <article class="why-card">
+                            <h3>Aligned with your voice</h3>
+                            <p>Dedicated tone profiles for posts, replies, and reposts—plus a builder for custom prompts. Outputs stay congruent with your style.</p>
+                        </article>
+                        <article class="why-card">
+                            <h3>Transparent & secure</h3>
+                            <p>Runs fully client-side. API keys live in Chrome storage. No accounts, no hidden analytics, and you control every generated word.</p>
+                        </article>
+                        <article class="why-card">
+                            <h3>Battle-tested UX</h3>
+                            <p>Glassmorphism UI with dark mode, floating nav, and keyboard shortcuts. Designed for speed-first workflows on desktop and laptop.</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section alt" id="privacy">
+                <div class="container privacy-card">
+                    <div>
+                        <h2>Privacy-first by design</h2>
+                        <p>Fibr never stores or sends your data anywhere except directly to Google’s Gemini API using your key. Review our detailed <a href="privacy-policy.html">privacy policy</a>.</p>
+                    </div>
+                    <ul role="list">
+                        <li>🔒 API keys saved locally with Chrome storage.</li>
+                        <li>🚫 No third-party tracking, pixels, or analytics.</li>
+                        <li>🗂️ Offline gallery keeps every idea within the extension.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="section final-cta">
+                <div class="container final-card">
+                    <h2>Ready to turn research into viral-ready threads?</h2>
+                    <p>Install Fibr, connect your Gemini API key, and create Twitter content that sounds like you—at scale.</p>
+                    <div class="hero-actions">
+                        <a class="button primary" href="https://github.com/Ravinder82/Fibr-4-Tweeter#-installation" target="_blank" rel="noopener noreferrer">Install Fibr</a>
+                        <a class="button ghost" href="https://github.com/Ravinder82/Fibr-4-Tweeter" target="_blank" rel="noopener noreferrer">Star on GitHub</a>
+                    </div>
+                </div>
+            </section>
         </main>
+
+        <footer class="site-footer">
+            <div class="container footer-inner">
+                <div class="brand-foot">
+                    <img src="icons/fibr.svg" alt="Fibr logo" class="brand-mark">
+                    <span>Fibr</span>
+                </div>
+                <p class="foot-note">Built for creators by Ravinder82. MIT Licensed. View the source on <a href="https://github.com/Ravinder82/Fibr-4-Tweeter" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
+            </div>
+        </footer>
     </div>
-
-    <!-- Demo Content Modal -->
-    <div id="demo-modal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Demo Mode</h3>
-                <button class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p>This is a demo version of TabTalk AI. To use the full functionality:</p>
-                <ol>
-                    <li>Get a free API key from <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a></li>
-                    <li>Start chatting with any webpage content!</li>
-                </ol>
-                <p><strong>For now, you can try the interface with simulated responses.</strong></p>
-            </div>
-            <div class="modal-footer">
-               <button id="demo-continue" class="button-primary">Continue Demo</button>
-               <button id="demo-setup" class="button-secondary">Setup API Key</button>
-           </div>
-       </div>
-   </div>
-
-    <script src="marked.min.js"></script>
-    <script src="app.js"></script>
-    <div id="aria-status" class="visually-hidden" aria-live="polite"></div>
 </body>
 </html>

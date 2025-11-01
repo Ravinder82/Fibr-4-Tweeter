@@ -8,15 +8,19 @@
       category: 'positive',
       description: 'Celebrate the win with concrete proof points.',
       aiInstructions: `TONE: Praise
-MISSION: Deliver genuine, operator-level praise for the product or post.
+
+MISSION: Deliver genuine, operator-level praise for the product, idea, or post. Make people feel seen and understood.
 
 NON-NEGOTIABLE RULES:
-- Study the analysis to surface the single most impressive outcome or feature.
-- Reference at least one concrete proof (metric, quote, feature, user outcome) from the source.
-- Speak like a peer who recognizes hard work—no generic marketing fluff or hollow hype.
-- Make the praise actionable by highlighting why it matters (impact, momentum, market position).
-- Keep it punchy: 2–4 tightly written sentences, no emoji spam (max 1 if it reinforces authenticity).
-- Do not pivot into suggestions, criticism, or requests—stay firmly in celebration mode.`,
+
+- Study the analysis to surface the single most impressive outcome, feature, or insight.
+- Reference at least one concrete proof from the source (specific metric, quote, shipped feature, user outcome, market signal).
+- Speak like a peer who recognizes authentic excellence—no generic marketing fluff or hollow hype.
+- Make the praise *actionable* by highlighting why it matters (impact, momentum, market position, user value).
+- Keep it punchy: 2–4 tightly written sentences, no emoji spam (max 1 if it feels authentic).
+- Do not pivot into suggestions, criticism, or requests—stay firmly in genuine celebration mode.
+- Show you understand the work and effort behind what you're praising.
+- Let your enthusiasm be real, grounded, and specific.`,
     },
     {
       id: 'comment-ask',
@@ -26,15 +30,19 @@ NON-NEGOTIABLE RULES:
       category: 'inquisitive',
       description: 'Probe for specs, roadmap, or technical depth.',
       aiInstructions: `TONE: Ask
-MISSION: Ask a precise technical or product question that proves you studied the material.
+
+MISSION: Ask a precise technical or product question that proves you studied the material deeply and care about understanding.
 
 NON-NEGOTIABLE RULES:
-- Use the analysis to set context in one short clause (e.g., "That latency drop...").
+
+- Use the analysis to set context in one short, natural clause (e.g., "That latency drop…," "The way you…").
 - Anchor the question in a specific feature, metric, or claim mentioned in the content.
-- Ask 1–2 sharp questions that reveal curiosity about implementation, roadmap, or edge cases.
-- Sound respectful and collaborative—no aggressive grilling, no generic "tell me more."
-- Offer a quick reason why the answer matters (performance, adoption, security, UX, etc.).
-- Keep it to 2–4 sentences total and end with the question itself—no extra fluff or CTA.`,
+- Ask 1–2 sharp questions that reveal genuine curiosity about implementation, roadmap, edge cases, or implications.
+- Sound respectful and collaborative—curious, not aggressive; genuinely interested, not interrogating.
+- Offer a quick reason why the answer matters to you (performance, user adoption, security, UX, market timing, etc.).
+- Keep it to 2–4 sentences total, ending with the question—no extra fluff or CTA.
+- Show you're thinking like someone in the domain, not an outsider.
+- Make the question specific enough that only someone who built this could answer well.`,
     }
   ];
 
@@ -117,10 +125,13 @@ NON-NEGOTIABLE RULES:
       if (!modal) return;
 
       modal.classList.remove('hidden');
-      modal.setAttribute('aria-hidden', 'false');
+      modal.removeAttribute('aria-hidden');
+      modal.removeAttribute('inert');
 
-      const firstTone = modal.querySelector('.comments-tone-option');
-      firstTone?.focus();
+      setTimeout(() => {
+        const firstTone = modal.querySelector('.comments-tone-option');
+        firstTone?.focus();
+      }, 50);
     },
 
     hideModal: function() {
@@ -129,6 +140,7 @@ NON-NEGOTIABLE RULES:
 
       modal.classList.add('hidden');
       modal.setAttribute('aria-hidden', 'true');
+      modal.setAttribute('inert', '');
       this.resetSelections();
     },
 
@@ -179,10 +191,8 @@ NON-NEGOTIABLE RULES:
       const toneToUse = this.selectedTone;
       this.hideModal();
 
-      // CRITICAL FIX: Clear previous comment outputs BEFORE generation starts
-      if (window.TabTalkTwitter && window.TabTalkTwitter.clearPreviousCommentOutputs) {
-        window.TabTalkTwitter.clearPreviousCommentOutputs.call(this.appInstance);
-      }
+      // Content is already cleared by resetScreenForGeneration() called before modal opened
+      // No need for selective clearing here
 
       try {
         if (window.TabTalkTwitter && typeof window.TabTalkTwitter.generateCommentReplyWithTone === 'function') {
@@ -208,6 +218,7 @@ NON-NEGOTIABLE RULES:
   };
 
   window.TabTalkCommentsModal = CommentsModal;
+  window.FibrCommentsModal = CommentsModal; // Fibr alias
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => CommentsModal.init());

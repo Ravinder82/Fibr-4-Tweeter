@@ -205,6 +205,9 @@
       
       card.className = cardClass;
       const accurate = this.getAccurateCharacterCount(item.content || '');
+
+      // Build a clean preview: prefer first tweet content when thread-like
+      const previewText = this.buildPreviewText(item);
       card.innerHTML = `
         <div class="gallery-card-header">
           <div class="title-row">
@@ -218,7 +221,7 @@
         </div>
         <div class="gallery-card-body">
           <div class="gallery-preview" data-content="${this.escapeHtml(item.content || '')}">
-            ${this.escapeHtml(item.content || '').substring(0, 200)}${(item.content || '').length > 200 ? '...' : ''}
+            ${this.escapeHtml(previewText).substring(0, 200)}${previewText.length > 200 ? '...' : ''}
           </div>
         </div>
         <div class="gallery-card-footer">
@@ -262,16 +265,16 @@
         }
       });
 
-      // Read - Open modal
+      // Read - Open Rich Text Viewer Modal
       readBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        this.openReadModal(item);
+        this.RichTextModal.showViewer(item);
       });
 
-      // Edit - Open modal in edit mode
+      // Edit - Open Rich Text Editor Modal
       editBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        this.openEditModal(item);
+        this.RichTextModal.showEditor(item);
       });
 
       // Delete
@@ -283,124 +286,547 @@
         card.remove();
       });
 
-      // Click card to read
+      // Click card to read - Open Rich Text Viewer Modal
       card.addEventListener('click', (e) => {
         // Ignore if clicking a button
         if (e.target.closest('.btn-action')) return;
-        this.openReadModal(item);
+        this.RichTextModal.showViewer(item);
       });
 
       return card;
     },
 
-    openReadModal(item) {
-      const modal = document.createElement('div');
-      modal.className = 'gallery-modal';
-      // Build modal content; do not include image prompts for saved content
-      let imagePromptSection = '';
-      modal.innerHTML = `
-        <div class="gallery-modal-overlay"></div>
-        <div class="gallery-modal-content">
-          <div class="gallery-modal-header">
-            <div>
-              <h3>${this.escapeHtml(item.title || 'Post')}</h3>
-              <span class="modal-meta">${this.formatDate(item.updatedAt || item.timestamp)} • ${this.getAccurateCharacterCount(item.content || '')} chars</span>
-            </div>
-            <button class="modal-close" aria-label="Close">×</button>
+    // =====================================================
+// SUPER ROBUST RICH TEXT MODAL SYSTEM - BULLETPROOF
+// =====================================================
+// Architecture: Single modal instance, atomic operations, no conflicts
+    
+RichTextModal: {
+  // Singleton pattern - only ONE modal can exist
+  _instance: null,
+  _currentMode: null, // 'viewer' or 'editor'
+  _currentItem: null,
+  
+  // Public API - Entry points
+  showViewer(item) {
+    this._destroyExisting(); // Atomic cleanup first
+    this._createViewer(item);
+  },
+  
+  showEditor(item) {
+    this._destroyExisting(); // Atomic cleanup first  
+    this._createEditor(item);
+  },
+  
+  // Core modal management
+  _destroyExisting() {
+    if (this._instance) {
+      // Remove ESC handler
+      if (this._instance._escHandler) {
+        document.removeEventListener('keydown', this._instance._escHandler);
+        this._instance._escHandler = null;
+      }
+      // Remove from DOM
+      if (this._instance.parentNode) {
+        this._instance.parentNode.removeChild(this._instance);
+      }
+      // Reset state
+      this._instance = null;
+      this._currentMode = null;
+      this._currentItem = null;
+    }
+  },
+  
+  _createBaseModal() {
+    const modal = document.createElement('div');
+    modal.className = 'rich-text-modal';
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    `;
+    
+    // Store reference for cleanup
+    this._instance = modal;
+    
+    return modal;
+  },
+  
+  _createViewer(item) {
+    const modal = this._createBaseModal();
+    this._currentMode = 'viewer';
+    this._currentItem = item;
+    
+    // Parse content for display
+    const displayData = this._prepareDisplayContent(item);
+    
+    modal.innerHTML = `
+      <div class="rich-text-modal-content" style="
+        background: var(--primary-bg);
+        border-radius: 12px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        transform: scale(0.9);
+        transition: transform 0.2s ease;
+      ">
+        
+        <div class="rich-text-modal-body" style="
+          padding: 24px;
+          max-height: 400px;
+          overflow-y: auto;
+          background: var(--primary-bg);
+        ">
+          ${displayData.contentHTML}
+        </div>
+        
+        <div class="rich-text-modal-footer" style="
+          padding: 16px 20px;
+          border-top: 1px solid var(--border-color);
+          display: flex;
+          gap: 12px;
+          justify-content: flex-end;
+          background: var(--secondary-bg);
+        ">
+          <button class="rich-text-modal-btn copy" style="
+            background: var(--tertiary-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+          ">Copy</button>
+          <button class="rich-text-modal-btn edit" style="
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+          ">Edit</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Animate in
+    requestAnimationFrame(() => {
+      modal.style.opacity = '1';
+      modal.querySelector('.rich-text-modal-content').style.transform = 'scale(1)';
+    });
+    
+    // Bind events
+    this._bindViewerEvents(modal, item, displayData);
+  },
+  
+  _createEditor(item) {
+    const modal = this._createBaseModal();
+    this._currentMode = 'editor';
+    this._currentItem = item;
+    
+    // Prepare editable content
+    const editText = this._prepareEditableContent(item);
+    
+    modal.innerHTML = `
+      <div class="rich-text-modal-content" style="
+        background: var(--primary-bg);
+        border-radius: 12px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        transform: scale(0.9);
+        transition: transform 0.2s ease;
+      ">
+        
+        <div class="rich-text-modal-body" style="
+          padding: 20px;
+          max-height: 400px;
+          overflow-y: auto;
+          background: var(--primary-bg);
+        ">
+          <textarea class="rich-text-modal-textarea" style="
+            width: 100%;
+            min-height: 300px;
+            background: var(--secondary-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s ease;
+          " placeholder="Edit your content...">${this._escapeHtml(editText)}</textarea>
+        </div>
+        
+        <div class="rich-text-modal-footer" style="
+          padding: 16px 20px;
+          border-top: 1px solid var(--border-color);
+          display: flex;
+          gap: 12px;
+          justify-content: space-between;
+          background: var(--secondary-bg);
+        ">
+          <div style="color: var(--text-secondary); font-size: 12px;">
+            <span class="char-count">0</span> characters
           </div>
-          <div class="gallery-modal-body">
-            <div class="modal-text">${this.escapeHtml(item.content || '').replace(/\n/g, '<br>')}</div>
-          </div>
-          <div class="gallery-modal-footer">
-            <button class="modal-btn copy">Copy</button>
-            <button class="modal-btn edit">Edit</button>
+          <div style="display: flex; gap: 12px;">
+            <button class="rich-text-modal-btn cancel" style="
+              background: var(--tertiary-bg);
+              color: var(--text-primary);
+              border: 1px solid var(--border-color);
+              padding: 8px 16px;
+              border-radius: 6px;
+              cursor: pointer;
+              font-size: 14px;
+              transition: all 0.2s ease;
+            ">Cancel</button>
+            <button class="rich-text-modal-btn save" style="
+              background: var(--accent-color);
+              color: white;
+              border: none;
+              padding: 8px 16px;
+              border-radius: 6px;
+              cursor: pointer;
+              font-size: 14px;
+              transition: all 0.2s ease;
+            ">Save Changes</button>
           </div>
         </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Animate in
+    requestAnimationFrame(() => {
+      modal.style.opacity = '1';
+      modal.querySelector('.rich-text-modal-content').style.transform = 'scale(1)';
+    });
+    
+    // Bind events
+    this._bindEditorEvents(modal, item);
+  },
+  
+  // Content preparation
+  _prepareDisplayContent(item) {
+    let tweetsArray = null;
+    
+    // Parse tweets if available
+    if (Array.isArray(item.tweets) && item.tweets.length > 0) {
+      tweetsArray = item.tweets.map(t => {
+        const raw = (t.content || '').toString();
+        const cleaned = raw.replace(/^\d+\/[nN\d]+[\s:]*/, '').trim();
+        return { content: cleaned, charCount: t.charCount || this._getCharCount(cleaned) };
+      });
+    } else if ((item.content || '') && window.FibrTwitter && window.FibrTwitter.parseTwitterThread) {
+      const parsed = window.FibrTwitter.parseTwitterThread(item.content || '');
+      if (Array.isArray(parsed) && parsed.length > 1) {
+        tweetsArray = parsed.map(t => ({ content: t, charCount: this._getCharCount(t) }));
+      }
+    }
+    
+    const isThread = Array.isArray(tweetsArray) && tweetsArray.length > 0;
+    const totalChars = item.totalChars || this._getCharCount(item.content || '');
+    
+    // Build content HTML
+    let contentHTML = '';
+    if (isThread) {
+      contentHTML = '<div style="display: flex; flex-direction: column; gap: 16px;">';
+      tweetsArray.forEach((tweet, index) => {
+        contentHTML += `
+          <div style="
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            position: relative;
+          ">
+            <div style="
+              position: absolute;
+              top: 8px;
+              right: 8px;
+              background: var(--accent-color);
+              color: white;
+              padding: 2px 8px;
+              border-radius: 12px;
+              font-size: 12px;
+              font-weight: 600;
+            ">${index + 1}/${tweetsArray.length}</div>
+            <div style="
+              color: var(--text-primary);
+              line-height: 1.5;
+              white-space: pre-wrap;
+              margin-top: 8px;
+            ">${this._escapeHtml(tweet.content || '').replace(/\n/g, '<br>')}</div>
+            <div style="
+              margin-top: 12px;
+              color: var(--text-secondary);
+              font-size: 12px;
+            ">${tweet.charCount} characters</div>
+          </div>
+        `;
+      });
+      contentHTML += '</div>';
+    } else {
+      contentHTML = `
+        <div style="
+          color: var(--text-primary);
+          line-height: 1.6;
+          white-space: pre-wrap;
+        ">${this._escapeHtml(item.content || '').replace(/\n/g, '<br>')}</div>
       `;
-      document.body.appendChild(modal);
-
-      const close = () => modal.remove();
-      modal.querySelector('.modal-close').addEventListener('click', close);
-      modal.querySelector('.gallery-modal-overlay').addEventListener('click', close);
+    }
+    
+    return {
+      contentHTML,
+      meta: `${this._formatDate(item.updatedAt || item.timestamp)} • ${totalChars} characters${isThread ? ` • ${tweetsArray.length} tweets` : ''}`,
+      tweetsArray,
+      isThread
+    };
+  },
+  
+  _prepareEditableContent(item) {
+    let editText = item.content || '';
+    
+    if (Array.isArray(item.tweets) && item.tweets.length > 0) {
+      editText = item.tweets
+        .map(t => ((t.content || '').toString().replace(/^\d+\/[nN\d]+[\s:]*/, '').trim()))
+        .join('\n\n');
+    } else if ((item.content || '') && window.FibrTwitter && window.FibrTwitter.parseTwitterThread) {
+      const parsed = window.FibrTwitter.parseTwitterThread(item.content || '');
+      if (Array.isArray(parsed) && parsed.length > 1) {
+        editText = parsed.join('\n\n');
+      }
+    }
+    
+    return editText;
+  },
+  
+  // Event binding
+  _bindViewerEvents(modal, item, displayData) {
+    // Close handlers
+    const closeHandler = () => this._destroyExisting();
+    const closeBtnV = modal.querySelector('.rich-text-modal-close');
+    if (closeBtnV) closeBtnV.addEventListener('click', closeHandler);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeHandler();
+    });
+    
+    // ESC key
+    const escHandler = (e) => {
+      if (e.key === 'Escape') closeHandler();
+    };
+    modal._escHandler = escHandler;
+    document.addEventListener('keydown', escHandler);
+    
+    // Add hover effects for buttons
+    const copyBtn = modal.querySelector('.rich-text-modal-btn.copy');
+    const editBtn = modal.querySelector('.rich-text-modal-btn.edit');
+    
+    copyBtn.addEventListener('mouseenter', () => {
+      copyBtn.style.background = 'var(--border-color)';
+    });
+    copyBtn.addEventListener('mouseleave', () => {
+      copyBtn.style.background = 'var(--tertiary-bg)';
+    });
+    
+    editBtn.addEventListener('mouseenter', () => {
+      editBtn.style.opacity = '0.8';
+    });
+    editBtn.addEventListener('mouseleave', () => {
+      editBtn.style.opacity = '1';
+    });
+    
+    // Copy button
+    copyBtn.addEventListener('click', async () => {
+      let textToCopy = '';
       
-      modal.querySelector('.modal-btn.copy').addEventListener('click', async () => {
-        let textToCopy = '';
-        const isThread = (item.platform || '').toLowerCase() === 'thread' && Array.isArray(item.tweets) && item.tweets.length > 0;
-        if (isThread) {
-          textToCopy = item.tweets.map((t, index) => {
-            const header = t.number || `${index + 1}/${item.tweets.length}:`;
-            return `${header}\n${t.content || ''}`;
-          }).join('\n\n---\n\n');
-        } else {
-          textToCopy = item.content || '';
-        }
-        await navigator.clipboard.writeText(textToCopy);
-        const btn = modal.querySelector('.modal-btn.copy');
-        btn.textContent = 'Copied!';
-        setTimeout(() => btn.textContent = 'Copy', 1500);
-      });
-
-      modal.querySelector('.modal-btn.edit').addEventListener('click', () => {
-        close();
-        this.openEditModal(item);
-      });
-
-      // ESC to close
-      const escHandler = (e) => {
-        if (e.key === 'Escape') {
-          close();
-          document.removeEventListener('keydown', escHandler);
-        }
+      if (displayData.isThread && Array.isArray(displayData.tweetsArray)) {
+        textToCopy = displayData.tweetsArray.map((t, index) => {
+          return `${index + 1}/${displayData.tweetsArray.length}:\n${t.content || ''}`;
+        }).join('\n\n---\n\n');
+      } else {
+        textToCopy = item.content || '';
+      }
+      
+      await navigator.clipboard.writeText(textToCopy);
+      const btn = modal.querySelector('.rich-text-modal-btn.copy');
+      const originalText = btn.textContent;
+      btn.textContent = 'Copied!';
+      btn.style.background = 'var(--accent-color)';
+      btn.style.color = 'white';
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.style.background = 'var(--tertiary-bg)';
+        btn.style.color = 'var(--text-primary)';
+      }, 1500);
+    });
+    
+    // Edit button - transition to editor
+    editBtn.addEventListener('click', () => {
+      this._destroyExisting(); // Atomic cleanup
+      // Small delay for clean transition
+      setTimeout(() => this._createEditor(item), 100);
+    });
+  },
+  
+  _bindEditorEvents(modal, item) {
+    const textarea = modal.querySelector('.rich-text-modal-textarea');
+    const charCount = modal.querySelector('.char-count');
+    
+    // Update character count
+    const updateCharCount = () => {
+      charCount.textContent = this._getCharCount(textarea.value);
+    };
+    textarea.addEventListener('input', updateCharCount);
+    updateCharCount(); // Initial count
+    
+    // Add focus/blur styling
+    textarea.addEventListener('focus', () => {
+      textarea.style.borderColor = 'var(--accent-color)';
+    });
+    textarea.addEventListener('blur', () => {
+      textarea.style.borderColor = 'var(--border-color)';
+    });
+    
+    // Close handlers
+    const closeHandler = () => this._destroyExisting();
+    const closeBtnE = modal.querySelector('.rich-text-modal-close');
+    const cancelBtn = modal.querySelector('.rich-text-modal-btn.cancel');
+    const saveBtn = modal.querySelector('.rich-text-modal-btn.save');
+    
+    if (closeBtnE) closeBtnE.addEventListener('click', closeHandler);
+    cancelBtn.addEventListener('click', closeHandler);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeHandler();
+    });
+    
+    // Add hover effects for buttons
+    cancelBtn.addEventListener('mouseenter', () => {
+      cancelBtn.style.background = 'var(--border-color)';
+    });
+    cancelBtn.addEventListener('mouseleave', () => {
+      cancelBtn.style.background = 'var(--tertiary-bg)';
+    });
+    
+    saveBtn.addEventListener('mouseenter', () => {
+      saveBtn.style.opacity = '0.8';
+    });
+    saveBtn.addEventListener('mouseleave', () => {
+      saveBtn.style.opacity = '1';
+    });
+    
+    // ESC key
+    const escHandler = (e) => {
+      if (e.key === 'Escape') closeHandler();
+    };
+    modal._escHandler = escHandler;
+    document.addEventListener('keydown', escHandler);
+    
+    // Save button
+    saveBtn.addEventListener('click', async () => {
+      const newContent = textarea.value;
+      const patch = {
+        content: newContent,
+        updatedAt: Date.now(),
+        charCountAccurate: this._getCharCount(newContent)
       };
-      document.addEventListener('keydown', escHandler);
-    },
-
-    openEditModal(item) {
-      const modal = document.createElement('div');
-      modal.className = 'gallery-modal';
-      modal.innerHTML = `
-        <div class="gallery-modal-overlay"></div>
-        <div class="gallery-modal-content">
-          <div class="gallery-modal-header">
-            <div>
-              <h3>Edit: ${this.escapeHtml(item.title || 'Post')}</h3>
-              <span class="modal-meta">Editing mode</span>
-            </div>
-            <button class="modal-close" aria-label="Close">×</button>
-          </div>
-          <div class="gallery-modal-body">
-            <textarea class="modal-textarea" placeholder="Edit your content...">${this.escapeHtml(item.content || '')}</textarea>
-          </div>
-          <div class="gallery-modal-footer">
-            <button class="modal-btn cancel">Cancel</button>
-            <button class="modal-btn save primary">Save Changes</button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(modal);
-
-      const textarea = modal.querySelector('.modal-textarea');
-      const close = () => modal.remove();
       
-      modal.querySelector('.modal-close').addEventListener('click', close);
-      modal.querySelector('.gallery-modal-overlay').addEventListener('click', close);
-      modal.querySelector('.modal-btn.cancel').addEventListener('click', close);
-
-      modal.querySelector('.modal-btn.save').addEventListener('click', async () => {
-        const patch = {
-          content: textarea.value,
-          updatedAt: Date.now(),
-          charCountAccurate: this.getAccurateCharacterCount(textarea.value)
-        };
-        await this.updateItem(item, patch);
-        close();
-        // Refresh gallery
-        const container = document.querySelector('#gallery-view');
-        if (container) this.render(container);
-      });
-
-      textarea.focus();
-    },
+      // Parse as thread if applicable
+      if (window.FibrTwitter && window.FibrTwitter.parseTwitterThread) {
+        const parsed = window.FibrTwitter.parseTwitterThread(newContent || '');
+        if (Array.isArray(parsed) && parsed.length > 1) {
+          patch.tweets = parsed.map((t, idx) => ({
+            id: `tweet_${idx + 1}`,
+            number: `${idx + 1}/${parsed.length}`,
+            content: t,
+            charCount: this._getCharCount(t)
+          }));
+          patch.totalTweets = parsed.length;
+          patch.totalChars = parsed.reduce((sum, t) => sum + this._getCharCount(t), 0);
+          patch.platform = 'thread';
+          patch.type = 'thread';
+          patch.isThread = true;
+          patch.hasThreadStructure = true;
+        }
+      }
+      
+      // Save via gallery manager
+      await window.galleryManager.updateItem(item, patch);
+      
+      // Close modal and refresh gallery
+      this._destroyExisting();
+      const container = document.querySelector('#gallery-view');
+      if (container) window.galleryManager.render(container);
+    });
+    
+    // Focus textarea
+    textarea.focus();
+  },
+  
+  // Utility functions
+  _getCharCount(text) {
+    if (!text) return 0;
+    const trimmedText = String(text).trim();
+    let count = 0;
+    const characters = Array.from(trimmedText);
+    for (const char of characters) {
+      const codePoint = char.codePointAt(0);
+      const isEmoji = (
+        (codePoint >= 0x1F000 && codePoint <= 0x1F9FF) ||
+        (codePoint >= 0x2600 && codePoint <= 0x26FF) ||
+        (codePoint >= 0x2700 && codePoint <= 0x27BF) ||
+        (codePoint >= 0x1F600 && codePoint <= 0x1F64F) ||
+        (codePoint >= 0x1F300 && codePoint <= 0x1F5FF) ||
+        (codePoint >= 0x1F680 && codePoint <= 0x1F6FF) ||
+        (codePoint >= 0x1F1E0 && codePoint <= 0x1F1FF) ||
+        (codePoint >= 0x200D)
+      );
+      count += isEmoji ? 2 : 1;
+    }
+    return count;
+  },
+  
+  _escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  },
+  
+  _formatDate(ts) {
+    if (!ts) return '';
+    try {
+      const d = new Date(ts);
+      return d.toLocaleString();
+    } catch {
+      return '';
+    }
+  }
+},
 
     async updateItem(item, patch) {
       const saved = await FibrStorage.getSavedContent();
@@ -483,6 +909,26 @@
       
       // Method 3: Last resort fallback
       return item.content || '';
+    },
+
+    // Build a clean preview string for a card. Prefer first tweet content, without numbering
+    buildPreviewText(item) {
+      try {
+        if (Array.isArray(item.tweets) && item.tweets.length > 0) {
+          return (item.tweets[0].content || '').toString();
+        }
+        const content = (item.content || '').toString();
+        if (window.FibrTwitter && window.FibrTwitter.parseTwitterThread) {
+          const parsed = window.FibrTwitter.parseTwitterThread(content);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed[0];
+          }
+        }
+        // Fallback: strip leading numbering if present
+        return content.replace(/^\d+\/\d+[\s:]*/, '').trim();
+      } catch {
+        return item.content || '';
+      }
     },
 
     getAccurateCharacterCount(text) {

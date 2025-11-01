@@ -15,12 +15,12 @@
             </div>
             <div class="header-controls">
                 <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
-                    <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="4"></circle>
-                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
-                    </svg>
-                    <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    <span class="sr-only">Toggle theme</span>
+                    <svg class="lightbulb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M9 18h6" />
+                        <path d="M10 22h4" />
+                        <path d="M8 14h8" />
+                        <path d="M12 2a6 6 0 0 1 6 6c0 2.2-1 3.6-2.1 4.7-.7.7-1.2 1.5-1.4 2.3H9.5c-.2-.8-.7-1.6-1.4-2.3C7 11.6 6 10.2 6 8a6 6 0 0 1 6-6Z" />
                     </svg>
                 </button>
                 <button id="menu-button" class="menu-button" title="Menu">☰</button>
@@ -170,112 +170,6 @@
 
             <!-- VIEW 6: THREAD LIBRARY REMOVED -->
 
-            
-            <!-- VIEW 8: ENHANCED THREAD GENERATOR -->
-            <div id="thread-generator-view" class="view hidden">
-                <div class="thread-generator-container">
-                    <div class="generator-header">
-                        <div class="header-icon">🧵</div>
-                        <h2>Enhanced Thread Generator</h2>
-                        <p>Create powerful threads with AI-powered frameworks and personas</p>
-                    </div>
-                    
-                    <div class="generator-form">
-                        <!-- TOPIC INPUT WITH AI ENHANCEMENT -->
-                        <div class="form-group">
-                            <label for="thread-topic">Topic</label>
-                            <div class="topic-input-container">
-                                <input type="text" id="thread-topic" class="form-input" placeholder="Enter any topic..." />
-                                <div class="topic-actions">
-                                    <button type="button" id="refine-topic-btn" class="topic-action-btn" title="AI-powered topic refinement">
-                                        ✨ Refine
-                                    </button>
-                                    <button type="button" id="generate-ideas-btn" class="topic-action-btn" title="Generate topic ideas">
-                                        💡 Ideas
-                                    </button>
-                                </div>
-                            </div>
-                            <small class="form-hint">What do you want to create a thread about?</small>
-                            <div id="topic-suggestions" class="topic-suggestions hidden">
-                                <div class="suggestions-header">AI Suggestions:</div>
-                                <div id="suggestions-list" class="suggestions-list"></div>
-                            </div>
-                        </div>
-
-                        <!-- ENHANCED PERSONA PRESETS -->
-                        <div class="form-section">
-                            <label class="section-label">Choose Persona</label>
-                            <div class="persona-chips">
-                                <button class="persona-chip active" data-persona="educator">🎓 Educator</button>
-                                <button class="persona-chip" data-persona="operator">⚙️ Operator</button>
-                                <button class="persona-chip" data-persona="analyst">📊 Analyst</button>
-                                <button class="persona-chip" data-persona="entertainer">🎭 Entertainer</button>
-                                <button class="persona-chip" data-persona="visionary">🔮 Visionary</button>
-                                <button class="persona-chip" data-persona="storyteller">📚 Storyteller</button>
-                                <button class="persona-chip" data-persona="scientist">🔬 Scientist</button>
-                                <button class="persona-chip" data-persona="philosopher">🤔 Philosopher</button>
-                            </div>
-                        </div>
-
-                        <!-- ENHANCED FORMAT CHIPS (20 formats) -->
-                        <div class="form-section">
-                            <label class="section-label">Content Framework</label>
-                            <div class="format-grid">
-                                <button class="format-chip active" data-format="myth-busting">🧱 Myth‑busting</button>
-                                <button class="format-chip" data-format="status-shift">⚡ Status Shift</button>
-                                <button class="format-chip" data-format="cheat-code">🎮 Cheat Code</button>
-                                <button class="format-chip" data-format="analogy">🔗 Analogy</button>
-                                <button class="format-chip" data-format="pain">💡 Pain Point</button>
-                                <button class="format-chip" data-format="story">📖 Story</button>
-                                <button class="format-chip" data-format="data">📊 Data Driven</button>
-                                <button class="format-chip" data-format="framework">🏗️ Framework</button>
-                                <button class="format-chip" data-format="future">🔮 Future Focus</button>
-                                <button class="format-chip" data-format="practical">⚙️ Practical</button>
-                                <button class="format-chip" data-format="controversial">🔥 Controversial</button>
-                                <button class="format-chip" data-format="inspirational">✨ Inspirational</button>
-                                <button class="format-chip" data-format="step-by-step">📝 Step‑by‑Step</button>
-                                <button class="format-chip" data-format="comparison">⚖️ Comparison</button>
-                                <button class="format-chip" data-format="case-study">📋 Case Study</button>
-                                <button class="format-chip" data-format="trend">📈 Trend Alert</button>
-                                <button class="format-chip" data-format="myth-busting-plus">🧱 Myth+</button>
-                                <button class="format-chip" data-format="quick-win">🏆 Quick Win</button>
-                                <button class="format-chip" data-format="deep-dive">🤿 Deep Dive</button>
-                                <button class="format-chip" data-format="checklist">✅ Checklist</button>
-                            </div>
-                        </div>
-
-                        <!-- HOOK GENERATOR -->
-                        <div class="form-section">
-                            <label class="section-label">AI Hook Generator</label>
-                            <button class="hook-generator-btn" id="generate-hooks-btn">🎯 Generate 10 Hooks</button>
-                            <div class="hooks-container hidden" id="hooks-container"></div>
-                        </div>
-
-                        <!-- TREND FUSION -->
-                        <div class="form-section">
-                            <label class="section-label">Trend Fusion</label>
-                            <button class="trend-fusion-btn" id="trend-fusion-btn">🔥 Evergreen + Trend Hook</button>
-                            <div class="trend-result hidden" id="trend-result"></div>
-                        </div>
-
-                        <!-- ORIGINAL OPTIONS -->
-                        <div class="form-group form-checkbox">
-                            <label>
-                                <input type="checkbox" id="use-knowledge-pack" checked />
-                                <span>Use AI Knowledge Base</span>
-                            </label>
-                            <small class="form-hint">Includes curated facts and enhanced hooks</small>
-                        </div>
-                        
-                        <div class="generator-actions">
-                            <button id="generate-thread-btn" class="button-primary">
-                                🚀 Generate Enhanced Thread
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- VIEW 9: PRIVACY & SECURITY POLICY -->
             <div id="privacy-view" class="view hidden">
                 <div id="privacy-policy-container" class="privacy-view-container"></div>
@@ -351,27 +245,25 @@
             </div>
         </div>
 
-        <!-- BOTTOM NAVIGATION BAR -->
-        <nav id="bottom-nav" class="bottom-nav">
-            <button class="nav-item active" data-view="chat" title="Home">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <!-- FLOATING NAVIGATION -->
+        <div id="floating-nav" class="floating-nav" role="navigation" aria-label="Primary">
+            <button class="floating-nav-btn active" data-view="chat" aria-label="Home">
+                <svg class="floating-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                     <polyline points="9 22 9 12 15 12 15 22"></polyline>
                 </svg>
-                <span class="nav-label">Home</span>
             </button>
-            
-            <button class="nav-item" data-view="gallery" title="Gallery">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+            <button class="floating-nav-btn" data-view="gallery" aria-label="Gallery">
+                <svg class="floating-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                     <circle cx="8.5" cy="8.5" r="1.5"></circle>
                     <polyline points="21 15 16 10 5 21"></polyline>
                 </svg>
-                <span class="nav-label">Gallery</span>
             </button>
-        </nav>
+        </div>
     </div>
     <!-- Scripts -->
     <!-- All modules are now bundled into popup.js by esbuild -->
-    <script src="marked.min.js"></script>
+    <script src="modules/marked.min.js"></script>
     <script src="popup.js"></script>
