@@ -45,10 +45,10 @@
         if (bottomNav) {
           bottomNav.style.display = 'flex';
           bottomNav.style.visibility = 'visible';
-          bottomNav.style.height = '45px';
+          bottomNav.style.height = '32px';
         }
-        if (mainContent) mainContent.style.paddingBottom = '45px';
-        if (container) container.style.paddingBottom = '66px'; // Restore bottom padding for nav
+        if (mainContent) mainContent.style.paddingBottom = '60px';
+        if (container) container.style.paddingBottom = '60px'; // Restore bottom padding for floating nav
       }
       
       let targetId = `${viewName}-view`;

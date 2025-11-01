@@ -191,7 +191,7 @@ body {
     background: var(--primary-bg);
     position: relative;
     overflow: hidden;
-    padding: 0 0 66px 0; /* Space for bottom nav */
+    padding: 0 0 60px 0; /* Space for floating bottom nav */
 }
 
 /* Header - Ultra Compact Mobile Island */
@@ -5126,134 +5126,121 @@ body.dark-mode .tone-badge {
 /* Reduced motion respected by the global guard earlier in this file */
 
 /* ============================================ */
-/** BOTTOM NAVIGATION BAR (iPhone Style) */
+/** FLOATING NAVIGATION */
 /* ============================================ */
 
-.bottom-nav {
+.floating-nav {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 45px;
-  background: var(--secondary-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border-color);
-  box-shadow: var(--shadow-lg);
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  justify-content: space-around;
   align-items: center;
-  padding: 0 8px;
+  gap: 16px;
+  padding: 0;
   z-index: 1000;
+  pointer-events: auto;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.nav-item {
-  display: flex;
-  flex-direction: column;
+.floating-nav-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 18px;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.92) 0%, rgba(240, 240, 240, 0.7) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 12px 24px rgba(15, 17, 21, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  flex: 1;
-  height: 100%;
-  background: transparent;
-  border: none;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
   position: relative;
-  padding: 8px 4px;
+  isolation: isolate;
 }
 
-.nav-item::before {
+.floating-nav-btn::after {
   content: '';
   position: absolute;
-  top: 50%;
+  top: 6px;
   left: 50%;
-  transform: translate(-50%, -50%) scale(0);
-  width: 60px;
-  height: 60px;
-  background: var(--tertiary-bg);
+  transform: translateX(-50%) scale(0.6);
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--accent-color, #4c6fff);
+  opacity: 0;
+  transition: transform 0.25s ease, opacity 0.25s ease;
   z-index: -1;
 }
 
-.nav-item:active::before {
-  transform: translate(-50%, -50%) scale(1);
+.floating-nav-btn:hover,
+.floating-nav-btn:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 28px rgba(15, 17, 21, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  border-color: rgba(255, 255, 255, 0.85);
 }
 
-.nav-icon {
-  width: 24px;
-  height: 24px;
+.floating-nav-btn:focus-visible {
+  outline: 2px solid rgba(76, 111, 255, 0.4);
+  outline-offset: 2px;
+}
+
+.floating-nav-btn.active {
+  border-color: rgba(76, 111, 255, 0.8);
+  box-shadow: 0 18px 36px rgba(76, 111, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.98) 0%, rgba(238, 241, 255, 0.9) 100%);
+}
+
+.floating-nav-btn.active::after {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+.floating-nav-icon {
+  width: 18px;
+  height: 18px;
   color: var(--text-secondary);
-  transition: all 0.3s ease;
+  transition: color 0.25s ease, transform 0.25s ease;
   stroke-width: 2;
 }
 
-.nav-label {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  transition: all 0.3s ease;
-  letter-spacing: 0.3px;
-}
-
-/* Active state */
-.nav-item.active .nav-icon {
-  color: var(--text-primary);
-  transform: translateY(-2px);
-  stroke-width: 2.5;
-}
-
-.nav-item.active .nav-label {
-  color: var(--text-primary);
-  font-weight: 700;
-}
-
-/* Hover state (for desktop) */
-.nav-item:hover:not(.active) .nav-icon {
-  color: var(--accent-color);
+.floating-nav-btn.active .floating-nav-icon {
+  color: var(--accent-color, #4c6fff);
   transform: translateY(-1px);
+  stroke-width: 2.4;
 }
 
-.nav-item:hover:not(.active) .nav-label {
-  color: var(--accent-color);
+.floating-nav-btn:hover:not(.active) .floating-nav-icon {
+  color: var(--accent-color, #4c6fff);
 }
 
-/* Active indicator line */
-.nav-item.active::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 32px;
-  height: 3px;
-  background: linear-gradient(90deg, #404040 0%, #666666 100%);
-  border-radius: 0 0 3px 3px;
-  animation: slideDown 0.3s ease;
+:root[data-theme="dark"] .floating-nav-btn {
+  background: linear-gradient(160deg, rgba(26, 30, 40, 0.92) 0%, rgba(18, 22, 30, 0.78) 100%);
+  border: 1px solid rgba(80, 92, 114, 0.5);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(120, 132, 156, 0.28);
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-3px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+:root[data-theme="dark"] .floating-nav-btn.active {
+  border-color: rgba(110, 140, 255, 0.9);
+  background: linear-gradient(160deg, rgba(40, 48, 68, 0.95) 0%, rgba(28, 36, 52, 0.85) 100%);
+  box-shadow: 0 20px 38px rgba(28, 36, 52, 0.55), inset 0 1px 0 rgba(150, 170, 210, 0.3);
 }
 
-/* Hide bottom nav on onboarding screens - CSS fallback */
-.bottom-nav {
-  transition: all 0.3s ease;
+:root[data-theme="dark"] .floating-nav-btn::after {
+  background: rgba(110, 140, 255, 0.9);
 }
 
-/* Use body class to hide nav on specific views */
-body.onboarding-view .bottom-nav {
+/* Hide floating nav on onboarding screens - CSS fallback */
+.floating-nav {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+body.onboarding-view .floating-nav {
   display: none !important;
   visibility: hidden !important;
-  height: 0 !important;
   opacity: 0 !important;
 }
 
@@ -5262,7 +5249,7 @@ body.onboarding-view .container {
   padding-bottom: 0 !important;
 }
 
-/* Adjust main content to not overlap with bottom nav */
+/* Adjust main content to not overlap with floating nav */
 main {
   padding-bottom: 0;
 }
