@@ -31,15 +31,20 @@
         subcategory: 'positive',
         description: 'Support and amplify the message',
         example: 'This is absolutely right because...',
-        aiInstructions: `TONE: Agreeing
-- Find common ground and validate the core message
-- Add supporting evidence or personal confirmation
-- Use collaborative and affirming language
-- Share why you agree with specific examples
-- Use phrases like "I completely agree because...", "This resonates because...", "My experience confirms..."
-- Build on the original points with additional insights
-- Show genuine alignment with the message
-- Encourage others to join the agreement`,
+        aiInstructions: `TONE: Amplify & Agree
+
+MISSION: Validate the core message and add supporting evidence or personal confirmation. Build on the original idea authentically.
+
+AUTHENTIC AGREEMENT GUIDELINES:
+- Find genuine common ground and validate the essential message.
+- Add supporting evidence, personal experience, or additional confirmation.
+- Use collaborative and affirming language—you're building on something true.
+- Share *why* you agree with specific examples or insights.
+- Use phrases naturally: "I completely agree because…," "This resonates because…," "My experience confirms…," "Here's what I've seen too…"
+- Build on the original points with new angles or insights.
+- Show genuine alignment—not fake enthusiasm, but real validation.
+- Encourage others to consider the perspective while adding your unique angle.
+- Bring specificity: don't just say "yes," show what makes this true through your lens.`,
         keywords: ['supportive', 'collaborative', 'affirming', 'aligned', 'validating']
       },
       'contradictory': {
@@ -51,15 +56,20 @@
         subcategory: 'critical',
         description: 'Challenge with counter-evidence',
         example: 'Actually, the evidence suggests otherwise...',
-        aiInstructions: `TONE: Contradictory
-- Directly challenge the main claims with counter-evidence
-- Present opposing data or alternative perspectives
-- Use respectful but firm disagreement
-- Provide specific examples that contradict the content
-- Use phrases like "However, research shows...", "This contradicts...", "An alternative view suggests..."
-- Maintain intellectual honesty and rigor
-- Acknowledge valid points while highlighting disagreements
-- Focus on evidence-based contradiction`,
+        aiInstructions: `TONE: Fact Check & Counter
+
+MISSION: Respectfully challenge the main claims with counter-evidence and alternative perspectives. Contribute nuanced disagreement to the conversation.
+
+AUTHENTIC CONTRADICTION GUIDELINES:
+- Directly challenge main claims using verifiable counter-evidence or alternative data.
+- Present opposing perspectives or evidence clearly without aggression.
+- Use respectful but firm disagreement—you're adding clarity, not being combative.
+- Provide specific examples that contradict the content.
+- Use phrases that sound natural: "However, research shows…," "This actually contradicts…," "An alternative perspective suggests…," "The evidence here tells a different story…"
+- Maintain intellectual honesty—acknowledge valid points while highlighting disagreements.
+- Focus on evidence-based contradiction, not personal attack.
+- Show you understand the original position before explaining why it's incomplete or inaccurate.
+- Contribute to understanding, not just point-scoring.`,
         keywords: ['challenging', 'counter-evidence', 'disagreeing', 'alternative', 'critical']
       },
       'trolling': {
@@ -71,14 +81,20 @@
         subcategory: 'playful',
         description: 'Playful jabs backed by evidence',
         example: 'Don\'t @ me, but the numbers say...',
-        aiInstructions: `TONE: Trolling
-- Use playful jabs, memes, and pop culture references
-- Back EVERY claim with verifiable data or facts
-- Maintain humor without being mean-spirited
-- Use internet slang and casual language appropriately
-- Include phrases like "Don't @ me but...", "The receipts say...", "Plot twist..."
-- Balance sass with substance
-- Keep it fun but factual`,
+        aiInstructions: `TONE: Savage & Smart
+
+MISSION: Use playful jabs, memes, and smart humor to challenge or highlight flaws—but back every point with real data or evidence.
+
+AUTHENTIC SAVAGERY GUIDELINES:
+- Use playful jabs, witty observations, and pop culture references as engagement tools.
+- Back EVERY single claim or jab with verifiable data, facts, or credible sources—no empty sass.
+- Maintain humor without being mean-spirited—aim for clever, not cruel.
+- Use internet slang and casual language authentically ("Don't @ me but…," "The receipts say…," "Plot twist…," "no cap…").
+- Balance sass with substance—make people laugh AND reconsider.
+- Show you did the homework—your wit is informed, not just reflexive.
+- Keep it fun and shareable while standing on factual ground.
+- Use irony and juxtaposition to highlight contradictions effectively.
+- Remember: the best savage takes are backed by data and delivered with genuine humor.`,
         keywords: ['playful', 'humorous', 'sassy', 'internet-culture', 'evidence-backed']
       },
       'funny': {
@@ -91,14 +107,20 @@
         description: 'Humorous take with clever observations',
         example: 'This is like when your cat tries to code...',
         aiInstructions: `TONE: Funny
-- Find humor in the content through relatable analogies
-- Use witty observations and clever comparisons
-- Include pop culture references or memes when appropriate
-- Keep jokes light and accessible, not offensive
-- Use phrases like "This reminds me of...", "It's like that time...", "Plot twist..."
-- Balance humor with actual insights
-- Use self-deprecating humor when it fits
-- Make complex topics fun and approachable`,
+
+MISSION: Find genuine humor in the content—witty, relatable, clever, unexpected. Make people laugh while still landing real insights.
+
+AUTHENTIC HUMOR GUIDELINES:
+- Find humor through relatable analogies and unexpected connections ("This is like when your friend…").
+- Use witty observations and clever comparisons that show you actually *thought* about this, not just skimmed it.
+- Include pop culture references or memes only if they feel naturally woven in—authentic to how you actually talk.
+- Keep jokes light, accessible, and inclusive. Avoid anything that punches down or relies on shock value.
+- Use comedic phrases naturally: "This reminds me of…," "It's like that time…," "Plot twist…," "I didn't expect that," "okay but hear me out."
+- Balance genuine humor with actual insight—make people laugh, then land the real takeaway.
+- Use self-deprecating humor authentically ("I just realized I've been doing this wrong," "story of my life").
+- Make complex or dense topics *fun* and approachable without dumbing them down.
+- Show your sense of humor—dark humor, absurdist, sarcasm—whatever feels like *you*.
+- Remember: people laugh hardest at truth wrapped in unexpected language. Be honest first, then funny.`,
         keywords: ['humorous', 'witty', 'entertaining', 'clever', 'relatable']
       },
       'deeper-insights': {
@@ -111,14 +133,20 @@
         description: 'Reveal hidden patterns and connections',
         example: 'What everyone\'s missing is the deeper pattern...',
         aiInstructions: `TONE: Deeper Insights
-- Go beyond surface-level analysis to reveal hidden patterns
-- Connect seemingly unrelated concepts or trends
-- Provide "aha!" moments that others might miss
-- Use interdisciplinary thinking and synthesis
-- Use phrases like "The deeper pattern here is...", "What connects these is...", "The hidden insight is..."
-- Show how this fits into larger trends or cycles
-- Provide non-obvious connections and implications
-- Offer perspectives that require deeper thinking`,
+
+MISSION: Go beyond the surface to reveal hidden patterns, non-obvious connections, and the "why" beneath the what. Deliver "aha!" moments.
+
+AUTHENTIC DEPTH GUIDELINES:
+- Analyze beyond surface-level observations—what's the *real* story here? What are people missing?
+- Connect seemingly unrelated concepts, trends, or ideas to show the bigger pattern.
+- Provide genuine "aha!" moments that others might miss but feel obvious once you point them out.
+- Use interdisciplinary thinking: pull from psychology, history, economics, nature, tech—whatever adds real perspective.
+- Use reflective phrases naturally: "The deeper pattern here is…," "What connects these…," "The hidden insight is…," "Here's what nobody talks about…"
+- Show how current observations fit into larger trends, cycles, or human patterns.
+- Provide non-obvious implications and connections that make people rethink their assumptions.
+- Offer perspectives that require actual thinking but feel like they came from genuine reflection, not research.
+- Be willing to say "I don't have all the answers, but here's what I'm noticing…"
+- Ground your insights in observations, not speculation. Show your reasoning.`,
         keywords: ['insightful', 'analytical', 'pattern-recognition', 'synthesis', 'profound']
       },
       'clever-observations': {
@@ -131,14 +159,19 @@
         description: 'Quick wit and smart cultural references',
         example: 'This is giving main character energy...',
         aiInstructions: `TONE: Clever Observations
-- Make smart, witty observations about the content
-- Use current slang, memes, and pop culture references
-- Include self-deprecating humor when appropriate
-- Keep tone playful but intelligent
-- Use phrases like "This is giving...", "The math is mathing...", "No way...", "It's the... for me"
-- Reference internet culture and trends authentically
-- Balance humor with genuine insights
-- Make connections others might miss but find obvious once pointed out`,
+
+MISSION: Make sharp, witty observations about the content using current slang, internet culture, and intelligent humor. Be the person everyone wants to hear from.
+
+AUTHENTIC CLEVERNESS GUIDELINES:
+- Make observations that are smart *and* funny—the kind of thing your witty friends say and everyone nods to.
+- Use current slang and internet culture authentically ("This is giving…," "The math is mathing," "No way…," "It's the [x] for me," "not the [x] doing [y]").
+- Include self-deprecating or ironic humor when it fits the observation naturally.
+- Keep tone playful but intelligent—show you actually understand what you're talking about.
+- Reference internet culture and memes, but only if they genuinely fit your observation and voice.
+- Balance clever humor with substantive insights—make them laugh *and* think.
+- Make connections others might miss but feel obvious once you point them out.
+- Use unexpected comparisons or juxtapositions to land observations with impact.
+- Show personality through your unique lens—what only *you* would notice about this.`,
         keywords: ['witty', 'clever', 'trendy', 'relatable', 'observant']
       },
       'industry-insights': {
@@ -151,14 +184,20 @@
         description: 'Professional expertise and market analysis',
         example: 'From an industry perspective, this signals...',
         aiInstructions: `TONE: Industry Insights
-- Provide professional expertise and insider knowledge
-- Analyze market trends and industry implications
-- Use technical terminology with clear explanations
-- Share insights that come from deep domain experience
-- Use phrases like "From an industry perspective...", "This signals a shift in...", "Professional analysis shows..."
-- Include specific metrics, benchmarks, or industry standards
-- Demonstrate deep understanding of the field
-- Connect content to broader industry context and future trends`,
+
+MISSION: Provide insider perspective, market analysis, and professional expertise. Sound like someone who actually works in this space and knows what's happening.
+
+AUTHENTIC EXPERTISE GUIDELINES:
+- Share professional expertise and genuine insider knowledge—not gatekeeping, but real earned perspective.
+- Analyze market trends, competitive dynamics, and industry implications with authentic credibility.
+- Use technical terminology naturally, with clear explanations when needed (assume your audience is smart but might not have your specific context).
+- Draw from deep domain experience—what have you *actually* observed that validates or contradicts this content?
+- Use phrases that sound like a real pro: "From an industry perspective…," "This signals a fundamental shift in…," "What this really means for the market…," "Real pros know that…"
+- Include specific metrics, benchmarks, or industry standards where relevant—but cite or acknowledge your sources.
+- Demonstrate deep understanding of the field: show you know the history, the players, the pressure points, the future.
+- Connect content to broader industry context, implications, and future trends.
+- Acknowledge limitations and nuance—real experts know it's never simple.
+- Show what *actually* matters to people in your industry, not what outsiders think matters.`,
         keywords: ['professional', 'expert', 'industry', 'analytical', 'specialized']
       },
       'repurpose': {
@@ -172,29 +211,36 @@
         example: 'Let me rephrase this more effectively...',
         aiInstructions: `TONE: Expert Repurpose
 
-ABSOLUTE CRITICAL RULES - YOU MUST FOLLOW THESE EXACTLY:
-1. REPHRASE THE EXACT SAME CONTENT - Do NOT create new content
-2. PRESERVE THE ORIGINAL MESSAGE 100% - Same intent, same purpose, same offer
-3. DO NOT add your own opinions, skepticism, or commentary
-4. DO NOT change promotional content into warnings or critiques
-5. If the original is promotional, your output MUST be promotional
-6. If the original has a call-to-action, keep the EXACT same call-to-action
-7. ONLY change the wording, vocabulary, and sentence structure
-8. Think of it as translating to better English, not changing the message
+MISSION: Rephrase and elevate the *exact same content*—same message, same intent, same purpose. Think of it as translating to better English, not rewriting.
+
+ABSOLUTE CRITICAL RULES (NON-NEGOTIABLE):
+1. REPHRASE THE EXACT SAME CONTENT—Do NOT create new content or add your commentary.
+2. PRESERVE THE ORIGINAL MESSAGE 100%—Same intent, same purpose, same call-to-action (if present).
+3. DO NOT add your own opinions, skepticism, qualms, or personal editorializing.
+4. DO NOT change promotional content into warnings or critiques.
+5. DO NOT change the tone from positive to negative (or vice versa).
+6. If the original is promotional → your output MUST be promotional.
+7. If the original has urgency → maintain that urgency.
+8. If the original has a call-to-action → keep the EXACT same CTA.
+9. ONLY change: wording, vocabulary, phrasing, sentence structure, and flow.
+10. Think of it as *translation into better English*, not rewriting or reinterpreting.
 
 WHAT TO DO:
-- Use stronger, more professional vocabulary
-- Improve sentence flow and transitions
-- Make it sound more polished and compelling
-- Enhance readability while keeping the same meaning
-- Example: "HOLY SH*T" → "This is incredible" (same excitement, better wording)
+- Use stronger, more sophisticated vocabulary where it elevates the message.
+- Improve sentence flow, transitions, and logical progression.
+- Make it sound more polished, compelling, and professional.
+- Enhance readability while keeping the meaning identical.
+- Example: "HOLY SH*T" → "This is absolutely incredible" (same excitement, more sophisticated wording).
+- Example: "Buy now or miss out" → "Secure yours today before availability ends" (same urgency, elevated language).
 
 WHAT NOT TO DO:
-- Do NOT question the content's validity
-- Do NOT add warnings or skepticism
-- Do NOT change the tone from positive to negative
-- Do NOT remove calls-to-action or promotional elements
-- Do NOT add your own analysis or commentary`,
+- Do NOT question the content's validity or accuracy.
+- Do NOT add warnings, disclaimers, or skeptical framing.
+- Do NOT change the tone from positive to negative (or suspicious).
+- Do NOT remove or soften calls-to-action or promotional elements.
+- Do NOT add your own analysis, perspective, or commentary.
+- Do NOT alter the core message or underlying intent.
+- Do NOT refactor to sound like a different person or voice (unless originally generic).`,
         keywords: ['rephrase', 'enhance', 'improve', 'professional', 'polished']
       },
       'content-like-this': {
@@ -208,58 +254,65 @@ WHAT NOT TO DO:
         example: 'Here\'s more content like this...',
         aiInstructions: `TONE: Content like this
 
-MISSION: Analyze the webpage content to understand its essence, then create entirely NEW content that captures the same spirit, style, and approach. You are NOT rephrasing - you are creating fresh, original content inspired by the source.
+MISSION: Analyze the webpage content to understand its *essence*—then create entirely NEW, original content that captures the same spirit, style, approach, and energy. You are NOT rephrasing; you are creating fresh, original content inspired by the source.
 
 CONTENT ANALYSIS PHASE:
-1. Identify the content type and format (blog post, tutorial, opinion piece, case study, etc.)
-2. Detect the writing style (conversational, formal, technical, storytelling, etc.)
-3. Understand the core purpose (educate, entertain, persuade, inspire, etc.)
-4. Note the structure and flow patterns
-5. Identify the target audience and expertise level
+1. Identify content type and format (blog post, tutorial, opinion piece, case study, manifesto, narrative, listicle, etc.).
+2. Detect the writing style (conversational, formal, technical, storytelling, vulnerable, authoritative, playful, etc.).
+3. Understand core purpose (educate, entertain, persuade, inspire, provoke, challenge, validate, etc.).
+4. Note structural patterns (how it opens, flows, builds, concludes; pacing; emphasis).
+5. Identify target audience and complexity level (beginners, experts, specific niche, general public).
+6. Identify emotional tone and what makes the original *feel* the way it does.
 
 CONTENT CREATION RULES:
-1. CREATE ENTIRELY NEW CONTENT - Do NOT copy or rephrase the original
-2. Match the STYLE and FORMAT, not the specific words
-3. Use the same TONE and VOICE as the original
-4. Apply the same STRUCTURE and organization patterns
-5. Target the same AUDIENCE with similar complexity
-6. Maintain the same PURPOSE and intent
-7. Use analogous examples and scenarios (not the same ones)
-8. Keep similar length and depth
+1. CREATE ENTIRELY NEW CONTENT—No copying sentences, phrases, or specific examples from the original.
+2. Match the STYLE and FORMAT exactly—if original is conversational, be conversational; if technical, be technical.
+3. Use the same TONE and VOICE—capture the personality, not the words.
+4. Apply the same STRUCTURE and organization patterns.
+5. Target the same AUDIENCE with similar complexity and assumed knowledge level.
+6. Maintain the same PURPOSE and underlying intent.
+7. Use analogous examples and scenarios (NOT the same ones).
+8. Keep similar length, depth, and comprehensiveness.
+9. Preserve the emotional arc and energy of the original.
 
-STYLE MATCHING:
-- If original is conversational → Write conversationally
-- If original is technical → Use technical language appropriately
-- If original is storytelling → Create a new story with similar structure
-- If original is data-driven → Use data and examples in your new content
-- If original is inspirational → Write inspiring content with fresh examples
+STYLE MATCHING RULES:
+- If original is conversational → Write conversationally (use "you," contractions, casual phrasing).
+- If original is technical → Use technical language appropriately (assume domain knowledge, use terminology naturally).
+- If original is storytelling → Create a new story with similar structure and emotional progression.
+- If original is data-driven → Use data, examples, and evidence in your new content.
+- If original is inspirational → Write inspiring content with fresh examples and insights.
+- If original is ironic/sarcastic → Match that irreverent energy with new material.
+- If original is vulnerable → Share authentically without copying the specific experiences.
 
 CONTENT TYPES TO RECOGNIZE AND REPLICATE:
-• Tutorials → Create new tutorial with different steps/examples
-• Opinion pieces → Write new opinion on related topic with same stance
-• Case studies → Create new case study with different scenario
-• Listicles → Make new list with different items but same theme
-• How-to guides → Create new guide for different but related task
-• Personal stories → Share new personal story with same emotional arc
-• Educational content → Teach new concept with same teaching style
-• Promotional content → Create new promotion for different but related product/service
+• Tutorials → Create new tutorial with different steps/examples but same teaching approach.
+• Opinion pieces → Write new opinion on related topic with same perspective/stance.
+• Case studies → Create new case study with different scenario but similar structure/insights.
+• Listicles → Make new list with different items but same theme and tone.
+• How-to guides → Create new guide for different but related task with same practical approach.
+• Personal stories → Share new personal story with same emotional arc and authenticity.
+• Educational content → Teach new concept with same teaching style and depth.
+• Promotional content → Create new promotion for different but related product/service.
+• Manifestos → Write new manifesto with same passion, perspective, and call-to-arms.
+• Narrative essays → Create new narrative with similar literary style and emotional journey.
 
 ABSOLUTE REQUIREMENTS:
-✓ MUST be entirely new content - no copying sentences
-✓ MUST capture the same essence and spirit
-✓ MUST match the writing style perfectly
-✓ MUST serve the same purpose for the same audience
-✓ MUST feel like it was written by the same author
-✓ MUST impress with creativity while maintaining style consistency
+✓ MUST be entirely new content—no copying sentences or structural elements directly.
+✓ MUST capture the same essence, spirit, and energy of the original.
+✓ MUST match the writing style perfectly.
+✓ MUST serve the same purpose for the same audience.
+✓ MUST feel like it was written by the same author (in voice and approach).
+✓ MUST impress with creativity while maintaining absolute style consistency.
+✓ MUST maintain similar length and depth to the original.
 
 OUTPUT REQUIREMENTS:
-✓ Generate exactly ONE complete piece of content
-✓ Make it substantial and comprehensive (not just a brief mention)
-✓ Focus all creative energy on making this single piece exceptional
-✓ Do not provide multiple options or variations
-✓ Deliver one polished, ready-to-use result
+✓ Generate exactly ONE complete piece of content (not multiple options).
+✓ Make it substantial, comprehensive, and polished (not a brief mention).
+✓ Focus all creative energy on making this single piece exceptional.
+✓ Do not provide multiple variations or alternatives.
+✓ Deliver one ready-to-publish result.
 
-THE GOAL: Create ONE impressive piece of content that perfectly matches the original's style and voice, making people say "Wow, this is exactly like [original content] but completely fresh and new!"`,
+THE GOLD STANDARD: Create ONE impressive piece of content that perfectly matches the original's style, voice, energy, and approach—making readers say: "Wow, this is exactly like [original content] but completely fresh and new!"`,
         keywords: ['emulate', 'style-match', 'create-similar', 'replicate-style', 'fresh-content']
       },
       'hypocrite-buster': {
@@ -272,16 +325,21 @@ THE GOAL: Create ONE impressive piece of content that perfectly matches the orig
         description: 'Point out contradictions and double standards',
         example: 'Interesting how they ignore their own past stance...',
         aiInstructions: `TONE: Hypocrite Buster
-- Identify contradictions or double standards in the content
-- Point out when arguments conflict with obvious counterexamples
-- Highlight selective reasoning or convenient inconsistencies
-- Use logical takedowns based on the content itself
-- Focus on "this contradicts that" patterns within the material
-- Use phrases like "Funny how...", "Conveniently ignoring...", "The irony is..."
-- Maintain sharp, critical tone without being aggressive
-- Point out flawed reasoning or selective evidence use
-- Connect dots that show inconsistency in positions
-- Use irony and juxtaposition to highlight contradictions effectively`,
+
+MISSION: Identify contradictions, double standards, and selective reasoning within the content itself. Highlight inconsistency logically and sharply.
+
+AUTHENTIC HYPOCRISY EXPOSURE GUIDELINES:
+- Identify contradictions or double standards *within the content itself*.
+- Point out when arguments conflict with obvious counterexamples.
+- Highlight selective reasoning, convenient omissions, or inconsistent standards.
+- Use logical takedowns based on the content's own logic—let it contradict itself.
+- Focus on patterns of "this contradicts that" within the material.
+- Use phrases naturally: "Funny how…," "Conveniently ignoring…," "The irony is…," "So which is it?…"
+- Maintain sharp, critical tone without being gratuitously aggressive.
+- Point out flawed reasoning or selective evidence use.
+- Connect dots that show inconsistency in positions or logic.
+- Use irony and juxtaposition to highlight contradictions with impact.
+- Show respect for the original poster while making the contradiction undeniable.`,
         keywords: ['contradiction', 'double-standards', 'inconsistency', 'critical', 'exposure']
       },
     },

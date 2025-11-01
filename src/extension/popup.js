@@ -13,7 +13,6 @@ import './modules/validation.js';
 import './modules/validation-handlers.js';
 import './modules/tone-selector.js';
 import './modules/bottom-nav.js';
-import './modules/enhanced-quick-actions.js';
 import './modules/image-prompt-generator.js';
 import './modules/topic-enhancer.js';
 import './modules/privacy-policy.js';
@@ -108,6 +107,9 @@ import './modules/privacy-policy.js';
 
           if (this.apiKey) {
             this.showView("chat");
+            // CRITICAL FIX: Load page content immediately when API key exists
+            // This ensures content is available for quick actions
+            await this.getAndCachePageContent();
           } else if (hasSeenWelcome) {
             this.showView("api-setup");
           } else {
@@ -297,11 +299,15 @@ import './modules/privacy-policy.js';
           }),
           this.quickTwitterBtn &&
             this.quickTwitterBtn.addEventListener("click", async () => {
+              // DEFENSIVE LAYER 1: Ensure content is loaded before generation
+              await this.ensurePageContentLoaded();
               (this.resetScreenForGeneration && this.resetScreenForGeneration(),
                 await this.generateSocialContent("twitter"));
             }),
           this.quickRepostBtn &&
             this.quickRepostBtn.addEventListener("click", async () => {
+              // DEFENSIVE LAYER 2: Ensure content is loaded before repost
+              await this.ensurePageContentLoaded();
               // Clear previous content before opening modal
               this.resetScreenForGeneration && this.resetScreenForGeneration();
               
@@ -326,6 +332,8 @@ import './modules/privacy-policy.js';
             }),
           this.quickCommentsBtn &&
             this.quickCommentsBtn.addEventListener("click", async () => {
+              // DEFENSIVE LAYER 3: Ensure content is loaded before comments
+              await this.ensurePageContentLoaded();
               this.resetScreenForGeneration && this.resetScreenForGeneration();
               if (window.FibrCommentsModal?.showWithContentLoading) {
                 try {
@@ -346,6 +354,8 @@ import './modules/privacy-policy.js';
           this.quickTwitterThreadBtn &&
             this.quickTwitterThreadBtn.addEventListener("click", async () => {
               console.log('Thread button clicked - showing tone selector for thread generation');
+              // DEFENSIVE LAYER 4: Ensure content is loaded before thread
+              await this.ensurePageContentLoaded();
               (this.resetScreenForGeneration && this.resetScreenForGeneration(),
                 await this.generateSocialContent("thread"));
             }),
@@ -360,17 +370,12 @@ import './modules/privacy-policy.js';
               ) {
                 window.FibrThreadGenerator.showModal(this);
               } else {
-                this.showView("thread-generator");
+                console.error('Fibr: Thread Generator modal not available');
+                this.showToast
+                  ? this.showToast('❌ Thread Generator unavailable. Please reload the extension.', 4000)
+                  : alert('❌ Thread Generator unavailable. Please reload the extension.');
               }
             }));
-        // Thread Generator button
-        let generateThreadBtn = document.getElementById("generate-thread-btn");
-        generateThreadBtn &&
-          generateThreadBtn.addEventListener("click", async () => {
-            if (this.handleThreadGeneratorSubmit) {
-              await this.handleThreadGeneratorSubmit();
-            }
-          });
         this.initializeHorizontalScroll();
 
         // Initialize modules that need the DOM now that it's safe
@@ -442,6 +447,50 @@ import './modules/privacy-policy.js';
           } finally {
             this.setLoading(!1);
           }
+        }
+      }
+      
+      // CRASH-PROOF HELPER: Ensures page content is loaded with retry mechanism
+      async ensurePageContentLoaded() {
+        // If content already loaded, return immediately
+        if (this.pageContent && this.pageContent.length > 0) {
+          console.log('Fibr: Page content already loaded, skipping reload');
+          return true;
+        }
+        
+        console.log('Fibr: Page content not loaded, loading now...');
+        
+        // Check API key first
+        if (!this.apiKey) {
+          const errorMsg = '❌ Please set up your Gemini API key first.';
+          if (this.showToast) {
+            this.showToast(errorMsg, 3000);
+          } else {
+            alert(errorMsg);
+          }
+          return false;
+        }
+        
+        // Attempt to load content
+        try {
+          await this.getAndCachePageContent();
+          
+          // Verify content was loaded
+          if (this.pageContent && this.pageContent.length > 0) {
+            console.log('Fibr: Page content loaded successfully');
+            return true;
+          } else {
+            throw new Error('Content extraction returned empty result');
+          }
+        } catch (error) {
+          console.error('Fibr: Failed to load page content:', error);
+          const errorMsg = '❌ Failed to load page content. Please refresh the page and try again.';
+          if (this.showToast) {
+            this.showToast(errorMsg, 4000);
+          } else {
+            alert(errorMsg);
+          }
+          return false;
         }
       }
       

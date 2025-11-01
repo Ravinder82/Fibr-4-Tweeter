@@ -170,112 +170,6 @@
 
             <!-- VIEW 6: THREAD LIBRARY REMOVED -->
 
-            
-            <!-- VIEW 8: ENHANCED THREAD GENERATOR -->
-            <div id="thread-generator-view" class="view hidden">
-                <div class="thread-generator-container">
-                    <div class="generator-header">
-                        <div class="header-icon">🧵</div>
-                        <h2>Enhanced Thread Generator</h2>
-                        <p>Create powerful threads with AI-powered frameworks and personas</p>
-                    </div>
-                    
-                    <div class="generator-form">
-                        <!-- TOPIC INPUT WITH AI ENHANCEMENT -->
-                        <div class="form-group">
-                            <label for="thread-topic">Topic</label>
-                            <div class="topic-input-container">
-                                <input type="text" id="thread-topic" class="form-input" placeholder="Enter any topic..." />
-                                <div class="topic-actions">
-                                    <button type="button" id="refine-topic-btn" class="topic-action-btn" title="AI-powered topic refinement">
-                                        ✨ Refine
-                                    </button>
-                                    <button type="button" id="generate-ideas-btn" class="topic-action-btn" title="Generate topic ideas">
-                                        💡 Ideas
-                                    </button>
-                                </div>
-                            </div>
-                            <small class="form-hint">What do you want to create a thread about?</small>
-                            <div id="topic-suggestions" class="topic-suggestions hidden">
-                                <div class="suggestions-header">AI Suggestions:</div>
-                                <div id="suggestions-list" class="suggestions-list"></div>
-                            </div>
-                        </div>
-
-                        <!-- ENHANCED PERSONA PRESETS -->
-                        <div class="form-section">
-                            <label class="section-label">Choose Persona</label>
-                            <div class="persona-chips">
-                                <button class="persona-chip active" data-persona="educator">🎓 Educator</button>
-                                <button class="persona-chip" data-persona="operator">⚙️ Operator</button>
-                                <button class="persona-chip" data-persona="analyst">📊 Analyst</button>
-                                <button class="persona-chip" data-persona="entertainer">🎭 Entertainer</button>
-                                <button class="persona-chip" data-persona="visionary">🔮 Visionary</button>
-                                <button class="persona-chip" data-persona="storyteller">📚 Storyteller</button>
-                                <button class="persona-chip" data-persona="scientist">🔬 Scientist</button>
-                                <button class="persona-chip" data-persona="philosopher">🤔 Philosopher</button>
-                            </div>
-                        </div>
-
-                        <!-- ENHANCED FORMAT CHIPS (20 formats) -->
-                        <div class="form-section">
-                            <label class="section-label">Content Framework</label>
-                            <div class="format-grid">
-                                <button class="format-chip active" data-format="myth-busting">🧱 Myth‑busting</button>
-                                <button class="format-chip" data-format="status-shift">⚡ Status Shift</button>
-                                <button class="format-chip" data-format="cheat-code">🎮 Cheat Code</button>
-                                <button class="format-chip" data-format="analogy">🔗 Analogy</button>
-                                <button class="format-chip" data-format="pain">💡 Pain Point</button>
-                                <button class="format-chip" data-format="story">📖 Story</button>
-                                <button class="format-chip" data-format="data">📊 Data Driven</button>
-                                <button class="format-chip" data-format="framework">🏗️ Framework</button>
-                                <button class="format-chip" data-format="future">🔮 Future Focus</button>
-                                <button class="format-chip" data-format="practical">⚙️ Practical</button>
-                                <button class="format-chip" data-format="controversial">🔥 Controversial</button>
-                                <button class="format-chip" data-format="inspirational">✨ Inspirational</button>
-                                <button class="format-chip" data-format="step-by-step">📝 Step‑by‑Step</button>
-                                <button class="format-chip" data-format="comparison">⚖️ Comparison</button>
-                                <button class="format-chip" data-format="case-study">📋 Case Study</button>
-                                <button class="format-chip" data-format="trend">📈 Trend Alert</button>
-                                <button class="format-chip" data-format="myth-busting-plus">🧱 Myth+</button>
-                                <button class="format-chip" data-format="quick-win">🏆 Quick Win</button>
-                                <button class="format-chip" data-format="deep-dive">🤿 Deep Dive</button>
-                                <button class="format-chip" data-format="checklist">✅ Checklist</button>
-                            </div>
-                        </div>
-
-                        <!-- HOOK GENERATOR -->
-                        <div class="form-section">
-                            <label class="section-label">AI Hook Generator</label>
-                            <button class="hook-generator-btn" id="generate-hooks-btn">🎯 Generate 10 Hooks</button>
-                            <div class="hooks-container hidden" id="hooks-container"></div>
-                        </div>
-
-                        <!-- TREND FUSION -->
-                        <div class="form-section">
-                            <label class="section-label">Trend Fusion</label>
-                            <button class="trend-fusion-btn" id="trend-fusion-btn">🔥 Evergreen + Trend Hook</button>
-                            <div class="trend-result hidden" id="trend-result"></div>
-                        </div>
-
-                        <!-- ORIGINAL OPTIONS -->
-                        <div class="form-group form-checkbox">
-                            <label>
-                                <input type="checkbox" id="use-knowledge-pack" checked />
-                                <span>Use AI Knowledge Base</span>
-                            </label>
-                            <small class="form-hint">Includes curated facts and enhanced hooks</small>
-                        </div>
-                        
-                        <div class="generator-actions">
-                            <button id="generate-thread-btn" class="button-primary">
-                                🚀 Generate Enhanced Thread
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- VIEW 9: PRIVACY & SECURITY POLICY -->
             <div id="privacy-view" class="view hidden">
                 <div id="privacy-policy-container" class="privacy-view-container"></div>
@@ -373,5 +267,5 @@
     </div>
     <!-- Scripts -->
     <!-- All modules are now bundled into popup.js by esbuild -->
-    <script src="marked.min.js"></script>
+    <script src="modules/marked.min.js"></script>
     <script src="popup.js"></script>
