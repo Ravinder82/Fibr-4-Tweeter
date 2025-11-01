@@ -43,7 +43,7 @@ Transform lengthy articles, blog posts, or research into engaging Twitter conten
 ### ⚡ **One-Tap Quick Actions**
 - Quick access buttons for Post, Repost, Thread, Gallery, and viral Click Farming flows
 - Repost modal mirrors Twitter native UX with tone presets, image prompt toggle, and instant generation
-- Thread generator launches a focused modal with topic inputs, AI knowledge packs, and optional image prompts
+- Thread generator launches a focused modal with topic inputs and optional image prompts
 
 ### 🤖 **Advanced AI Content Generation**
 - **Twitter Posts**: Generate single tweets with tone presets, character counting, and regeneration support
@@ -63,7 +63,10 @@ Transform lengthy articles, blog posts, or research into engaging Twitter conten
 ### 🔧 **Professional Tools**
 - **Quick Actions**: One-click generation for Twitter post, repost, thread, summary, analysis, and click-farming flows
 - **Individual Card Copy**: Copy each tweet or thread card separately
-- **Gallery & History**: Save, read, edit, and delete generated content from a redesigned library
+- **Rich Text Gallery**: Save, view, and edit generated content with a powerful modal system
+- **Thread Cards**: Beautiful numbered cards for multi-part threads with character counts
+- **Live Character Counting**: Real-time Unicode-aware counting in edit mode
+- **Smart Thread Parsing**: Automatically detects and formats thread content
 - **Regenerate Options**: Refine content with different length settings
 - **Export Functionality**: Save conversations and content
 - **Settings Management**: Persistent preferences, API key storage, and dark/light theme toggle
@@ -144,6 +147,7 @@ Choose from 8 analysis types:
 - **Content Optimization**: AI-powered content improvement suggestions
 - **Multi-platform**: Generate content for Twitter, LinkedIn, Blog, and Email
 - **Export Options**: JSON and PDF export for conversations
+- **Rich Text Gallery**: View and edit saved content with professional modal system
 
 ## 🎨 UI Navigation
 
@@ -166,6 +170,7 @@ Choose from 8 analysis types:
 - **Character Counters**: Real-time Twitter limit tracking
 - **Length Sliders**: Adjustable content length controls
 - **Copy Buttons**: One-click content copying
+- **Rich Text Modals**: Professional viewer and editor for saved content
 - **Regenerate Buttons**: Quick content refinement
 
 ## 🔧 Technical Details
@@ -183,6 +188,7 @@ Choose from 8 analysis types:
 - **Content Scripts**: Intelligent webpage content extraction
 - **Modular Design**: Separate modules for API, UI, Twitter, analysis, and more
 - **Progressive Enhancement**: Graceful degradation for older browsers
+- **Rich Text Modal System**: Bulletproof modal architecture with atomic operations
 
 ### Browser Compatibility
 - **Chrome 88+**: Full feature support
@@ -193,6 +199,7 @@ Choose from 8 analysis types:
 - **Responsive Design**: Adapts to any popup/container size
 - **Async/Await**: Modern JavaScript for smooth user experience
 - **CSS Custom Properties**: Dynamic theming and dark mode support
+- **Modal Architecture**: Single-instance, conflict-free modal management
 
 ## 🔐 Privacy & Security
 
@@ -207,11 +214,11 @@ Choose from 8 analysis types:
 
 To satisfy Chrome Web Store requirements, follow these steps to host the publicly accessible privacy policy:
 
-1. **Prepare the HTML**  
-   - Create a `website/` folder in the repo root (already tracked in main).  
+1. **Prepare the HTML**
+   - Create a `website/` folder in the repo root (already tracked in main).
    - Ensure `website/privacy-policy.html` contains the latest policy content (see this repo's file for reference).
 
-2. **Publish to GitHub Pages**  
+2. **Publish to GitHub Pages**
    ```bash
    git checkout --orphan gh-pages
    git reset --hard
@@ -222,9 +229,9 @@ To satisfy Chrome Web Store requirements, follow these steps to host the publicl
    git checkout main
    ```
 
-3. **Enable Pages in GitHub UI** *(manual step)*  
-   - Repo → **Settings → Pages**  
-   - Build & deployment: “Deploy from a branch” → `gh-pages` branch, root folder  
+3. **Enable Pages in GitHub UI** *(manual step)*
+   - Repo → **Settings → Pages**
+   - Build & deployment: "Deploy from a branch" → `gh-pages` branch, root folder
    - Save and verify: `https://ravinder82.github.io/Fibr-4-Tweeter/privacy-policy.html`
 
 ## 📁 Project Structure
@@ -246,13 +253,17 @@ Fibr-4-Tweeter/
 │       ├── ui-render.js      # UI rendering components
 │       ├── scroll.js         # Horizontal scrolling
 │       ├── navigation.js     # View navigation
-│       ├── thread-library.js # Thread management
+│       ├── gallery.js        # Rich Text Modal System
 │       ├── character-counter.js # Unicode-aware counting
 │       ├── length-control.js # Content length controls
 │       ├── content-analysis.js # AI analysis features
 │       ├── demo-mode.js      # Demo functionality
 │       ├── auto-resize.js    # Smart text areas
 │       ├── progress-bars.js  # Progress indicators
+│       ├── tone-selector.js  # Tone selection modal
+│       ├── repost-modal.js   # Repost modal
+│       ├── comments-modal.js # Comments modal
+│       ├── thread-generator.js # Thread generation
 │       └── icons/            # Extension icons
 ├── src/
 │   └── extension/             # Source code
@@ -263,6 +274,8 @@ Fibr-4-Tweeter/
 ├── icons/                     # Extension icons (16, 32, 48, 128px)
 ├── scripts/                   # Build scripts
 ├── tests/                     # Test files
+├── docs/                      # Documentation
+│   └── development/          # Development docs
 ├── README.md                  # Project documentation
 ├── package.json              # Dependencies and scripts
 └── manifest.json             # Root manifest
@@ -347,22 +360,22 @@ Use this section when preparing your Chrome Web Store listing or marketing asset
 - **Long description starter:**
   > Fibr is a speed-first AI copilot for X/Twitter creators. Capture insights from any article, video, or research page and instantly generate ready-to-post tweets, threads, or repost replies. Powered by Google Gemini, Fibr keeps your voice authentic, adds expert research, and ships publish-ready content in seconds.
 - **Primary call-to-action:** "Generate viral-ready posts from any webpage."
-- **Key value pillars:** Speed-first workflow • Authentic tone presets • Research-backed outputs • Gallery & memory system • Works with free Gemini API key
+- **Key value pillars:** Speed-first workflow • Authentic tone presets • Research-backed outputs • Rich Text Gallery • Works with free Gemini API key
 
 ### 2. Feature Bullets for Store Listing
 1. 🔁 **Repost like a pro** – Dedicated modal with curated reply tones and optional AI image prompts.
-2. 🧵 **Thread generator** – Topic input, AI knowledge packs, and automatic gallery save of every thread.
+2. 🧵 **Thread generator** – Topic input and automatic gallery save of every thread.
 3. ⚡ **One-tap quick actions** – Post, Repost, Thread, Gallery, and viral Click Farming all within a two-click flow.
 4. 🧠 **Context-aware analysis** – Summaries, fact checks, FAQs, and research insights before you post.
-5. 🗂️ **Creator workspace** – Gallery and history keep your best ideas organized.
+5. 📝 **Rich Text Gallery** – Professional modal system for viewing and editing saved content with live character counting.
 
 ### 3. Screenshot & Video Storyboard
 Capture these states (light & dark themes) for 1280×800 screenshots:
 1. **Home + quick actions** – show glassmorphism UI with quick action bar.
 2. **Tone selector** – highlight original post tones and custom mix builder.
 3. **Repost modal** – showcase reply tone grid, image prompt toggle, and "Generate" button.
-4. **Thread generator** – illustrate topic input, knowledge pack toggle, and results card.
-5. **Gallery view** – demonstrate saved cards with read/edit modal.
+4. **Thread generator** – illustrate topic input and results card.
+5. **Gallery view** – demonstrate saved cards with rich text modal system.
 Optional promo video (30–45s) should walk through the same flow with callouts.
 
 ### 4. Asset Checklist
@@ -374,7 +387,7 @@ Optional promo video (30–45s) should walk through the same flow with callouts.
 
 ### 5. Categories, Keywords & Compliance
 - **Category:** Productivity → Blogging or Social & Communication.
-- **Keywords:** AI Twitter writer, X thread generator, repost assistant, Gemini AI, social media automation.
+- **Keywords:** AI Twitter writer, X thread generator, repost assistant, rich text editor, Gemini AI, social media automation.
 - **Permissions to list:** `activeTab`, `storage`, `scripting`, `tabs` (explain usage in submission form).
 - **Data disclosure:** No personal data collected; API key stored locally; only communicates with Google Gemini via user-provided key.
 
@@ -401,7 +414,7 @@ Contributions welcome! Priority areas:
 
 ## 📄 License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🆘 Support & Community
 
