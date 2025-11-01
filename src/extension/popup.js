@@ -108,7 +108,6 @@ import './modules/privacy-policy.js';
 
           if (this.apiKey) {
             this.showView("chat");
-            await this.getAndCachePageContent();
           } else if (hasSeenWelcome) {
             this.showView("api-setup");
           } else {
@@ -413,6 +412,8 @@ import './modules/privacy-policy.js';
           (this.setLoading(!0, "Reading page..."),
             (this.pageStatus.textContent = "Injecting script to read page..."));
           try {
+            if (!this.currentTab.url || (!this.currentTab.url.startsWith("http://") && !this.currentTab.url.startsWith("https://")))
+              throw new Error("Unsupported page protocol.");
             if (
               this.currentTab.url?.startsWith("chrome://") ||
               this.currentTab.url?.startsWith(
