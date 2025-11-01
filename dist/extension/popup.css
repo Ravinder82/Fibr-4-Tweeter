@@ -837,7 +837,7 @@ margin-bottom: 24px;
 .welcome-title {
     font-size: 24px;
     font-weight: 700;
-    background: linear-gradient(135deg, #666666 0%, #000000 100%);
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--text-primary) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -924,8 +924,8 @@ margin-bottom: 24px;
 }
 
 .step-number {
-    background: linear-gradient(135deg, #404040 0%, #666666 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--border-dark) 100%);
+    color: var(--primary-bg);
     width: 24px;
     height: 24px;
     border-radius: 50%;
@@ -1016,9 +1016,9 @@ margin-bottom: 24px;
 }
 
 .button-primary {
-    background: linear-gradient(135deg, #404040 0%, #666666 100%);
-    color: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--text-secondary) 100%);
+    color: var(--primary-bg);
+    box-shadow: var(--shadow-md);
 }
 
 .button-primary:hover:not(:disabled) {
@@ -3817,8 +3817,8 @@ body.dark-mode .copy-all-status {
 
 .tone-modal-content {
   position: relative;
-  width: 90%;
-  max-width: 500px;
+  width: 92%;
+  max-width: 520px;
   max-height: 80vh;
   background: var(--primary-bg);
   border: 1px solid var(--border-color);
@@ -3833,6 +3833,8 @@ body.dark-mode .copy-all-status {
   animation: slideUp 0.3s ease;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+  padding: 0;
 }
 
 @keyframes fadeIn {
@@ -3854,7 +3856,8 @@ body.dark-mode .copy-all-status {
 /* Tone Modal Sections for Enhanced Features */
 .modal-section {
   margin-bottom: 20px;
-  padding: 0 24px;
+  padding: 0 16px;
+  box-sizing: border-box;
 }
 
 .modal-section .section-label {
@@ -3896,7 +3899,7 @@ body.dark-mode .copy-all-status {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
+  padding: 18px 16px;
   background: var(--secondary-bg);
   border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
@@ -4067,14 +4070,15 @@ body.dark-mode .copy-all-status {
 }
 
 .tone-grid {
-  padding: 16px 24px;
+  padding: 16px;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
   max-width: 100%;
   max-height: none;
   overflow: visible;
+  box-sizing: border-box;
 }
 
 .tone-modal-content::-webkit-scrollbar {
@@ -4099,17 +4103,19 @@ body.dark-mode .copy-all-status {
 .tone-option {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
-  padding: 16px;
+  gap: 12px;
+  padding: 14px;
   background: var(--secondary-bg);
   border: 2px solid var(--border-color);
-  border-radius: 14px;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
   outline: none;
   width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
+  overflow: hidden;
 }
 .tone-option:hover {
   background: var(--tertiary-bg);
@@ -4187,7 +4193,7 @@ body.dark-mode .copy-all-status {
 .custom-tone-section {
   flex-shrink: 0;
   border-top: 1px solid rgba(203, 213, 225, 0.3);
-  padding: 16px 24px;
+  padding: 16px;
 }
 
 .custom-builder-toggle {
@@ -4552,7 +4558,7 @@ body.dark-mode .copy-all-status {
 .tone-modal-actions {
   display: flex;
   gap: 12px;
-  padding: 20px 24px;
+  padding: 18px 16px;
   background: var(--secondary-bg);
   border-top: 1px solid var(--border-color);
   position: sticky;
@@ -5520,6 +5526,159 @@ main {
 
 :root[data-theme="dark"] .suggestion-apply:hover {
   background: var(--text-secondary);
+}
+
+/* ========================================
+   DARK MODE: ONBOARDING/WELCOME PAGE
+   ======================================== */
+
+:root[data-theme="dark"] .welcome-title {
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+:root[data-theme="dark"] .welcome-logo {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+:root[data-theme="dark"] .step-number {
+  background: linear-gradient(135deg, var(--text-secondary) 0%, var(--accent-light) 100%);
+  color: var(--primary-bg);
+}
+
+:root[data-theme="dark"] .button-primary {
+  background: linear-gradient(135deg, var(--text-secondary) 0%, var(--accent-medium) 100%);
+  color: var(--primary-bg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme="dark"] .button-primary:hover:not(:disabled) {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+:root[data-theme="dark"] .button-secondary {
+  background: var(--tertiary-bg);
+  border: 1px solid var(--border-color);
+}
+
+:root[data-theme="dark"] .tutorial-link {
+  background: var(--tertiary-bg);
+  color: var(--text-secondary);
+}
+
+:root[data-theme="dark"] .tutorial-link:hover {
+  background: var(--border-dark);
+  color: var(--text-primary);
+}
+
+/* ========================================
+   EMPTY STATE BOARD ANIMATION
+   ======================================== */
+
+.empty-state-board {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  padding: 40px 20px;
+  animation: fadeIn 0.4s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.board-container {
+  position: relative;
+  width: 100%;
+  /* Removed all borders, shadows, and decorative elements for boundaryless flow */
+}
+
+/* Removed board-container::after overlay */
+/* Removed all rivet decorations */
+
+.board {
+  --size: 4px;
+  --hue: 32;
+  --duration: 8;
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(48px, 10vw, 80px);
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  width: 100%;
+  padding-block: 1.2rem;
+  line-height: 1;
+  overflow: hidden;
+  background: transparent;
+  position: relative;
+  filter: contrast(1.8) brightness(1.3) saturate(1.5);
+}
+
+.board::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  mix-blend-mode: plus-lighter;
+  filter: brightness(1.1);
+  background: radial-gradient(
+      circle at center,
+      rgba(128, 128, 128, 0.2) 1px,
+      transparent 4px
+    )
+    50% 50% / var(--size) var(--size);
+}
+
+.board__content {
+  filter: blur(1px) contrast(1.2) saturate(1.4);
+  color: var(--text-primary);
+  mask: radial-gradient(circle at center, #000 1px, transparent 1px)
+    50% 50% / var(--size) var(--size);
+  height: 100%;
+}
+
+.text-track {
+  position: relative;
+  display: flex;
+  width: fit-content;
+  animation: slide calc(var(--duration) * 1s) infinite linear;
+  filter: blur(1px) brightness(1);
+}
+
+.text-track .text {
+  padding-inline: 4rem;
+  min-width: 100cqi;
+  text-align: center;
+  text-shadow: 0 0 2px var(--text-primary);
+  filter: blur(1.5px) drop-shadow(0 0 2px rgba(128, 128, 128, 0.6))
+    contrast(2.5) brightness(1.3);
+}
+
+@keyframes slide {
+  to {
+    translate: -50% 0;
+  }
+}
+
+/* Dark theme adjustments */
+:root[data-theme="dark"] .board {
+  filter: contrast(2) brightness(1.5) saturate(2);
+}
+
+:root[data-theme="dark"] .text-track .text {
+  filter: blur(1.5px) drop-shadow(0 0 3px rgba(180, 188, 200, 0.7))
+    contrast(2.8) brightness(1.4);
 }
 
 

@@ -16,6 +16,7 @@ import './modules/bottom-nav.js';
 import './modules/image-prompt-generator.js';
 import './modules/topic-enhancer.js';
 import './modules/privacy-policy.js';
+import './modules/empty-state.js';
 
 (() => {
   (() => {
@@ -77,11 +78,11 @@ import './modules/privacy-policy.js';
 
           await this.loadState();
 
-          // Initialize theme from storage, default to dark mode
+          // Initialize theme from storage, default to light mode
           try {
             let theme = await this.getStorageItem ? await this.getStorageItem("theme") : null;
             if (!theme) {
-              theme = 'dark'; // Default to dark mode
+              theme = 'light'; // Default to light mode
             }
             document.documentElement.setAttribute('data-theme', theme);
           } catch (e) {}

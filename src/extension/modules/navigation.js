@@ -63,6 +63,11 @@
       const target = document.getElementById(targetId);
       if (target) {
         target.classList.remove('hidden');
+        
+        // Update empty state when switching to chat view
+        if (viewName === 'chat' && window.FibrUI && window.FibrUI.updateEmptyState) {
+          setTimeout(() => window.FibrUI.updateEmptyState(), 50);
+        }
 
         // Special handling for history view
         if (viewName === 'history' && window.historyManager) {
