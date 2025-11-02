@@ -41,35 +41,42 @@ Transform lengthy articles, blog posts, or research into engaging Twitter conten
 - Intuitive navigation with horizontal scrolling action bar
 
 ### ⚡ **One-Tap Quick Actions**
-- Quick access buttons for Post, Repost, Thread, Gallery, and viral Click Farming flows
-- Repost modal mirrors Twitter native UX with tone presets, image prompt toggle, and instant generation
-- Thread generator launches a focused modal with topic inputs and optional image prompts
+- Quick access buttons for Post, Repost, Comments, Thread, and Create
+- **Post**: Generate single tweets with 6 original tone presets and custom tone mixing
+- **Repost**: Dedicated modal with 5 reply tones, image prompt toggle, and instant generation
+- **Comments**: Strategic comment generation with Praise and Ask tones
+- **Thread**: Generate threads from current page content with tone customization
+- **Create**: Generate threads on any custom topic using AI knowledge base
 
 ### 🤖 **Advanced AI Content Generation**
-- **Twitter Posts**: Generate single tweets with tone presets, character counting, and regeneration support
-- **Twitter Threads**: Create numbered thread cards with copy, save-to-gallery, and image prompt options
-- **Content Analysis**: 8 analysis types including summaries, key points, FAQs, and fact-checking
-- **Smart Length Control**: Interactive slider (50-2000 characters) with presets and emoji-safe counting
+- **Twitter Posts**: Generate single tweets with 6 original tone presets (Funny, Deeper Insights, Clever Observations, Industry Insights, Expert Repurpose, Content like this)
+- **Reply Content**: 5 reply tones for Repost (Fact Check, Amplify & Agree, Fact Check & Counter, Savage & Smart, Hypocrite Buster)
+- **Comment Responses**: 2 strategic comment tones (Praise, Ask)
+- **Twitter Threads**: Create numbered thread cards with automatic gallery save and per-tweet image prompts
+- **Custom Topic Threads**: Generate threads on any subject using AI knowledge base
+- **Custom Tone Mixing**: Combine two tones for unique voice combinations
+- **Smart Content Analysis**: AI-powered research context and key insights for every generation
 - **Unicode-Aware**: Proper emoji and special character handling for clean publishing
 
 ### 💡 **Intelligent Features**
-- **Demo Mode**: Full functionality without API key for testing and demos
-- **Tone Presets**: Original post styles plus dedicated reply/repost tones with AI instructions
-- **Character Counter**: Real-time counting with emoji support
-- **Content Sanitization**: Removes AI artifacts and formatting noise
-- **Auto-Resize Text Areas**: Smart containers that adapt to content
+- **11 Tone Presets**: 6 original post tones, 5 reply tones, and custom mixing capability
+- **AI Research Augmentation**: Every generation includes fresh research context and domain expertise
+- **Real-time Character Counter**: Unicode-aware counting with emoji support
+- **Content Sanitization**: Removes AI artifacts, meta-commentary, and formatting noise
+- **Automatic Gallery Save**: Threads auto-save to gallery for easy access
+- **Image Prompt Generation**: Optional 9:16 Nano Banana prompts for visual content
 - **Progress Indicators**: Visual feedback during AI processing
 
 ### 🔧 **Professional Tools**
-- **Quick Actions**: One-click generation for Twitter post, repost, thread, summary, analysis, and click-farming flows
+- **Quick Actions**: One-click generation for Post, Repost, Comments, Thread, and Create flows
 - **Individual Card Copy**: Copy each tweet or thread card separately
-- **Rich Text Gallery**: Save, view, and edit generated content with a powerful modal system
+- **Rich Gallery System**: Save, search, sort, view, and delete generated content (50-item limit)
+- **Virtual Scrolling**: Smooth performance with large content libraries
 - **Thread Cards**: Beautiful numbered cards for multi-part threads with character counts
-- **Live Character Counting**: Real-time Unicode-aware counting in edit mode
-- **Smart Thread Parsing**: Automatically detects and formats thread content
-- **Regenerate Options**: Refine content with different length settings
-- **Export Functionality**: Save conversations and content
-- **Settings Management**: Persistent preferences, API key storage, and dark/light theme toggle
+- **Smart Filtering**: Search and sort by updated date, created date, or content length
+- **Bulk Management**: Delete all saved items by category
+- **Settings Management**: Persistent preferences, API key storage, and light/dark theme toggle
+- **Privacy Policy**: Built-in privacy & security documentation
 
 ## 📸 Screenshots
 
@@ -121,33 +128,36 @@ Fibr requires a free Google Gemini API key to function. Get yours at:
 ### Basic Twitter Content Generation
 1. **Open any webpage** with content you want to tweet about
 2. **Click the Fibr extension icon**
-3. **Select "Twitter"** from the quick actions
-4. **Adjust length** using the slider (50-2000 characters)
-5. **Copy individual tweets** or the entire thread
+3. **Select "Post"** from the quick actions
+4. **Choose your tone** from 6 original post styles or create a custom mix
+5. **Generate and copy** your ready-to-post content
 
-### Content Analysis
-Choose from 8 analysis types:
-- **📄 Summary** - Concise content overview
-- **🎯 Key Points** - Actionable bullet points
-- **🔍 Analysis** - Deep insights and implications
-- **❓ FAQ** - Question and answer generation
-- **✅ Fact Check** - Accuracy verification
-- **⚖️ Pros & Cons** - Balanced perspectives
-- **📅 Timeline** - Chronological information
-- **💬 Key Quotes** - Important passages
+### Repost & Reply Generation
+1. **Navigate to content** you want to repost or reply to
+2. **Select "Repost"** from quick actions
+3. **Choose your reply tone**: Fact Check, Amplify & Agree, Fact Check & Counter, Savage & Smart, or Hypocrite Buster
+4. **Optional**: Toggle image prompt generation
+5. **Generate authentic reply** content
 
-### AI Chat Interface
-- Ask questions about any webpage content
-- Get explanations and clarifications
-- Interactive markdown-formatted responses
-- Conversation history with timestamps
+### Comment Creation
+1. **Open content** you want to comment on
+2. **Select "Comments"** from quick actions
+3. **Choose tone**: Praise (celebrate wins) or Ask (technical questions)
+4. **Generate strategic comment** backed by AI analysis
+
+### Thread Generation
+- **Thread**: Create multi-tweet thread from current webpage content
+- **Create**: Generate thread on any custom topic with AI knowledge base
+- Optional per-tweet image prompts (9:16 format)
+- Automatic save to gallery
 
 ### Advanced Features
-- **Thread Library**: Save and organize your best threads
-- **Content Optimization**: AI-powered content improvement suggestions
-- **Multi-platform**: Generate content for Twitter, LinkedIn, Blog, and Email
-- **Export Options**: JSON and PDF export for conversations
-- **Rich Text Gallery**: View and edit saved content with professional modal system
+- **Gallery Management**: Save up to 50 items with search, sort, and delete functionality
+- **Custom Tone Mixing**: Combine any two tones for unique voice combinations
+- **AI Research Augmentation**: Domain expertise and fresh insights (October 2024 knowledge)
+- **Image Prompt Generation**: Optional 9:16 Nano Banana prompts for visual content
+- **Dark/Light Themes**: Smooth theme toggle with system preference detection
+- **Unicode Processing**: Proper handling of emojis and special characters
 
 ## 🎨 UI Navigation
 
@@ -246,24 +256,20 @@ Fibr-4-Tweeter/
 │       ├── popup.css          # Glassmorphism styling
 │       ├── background.js      # Service worker for API calls
 │       ├── content.js         # Content extraction script
-│       ├── api.js            # Gemini API integration
-│       ├── twitter.js        # Twitter content generation
-│       ├── export.js         # Export functionality
-│       ├── storage.js         # Storage management
-│       ├── ui-render.js      # UI rendering components
-│       ├── scroll.js         # Horizontal scrolling
-│       ├── navigation.js     # View navigation
-│       ├── gallery.js        # Rich Text Modal System
-│       ├── character-counter.js # Unicode-aware counting
-│       ├── length-control.js # Content length controls
-│       ├── content-analysis.js # AI analysis features
-│       ├── demo-mode.js      # Demo functionality
-│       ├── auto-resize.js    # Smart text areas
-│       ├── progress-bars.js  # Progress indicators
-│       ├── tone-selector.js  # Tone selection modal
-│       ├── repost-modal.js   # Repost modal
-│       ├── comments-modal.js # Comments modal
-│       ├── thread-generator.js # Thread generation
+│       ├── modules/          # Modular components
+│       │   ├── api.js            # Gemini API integration
+│       │   ├── twitter.js        # Twitter content generation
+│       │   ├── storage.js         # Storage management
+│       │   ├── ui-render.js      # UI rendering components
+│       │   ├── navigation.js     # View navigation
+│       │   ├── gallery.js        # Gallery system with virtual scrolling
+│       │   ├── tone-selector.js  # Tone selection modal (11 tones)
+│       │   ├── repost-modal.js   # Repost modal with 5 reply tones
+│       │   ├── comments-modal.js # Comments modal with 2 tones
+│       │   ├── thread-generator.js # Custom topic thread generation
+│       │   ├── image-prompt-generator.js # 9:16 image prompts
+│       │   ├── privacy-policy.js # Privacy documentation
+│       │   └── bottom-nav.js     # Floating navigation
 │       └── icons/            # Extension icons
 ├── src/
 │   └── extension/             # Source code
@@ -363,20 +369,20 @@ Use this section when preparing your Chrome Web Store listing or marketing asset
 - **Key value pillars:** Speed-first workflow • Authentic tone presets • Research-backed outputs • Rich Text Gallery • Works with free Gemini API key
 
 ### 2. Feature Bullets for Store Listing
-1. 🔁 **Repost like a pro** – Dedicated modal with curated reply tones and optional AI image prompts.
-2. 🧵 **Thread generator** – Topic input and automatic gallery save of every thread.
-3. ⚡ **One-tap quick actions** – Post, Repost, Thread, Gallery, and viral Click Farming all within a two-click flow.
-4. 🧠 **Context-aware analysis** – Summaries, fact checks, FAQs, and research insights before you post.
-5. 📝 **Rich Text Gallery** – Professional modal system for viewing and editing saved content with live character counting.
+1. ✍️ **6 Original Post Tones** – Funny, Deeper Insights, Clever Observations, Industry Insights, Expert Repurpose, Content like this—plus custom mixing.
+2. 🔁 **5 Reply Tones for Repost** – Fact Check, Amplify & Agree, Fact Check & Counter, Savage & Smart, Hypocrite Buster.
+3. 💬 **Strategic Comments** – Praise and Ask tones for meaningful engagement.
+4. 🧵 **Thread on Anything** – Generate from current page or create on custom topics with AI knowledge base.
+5. 🗂️ **Rich Gallery** – Save, search, sort 50 items with virtual scrolling and bulk management.
 
 ### 3. Screenshot & Video Storyboard
 Capture these states (light & dark themes) for 1280×800 screenshots:
-1. **Home + quick actions** – show glassmorphism UI with quick action bar.
-2. **Tone selector** – highlight original post tones and custom mix builder.
-3. **Repost modal** – showcase reply tone grid, image prompt toggle, and "Generate" button.
-4. **Thread generator** – illustrate topic input and results card.
-5. **Gallery view** – demonstrate saved cards with rich text modal system.
-Optional promo video (30–45s) should walk through the same flow with callouts.
+1. **Home + quick actions** – Show glassmorphism UI with 5 action buttons (Post, Repost, Comments, Thread, Create).
+2. **Tone selector** – Highlight 6 original post tones and custom mix builder.
+3. **Repost modal** – Showcase 5 reply tones, image prompt toggle, and "Generate" button.
+4. **Comments modal** – Display Praise and Ask tones with descriptions.
+5. **Gallery view** – Demonstrate search, sort, saved cards, and bulk management.
+Optional promo video (30–45s) should walk through Post → Repost → Gallery flow.
 
 ### 4. Asset Checklist
 - 128×128 icon (already provided in `icons/`).
@@ -387,7 +393,7 @@ Optional promo video (30–45s) should walk through the same flow with callouts.
 
 ### 5. Categories, Keywords & Compliance
 - **Category:** Productivity → Blogging or Social & Communication.
-- **Keywords:** AI Twitter writer, X thread generator, repost assistant, rich text editor, Gemini AI, social media automation.
+- **Keywords:** AI Twitter writer, X thread generator, repost assistant, comment generator, tone presets, Gemini AI, social media automation.
 - **Permissions to list:** `activeTab`, `storage`, `scripting`, `tabs` (explain usage in submission form).
 - **Data disclosure:** No personal data collected; API key stored locally; only communicates with Google Gemini via user-provided key.
 
