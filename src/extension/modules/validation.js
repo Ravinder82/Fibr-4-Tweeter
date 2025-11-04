@@ -36,6 +36,38 @@
         console.warn("Validation: Key starts with:", cleanedKey.substring(0, 4));
       }
       
+      // Use request scheduler to prevent duplicate validation calls
+      const jobId = `validation_${cleanedKey.substring(0, 10)}`;
+      
+      if (window.FibrRequestScheduler) {
+        return await window.FibrRequestScheduler.enqueueJob(
+          'VALIDATION',
+          jobId,
+          async () => {
+            try {
+              console.log("Validation: Sending validation request to background...");
+              const response = await chrome.runtime.sendMessage({
+                action: 'validateApiKey',
+                apiKey: cleanedKey
+              });
+              
+              console.log("Validation: Response from background:", response);
+              
+              if (!response) {
+                console.error("Validation: No response from background script");
+                return { success: false, error: 'No response from validation service. Please try again.' };
+              }
+              
+              return response;
+            } catch (error) {
+              console.error('Validation: Request failed with exception:', error);
+              return { success: false, error: 'Failed to validate API key. Please try again.' };
+            }
+          }
+        );
+      }
+      
+      // Fallback without scheduler
       try {
         console.log("Validation: Sending validation request to background...");
         const response = await chrome.runtime.sendMessage({

@@ -505,31 +505,10 @@ Generate the complete thread now:`;
         card.dataset.threadId = threadId;
         contentContainer.appendChild(card);
 
-        // Live-only per-tweet image prompt generation if enabled
+        // DISABLED: Automatic image prompt generation to reduce API calls
+        // Users can manually generate image prompts by clicking the image button on each card
         if (includeImagePrompts && window.TabTalkImagePromptGenerator) {
-          (async () => {
-            try {
-              const contentId = `threadgen_${threadId}_tweet_${index + 1}`;
-              const prompt = await window.TabTalkImagePromptGenerator.generatePromptForCard(contentId, tweet);
-              if (prompt) {
-                // Attach to card for copy; do not persist to Gallery
-                card.dataset.imagePrompt = encodeURIComponent(prompt);
-                // Inject UI block under content
-                const contentEl = card.querySelector('.twitter-card-content');
-                if (contentEl && !card.querySelector('.image-prompt-display')) {
-                  const promptEl = document.createElement('div');
-                  promptEl.className = 'image-prompt-display';
-                  promptEl.innerHTML = `
-                    <div class="image-prompt-label">🖼️ Nano Banana Prompt (9:16)</div>
-                    <div class="image-prompt-text">${window.TabTalkUI?.escapeHtml ? window.TabTalkUI.escapeHtml(prompt) : prompt}</div>
-                  `;
-                  contentEl.appendChild(promptEl);
-                }
-              }
-            } catch (e) {
-              console.warn('Thread Generator: image prompt generation failed:', e);
-            }
-          })();
+          console.log('⚠️ Thread Generator: Image prompts disabled - use manual button on each card instead');
         }
       });
       

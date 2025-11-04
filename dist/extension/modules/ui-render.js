@@ -137,11 +137,19 @@
       if (isLoading) {
         if (this.pageStatus) this.pageStatus.textContent = statusMessage;
         this.setAriaStatus(statusMessage);
+        try {
+          const els = document.querySelectorAll('.action-btn, .twitter-action-btn, .regenerate-btn, .btn-regenerate-thread');
+          els.forEach(el => { if (el) { el.disabled = true; el.setAttribute('aria-busy', 'true'); } });
+        } catch (e) {}
       } else {
         if (this.pageStatus && !this.pageStatus.textContent.startsWith('✅')) {
           this.pageStatus.textContent = '✅ Done';
         }
         this.setAriaStatus('Ready');
+        try {
+          const els = document.querySelectorAll('.action-btn, .twitter-action-btn, .regenerate-btn, .btn-regenerate-thread');
+          els.forEach(el => { if (el) { el.disabled = false; el.setAttribute('aria-busy', 'false'); } });
+        } catch (e) {}
       }
     },
 

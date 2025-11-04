@@ -1,175 +1,57 @@
-// background.js - RATE LIMITED VERSION with Request Queue
+// background.js - Direct API calls without rate limiting
 
 const GEMINI_MODEL = 'gemini-2.0-flash';
 const GEMINI_FALLBACK_MODEL = 'gemini-1.5-flash';
 const GEMINI_API_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/';
 
-// ============================================================================
-// RATE LIMITING & REQUEST QUEUE SYSTEM
-// ============================================================================
-
-class RateLimiter {
-    constructor() {
-        // Gemini API Free Tier Limits: 15 RPM (requests per minute), 1,500 RPD (requests per day)
-        this.requestsPerMinute = 15;
-        this.requestsPerDay = 1500;
-        this.requestTimestamps = [];
-        this.dailyRequestCount = 0;
-        this.dailyResetTime = this.getNextDayResetTime();
-        this.queue = [];
-        this.processing = false;
-        this.minRequestInterval = 4000; // Minimum 4 seconds between requests for safety
-        this.lastRequestTime = 0;
+function parseRetryAfter(headerValue) {
+    if (!headerValue) {
+        return null;
     }
 
-    getNextDayResetTime() {
-        const now = new Date();
-        const tomorrow = new Date(now);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        tomorrow.setHours(0, 0, 0, 0);
-        return tomorrow.getTime();
+    const numericDelay = Number(headerValue);
+    if (!Number.isNaN(numericDelay)) {
+        return Math.max(0, numericDelay * 1000);
     }
 
-    cleanOldTimestamps() {
-        const now = Date.now();
-        const oneMinuteAgo = now - 60000;
-        
-        // Remove timestamps older than 1 minute
-        this.requestTimestamps = this.requestTimestamps.filter(ts => ts > oneMinuteAgo);
-        
-        // Reset daily counter if needed
-        if (now >= this.dailyResetTime) {
-            this.dailyRequestCount = 0;
-            this.dailyResetTime = this.getNextDayResetTime();
-            console.log('Rate Limiter: Daily quota reset');
-        }
+    const asDate = Date.parse(headerValue);
+    if (!Number.isNaN(asDate)) {
+        const diff = asDate - Date.now();
+        return diff > 0 ? diff : null;
     }
 
-    canMakeRequest() {
-        this.cleanOldTimestamps();
-        
-        // Check daily limit
-        if (this.dailyRequestCount >= this.requestsPerDay) {
-            console.warn('Rate Limiter: Daily quota exceeded');
-            return false;
-        }
-        
-        // Check per-minute limit
-        if (this.requestTimestamps.length >= this.requestsPerMinute) {
-            console.warn('Rate Limiter: Per-minute quota exceeded');
-            return false;
-        }
-        
-        // Check minimum interval between requests
-        const now = Date.now();
-        const timeSinceLastRequest = now - this.lastRequestTime;
-        if (timeSinceLastRequest < this.minRequestInterval) {
-            console.log(`Rate Limiter: Too soon (${timeSinceLastRequest}ms < ${this.minRequestInterval}ms)`);
-            return false;
-        }
-        
-        return true;
-    }
-
-    recordRequest() {
-        const now = Date.now();
-        this.requestTimestamps.push(now);
-        this.dailyRequestCount++;
-        this.lastRequestTime = now;
-        console.log(`Rate Limiter: Request recorded (${this.requestTimestamps.length}/${this.requestsPerMinute} per min, ${this.dailyRequestCount}/${this.requestsPerDay} per day)`);
-    }
-
-    getWaitTime() {
-        this.cleanOldTimestamps();
-        
-        const now = Date.now();
-        
-        // Check if daily limit exceeded
-        if (this.dailyRequestCount >= this.requestsPerDay) {
-            const waitTime = this.dailyResetTime - now;
-            console.log(`Rate Limiter: Daily limit reached, wait ${Math.ceil(waitTime / 1000 / 60)} minutes`);
-            return waitTime;
-        }
-        
-        // Check if per-minute limit exceeded
-        if (this.requestTimestamps.length >= this.requestsPerMinute) {
-            const oldestTimestamp = this.requestTimestamps[0];
-            const waitTime = (oldestTimestamp + 60000) - now;
-            console.log(`Rate Limiter: Per-minute limit reached, wait ${Math.ceil(waitTime / 1000)} seconds`);
-            return Math.max(0, waitTime);
-        }
-        
-        // Check minimum interval
-        const timeSinceLastRequest = now - this.lastRequestTime;
-        if (timeSinceLastRequest < this.minRequestInterval) {
-            const waitTime = this.minRequestInterval - timeSinceLastRequest;
-            console.log(`Rate Limiter: Minimum interval wait ${Math.ceil(waitTime / 1000)} seconds`);
-            return waitTime;
-        }
-        
-        return 0;
-    }
-
-    async enqueue(apiKey, payload) {
-        return new Promise((resolve, reject) => {
-            const request = {
-                apiKey,
-                payload,
-                resolve,
-                reject,
-                timestamp: Date.now()
-            };
-            
-            this.queue.push(request);
-            console.log(`Rate Limiter: Request queued (queue size: ${this.queue.length})`);
-            
-            // Start processing if not already running
-            if (!this.processing) {
-                this.processQueue();
-            }
-        });
-    }
-
-    async processQueue() {
-        if (this.processing) return;
-        
-        this.processing = true;
-        console.log('Rate Limiter: Starting queue processing');
-        
-        while (this.queue.length > 0) {
-            const waitTime = this.getWaitTime();
-            
-            if (waitTime > 0) {
-                console.log(`Rate Limiter: Waiting ${Math.ceil(waitTime / 1000)} seconds before next request...`);
-                await new Promise(resolve => setTimeout(resolve, waitTime));
-            }
-            
-            if (!this.canMakeRequest()) {
-                // Should not happen after waiting, but safety check
-                console.warn('Rate Limiter: Still cannot make request after waiting');
-                await new Promise(resolve => setTimeout(resolve, 5000));
-                continue;
-            }
-            
-            const request = this.queue.shift();
-            console.log(`Rate Limiter: Processing request (${this.queue.length} remaining in queue)`);
-            
-            try {
-                this.recordRequest();
-                const result = await callGeminiApiDirect(request.apiKey, request.payload);
-                request.resolve(result);
-            } catch (error) {
-                request.reject(error);
-            }
-        }
-        
-        this.processing = false;
-        console.log('Rate Limiter: Queue processing complete');
-    }
+    return null;
 }
 
-// Global rate limiter instance
-const rateLimiter = new RateLimiter();
+function formatDuration(ms) {
+    if (!ms || ms <= 0) {
+        return 'a moment';
+    }
+
+    const totalSeconds = Math.ceil(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    const days = Math.floor(hours / 24);
+    const remainingHours = hours % 24;
+
+    const parts = [];
+    if (days) {
+        parts.push(`${days}d`);
+    }
+    if (remainingHours) {
+        parts.push(`${remainingHours}h`);
+    }
+    if (remainingMinutes && parts.length < 2) {
+        parts.push(`${remainingMinutes}m`);
+    }
+    if (!parts.length && seconds) {
+        parts.push(`${seconds}s`);
+    }
+
+    return parts.join(' ') || 'a moment';
+}
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'callGeminiAPI') {
@@ -184,9 +66,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         // Clean the API key (remove any extra whitespace)
         const cleanedKey = apiKey.trim().replace(/\s+/g, '');
-
-        // Use rate limiter queue for all requests
-        rateLimiter.enqueue(cleanedKey, payload)
+        
+        // Direct API call without rate limiting
+        callGeminiApiDirect(cleanedKey, payload)
             .then(response => sendResponse(response))
             .catch(error => sendResponse({ success: false, error: error.message || 'Request failed' }));
             
@@ -241,10 +123,10 @@ async function callGeminiApiDirect(apiKey, payload) {
     };
 
     const shouldRetry = (status, errorJson) => {
-        // Don't retry on 429 - rate limiter should prevent this
+        // Don't retry on 429 - no rate limiter to handle this
         if (status === 429) {
-            console.error('Gemini API: 429 error despite rate limiting - increasing backoff');
-            return false; // Let rate limiter handle this
+            console.error('Gemini API: 429 error - no rate limiting available');
+            return false;
         }
         // Retry on temporary service issues
         if (status === 503 || status === 500) return true;
@@ -262,7 +144,7 @@ async function callGeminiApiDirect(apiKey, payload) {
         return baseDelay + jitter;
     };
 
-    const maxAttempts = 3; // Reduced from 4 since rate limiter prevents most issues
+    const maxAttempts = 3; // Standard retry count
     let attempt = 0;
     let lastError = 'Service temporarily unavailable. Please try again later.';
     let model = GEMINI_MODEL;
@@ -287,12 +169,18 @@ async function callGeminiApiDirect(apiKey, payload) {
                 
                 console.error(`Gemini API Error (${response.status}):`, text);
 
-                // Special handling for 429 errors
-                if (response.status === 429) {
+                // Special handling for 429 or resource exhausted errors
+                const isResourceExhausted = errorJson?.error?.status === 'RESOURCE_EXHAUSTED' || /Resource exhausted/i.test(errorMessage);
+                if (response.status === 429 || isResourceExhausted) {
+                    let friendlyMessage = '⏱️ Gemini rate limit reached. Please wait a bit before trying again.';
+                    if (isResourceExhausted) {
+                        friendlyMessage = '🚫 Gemini quota exceeded. Please wait before trying again.';
+                    }
                     return {
                         success: false,
-                        error: '⏱️ Rate limit reached. Your request has been queued and will be processed shortly.',
-                        rateLimited: true
+                        error: friendlyMessage,
+                        rateLimited: true,
+                        retryAfter: 60000 // Default 60 second wait
                     };
                 }
 

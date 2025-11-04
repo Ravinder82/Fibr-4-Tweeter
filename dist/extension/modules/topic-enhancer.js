@@ -13,12 +13,24 @@
       const ideasBtn = document.getElementById('generate-ideas-btn');
       const topicInput = document.getElementById('thread-topic');
       
+      // DISABLED: Topic enhancer AI features to reduce API calls
+      // Users can manually type their topics instead
       if (refineBtn) {
-        refineBtn.addEventListener('click', () => this.refineTopic());
+        refineBtn.addEventListener('click', () => {
+          console.log('⚠️ Topic refinement disabled to reduce API calls');
+          this.showToast('💡 Tip: Type your topic directly to save API calls', 3000);
+        });
+        // Hide the button
+        refineBtn.style.display = 'none';
       }
       
       if (ideasBtn) {
-        ideasBtn.addEventListener('click', () => this.generateTopicIdeas());
+        ideasBtn.addEventListener('click', () => {
+          console.log('⚠️ Topic ideas generation disabled to reduce API calls');
+          this.showToast('💡 Tip: Type your topic directly to save API calls', 3000);
+        });
+        // Hide the button
+        ideasBtn.style.display = 'none';
       }
       
       if (topicInput) {

@@ -22,7 +22,7 @@
       const sections = [
         {
           title: 'Effective Date',
-          content: '<p>October 31, 2025</p>'
+          content: '<p>November 2, 2025</p>'
         },
         {
           title: 'Introduction',
@@ -40,7 +40,8 @@
           highlights: [
             'Your API key only authenticates requests sent directly from your browser to Google\'s Gemini API.',
             'All AI processing happens on Google servers. Fibr does not proxy or monitor these requests.',
-            'Generated outputs are saved locally in your browser to power the gallery and history experiences.'
+            'Generated outputs are saved locally in your browser to power the gallery and history experiences.',
+            'Your API key and saved content remain on your device until you delete them. We do not retain any data on our servers.'
           ]
         },
         {
@@ -66,6 +67,10 @@
             'Choose which webpages to analyze—nothing is sent without your action.',
             'Reach out to our support team anytime at grow.with.fibr@gmail.com for privacy questions.'
           ]
+        },
+        {
+          title: 'Children\'s Privacy',
+          content: '<p>Fibr is not intended for children under 13. We do not knowingly collect personal information from children under 13.</p>'
         },
         {
           title: 'Chrome Extension Permissions',

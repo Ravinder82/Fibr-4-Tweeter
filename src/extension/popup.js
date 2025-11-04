@@ -434,17 +434,23 @@ import './modules/cursor-trails.js';
             if (!t || t.length === 0)
               throw new Error("Script injection failed.");
             let e = t[0].result;
+            
+            // CRITICAL FIX: Check if result exists before accessing properties
+            if (!e) {
+              throw new Error("Content script returned no result. The page may be blocking script execution.");
+            }
+            
             if (e.success)
               ((this.pageContent = e.content),
-                (this.pageStatus.textContent = `\u2705 Content loaded (${(e.content.length / 1024).toFixed(1)} KB)`),
+                (this.pageStatus.textContent = `✅ Content loaded (${(e.content.length / 1024).toFixed(1)} KB)`),
                 this.updateQuickActionsVisibility());
-            else throw new Error(e.error);
+            else throw new Error(e.error || "Content extraction failed");
           } catch (t) {
             (console.error("TabTalk AI (popup):", t),
               // Special handling for extension context invalidated (common during development)
               t.message && t.message.includes("Extension context invalidated") 
                 ? (this.pageStatus.textContent = "⚠️ Extension reloaded. Please refresh the page and try again.")
-                : (this.pageStatus.textContent = `\u274C ${t.message}`));
+                : (this.pageStatus.textContent = `❌ ${t.message}`));
           } finally {
             this.setLoading(!1);
           }
