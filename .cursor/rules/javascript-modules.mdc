@@ -1,0 +1,111 @@
+---
+globs: *.js
+---
+
+# JavaScript Module Rules
+
+All JavaScript modules in Fibr follow strict patterns. Reference [src/extension/popup.js](mdc:src/extension/popup.js) for main structure.
+
+## Module Pattern (IIFE)
+
+All modules MUST use IIFE pattern:
+
+```javascript
+(function() {
+  const ModuleName = {
+    method: function() {
+      // implementation
+    }
+  };
+  window.ModuleName = ModuleName;
+})();
+```
+
+## Module Loading
+
+Modules augment main class prototype in [src/extension/popup.js](mdc:src/extension/popup.js):
+
+```javascript
+window.TabTalkAPI && Object.assign(l.prototype, window.TabTalkAPI);
+window.TabTalkTwitter && Object.assign(l.prototype, window.TabTalkTwitter);
+```
+
+## Key Modules
+
+- [src/extension/modules/twitter.js](mdc:src/extension/modules/twitter.js) - Main generation engine (3,014 lines)
+- [src/extension/modules/api.js](mdc:src/extension/modules/api.js) - API wrapper with retry logic
+- [src/extension/modules/gallery.js](mdc:src/extension/modules/gallery.js) - Gallery system (50-item limit)
+- [src/extension/modules/storage.js](mdc:src/extension/modules/storage.js) - Chrome Storage wrapper
+- [src/extension/modules/validation.js](mdc:src/extension/modules/validation.js) - API key validation
+
+## Code Patterns
+
+### Defensive Programming
+```javascript
+if (this.pageContent && this.pageContent.length > 0) {
+  // proceed
+} else {
+  // fallback with error handling
+}
+```
+
+### Storage Operations
+```javascript
+// Use abstraction methods, not direct chrome.storage
+await this.getStorageItem('geminiApiKey');
+await this.setStorageItem('theme', 'dark');
+```
+
+### Error Handling
+```javascript
+try {
+  // operation
+} catch (error) {
+  if (error.message && error.message.includes("Extension context invalidated")) {
+    // handle gracefully
+  }
+  throw error;
+}
+```
+
+## Service Worker Communication
+
+All API calls go through [src/extension/background.js](mdc:src/extension/background.js):
+
+```javascript
+chrome.runtime.sendMessage({
+  action: 'callGeminiAPI',
+  payload: { contents: conversation },
+  apiKey: this.apiKey
+}, response => {
+  if (response.success) {
+    // handle success
+  }
+});
+```
+
+## Content Extraction
+
+Content script [src/extension/content.js](mdc:src/extension/content.js) returns:
+
+```javascript
+return { success: boolean, content: string, error?: string };
+```
+
+## Character Counting
+
+Unicode-aware counting:
+
+```javascript
+function countCharacters(text) {
+  return [...text].length; // Grapheme-aware counting
+}
+```
+
+## Prohibited Patterns
+
+- No ES6 modules (import/export)
+- No direct chrome.storage calls (use abstraction)
+- No eval() or dynamic code execution
+- No console.log in production code
+- No debug code in committed files

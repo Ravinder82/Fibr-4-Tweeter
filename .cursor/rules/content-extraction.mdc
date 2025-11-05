@@ -1,0 +1,133 @@
+---
+description: content extraction, sanitization, webpage content, content cleaning
+---
+
+# Content Extraction Rules
+
+Rules for extracting and sanitizing webpage content. Reference [src/extension/content.js](mdc:src/extension/content.js) for implementation.
+
+## Extraction Strategy
+
+Five-strategy fallback system:
+
+1. Site-specific (Twitter/X status pages)
+2. Article element (`main article`, `article`)
+3. Content selectors (`.post-content`, `.article-content`)
+4. Largest text container
+5. Full body (last resort)
+
+## Site-Specific Handling
+
+### Twitter/X
+- Extract main tweet only
+- Selector: `[data-testid="tweetText"]`
+- Exclude: Replies, timeline, engagement metrics
+
+### News Sites
+- Extract article body
+- Metadata: Author, date, headline
+- Remove: Ads, navigation, comments
+
+### Blogs
+- Extract post content
+- Preserve: Structure, headings
+- Remove: Sidebars, widgets
+
+### Documentation
+- Extract headings and content
+- Preserve: Code blocks, structure
+- Remove: Navigation, footer
+
+### Forums
+- Extract thread content
+- Metadata: Thread title, participants
+- Remove: Signatures, timestamps
+
+### E-commerce
+- Extract product information
+- Metadata: Product name, price, availability
+- Remove: Related products, reviews
+
+## Sanitization Pipeline
+
+Three-layer process:
+
+### 1. DOM Cleaning
+```javascript
+ContentSanitizer.cleanDOM(element)
+```
+- Removes: Scripts, styles, iframes, ads, navigation
+- Preserves: Text content, structure
+
+### 2. Text Cleaning
+```javascript
+ContentSanitizer.cleanText(text)
+```
+- Removes: Noise patterns, engagement metrics
+- Filters: Empty lines, duplicate content
+- Preserves: Meaningful text
+
+### 3. AI Preparation
+```javascript
+ContentSanitizer.prepareForAI(text, maxLength=8000)
+```
+- Removes: URLs, emails
+- Truncates: Intelligently at sentence boundary
+- Formats: Clean whitespace
+
+## Content Limits
+
+- Maximum length: 8000 characters
+- Truncation: At sentence boundary
+- Minimum meaningful: 50 characters
+- Fallback: Use full body if extraction fails
+
+## Return Format
+
+```javascript
+{
+  success: boolean,
+  content: string, // Structured content with metadata
+  error?: string
+}
+```
+
+## Structured Content Format
+
+```
+---SITE TYPE---
+{siteType}
+---PAGE TITLE---
+{pageTitle}
+---PAGE URL---
+{pageUrl}
+---METADATA---
+{metadata}
+---PAGE CONTENT---
+{mainContent}
+```
+
+## Error Handling
+
+- Protected pages: chrome:// pages return error
+- No content: Return error with helpful message
+- Extraction failure: Try fallback strategies
+- Final fallback: Return body content with warning
+
+## IIFE Wrapper
+
+Content script wrapped in IIFE to prevent redeclaration errors:
+
+```javascript
+(function() {
+  // extraction code
+  return extractAndReturnContent();
+})();
+```
+
+## Prohibited Patterns
+
+- No eval() or dynamic code execution
+- No modifying page DOM (read-only)
+- No external API calls from content script
+- No storing sensitive page data

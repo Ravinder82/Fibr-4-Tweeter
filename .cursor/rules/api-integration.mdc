@@ -1,0 +1,95 @@
+---
+description: API integration, Gemini API, rate limiting, caching, API calls
+---
+
+# API Integration Rules
+
+Rules for all Gemini API interactions. Reference [src/extension/background.js](mdc:src/extension/background.js) for implementation.
+
+## API Endpoint
+
+- Base URL: `https://generativelanguage.googleapis.com/v1beta/models/`
+- Primary Model: `gemini-2.0-flash:generateContent`
+- Fallback Model: `gemini-1.5-flash:generateContent`
+- Rate Limits: 15 req/min, 1500/day (free tier)
+
+## Request Format
+
+```javascript
+{
+  contents: [
+    {
+      role: 'user',
+      parts: [{ text: prompt }]
+    }
+  ]
+}
+```
+
+## Response Parsing
+
+```javascript
+const text = response.data.candidates[0].content.parts[0].text;
+```
+
+## Retry Logic
+
+Implemented in [src/extension/background.js](mdc:src/extension/background.js):
+
+- Exponential backoff: 1s, 2s, 4s, 8s, 16s max
+- Max attempts: 3
+- Jitter: 25% random variation
+- Retry on: 503, 500, UNAVAILABLE
+- Don't retry on: 429 (rate limit)
+
+## Rate Limit Handling
+
+```javascript
+if (response.status === 429 || isResourceExhausted) {
+  return {
+    success: false,
+    error: friendlyMessage,
+    rateLimited: true,
+    retryAfter: 60000 // ms
+  };
+}
+```
+
+## Caching Strategy
+
+### Analysis Cache
+- Location: [src/extension/modules/twitter.js](mdc:src/extension/modules/twitter.js)
+- TTL: 30 minutes
+- Key: Content hash + analysis type
+
+### Validation Cache
+- Location: [src/extension/modules/validation.js](mdc:src/extension/modules/validation.js)
+- TTL: 5 minutes
+- Key: API key hash
+
+## Request Optimization
+
+- Request scheduler: Prevent duplicate concurrent calls
+- Image prompts: Manual only (not automatic)
+- Batch operations: Group related requests
+- Cache hits: Reuse cached analysis when possible
+
+## Error Messages
+
+- User-friendly: No technical jargon
+- Actionable: Tell user what to do
+- No data leakage: Don't expose API keys or internal details
+
+## Fallback Model
+
+If primary model fails:
+1. Try fallback model on last retry attempt
+2. Log model switch for debugging
+3. User sees same interface (transparent fallback)
+
+## Security
+
+- API keys stored in Chrome Storage Local (encrypted)
+- Never log API keys
+- Don't expose keys in error messages
+- Validate keys before saving

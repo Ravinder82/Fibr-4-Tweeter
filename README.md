@@ -49,7 +49,7 @@ Transform lengthy articles, blog posts, or research into engaging Twitter conten
 - **Create**: Generate threads on any custom topic using AI knowledge base
 
 ### 🤖 **Advanced AI Content Generation**
-- **Twitter Posts**: Generate single tweets with 6 original tone presets (Funny, Deeper Insights, Clever Observations, Industry Insights, Expert Repurpose, Content like this)
+- **Twitter Posts**: Generate single tweets with 6 original tone presets (Funny, Deeper Insights, Clever Observations, Industry Insights, Expert Repurpose, Shuffle)
 - **Reply Content**: 5 reply tones for Repost (Fact Check, Amplify & Agree, Fact Check & Counter, Savage & Smart, Hypocrite Buster)
 - **Comment Responses**: 2 strategic comment tones (Praise, Ask)
 - **Twitter Threads**: Create numbered thread cards with automatic gallery save and per-tweet image prompts
@@ -369,7 +369,7 @@ Use this section when preparing your Chrome Web Store listing or marketing asset
 - **Key value pillars:** Speed-first workflow • Authentic tone presets • Research-backed outputs • Rich Text Gallery • Works with free Gemini API key
 
 ### 2. Feature Bullets for Store Listing
-1. ✍️ **6 Original Post Tones** – Funny, Deeper Insights, Clever Observations, Industry Insights, Expert Repurpose, Content like this—plus custom mixing.
+1. ✍️ **6 Original Post Tones** – Funny, Deeper Insights, Clever Observations, Industry Insights, Expert Repurpose, Shuffle—plus custom mixing.
 2. 🔁 **5 Reply Tones for Repost** – Fact Check, Amplify & Agree, Fact Check & Counter, Savage & Smart, Hypocrite Buster.
 3. 💬 **Strategic Comments** – Praise and Ask tones for meaningful engagement.
 4. 🧵 **Thread on Anything** – Generate from current page or create on custom topics with AI knowledge base.

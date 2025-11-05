@@ -363,9 +363,9 @@ CRITICAL: If the original is hyping up a product, YOUR VERSION HYPES IT UP TOO (
 IF YOU FIND YOURSELF ADDING YOUR OWN OPINION OR CHANGING THE MESSAGE, STOP. YOU'RE DOING IT WRONG.
 ```
 
-#### Content like this (original)
+#### Shuffle (original)
 ```
-TONE: Content like this
+TONE: Shuffle (Expert Content Remix)
 
 YOU ARE A CHAMELEON WRITER WHO CAN PERFECTLY MIMIC ANY WRITING STYLE AND FORMAT.
 

@@ -1,0 +1,294 @@
+# Project Rules
+
+**Project:** Fibr - AI-Powered Twitter Content Generator  
+**Purpose:** Fibr-specific rules for supreme coding agent performance.
+
+---
+
+## PROJECT ARCHITECTURE RULES
+
+### Module System
+- **IIFE pattern mandatory:** All modules wrapped in `(function() { ... })();`
+- **Window exposure:** `window.ModuleName = ModuleName;` at end of module
+- **Prototype augmentation:** Modules augment main class: `Object.assign(l.prototype, window.ModuleName);`
+- **No ES6 modules:** Use IIFE. Maintain compatibility.
+
+### File Organization
+- **Core files:** `src/extension/background.js`, `content.js`, `popup.js`, `popup.html`
+- **Modules:** `src/extension/modules/` - all feature code here
+- **Shared:** `src/shared/` - reusable components
+- **Build output:** `dist/extension/` - never edit directly
+- **Edit source only:** Changes in `src/`. Build generates `dist/`.
+
+### Build Process
+- **Build command:** `npm run build:extension`
+- **Watch mode:** `npm run dev:extension` for development
+- **Reload required:** After build, reload extension in Chrome
+- **No manual dist edits:** Build process manages dist/
+
+---
+
+## CODE PATTERNS
+
+### Service Worker (`background.js`)
+- **API calls only:** All Gemini API calls routed through background script
+- **Retry logic:** Exponential backoff (1s, 2s, 4s, 8s, 16s max)
+- **Rate limit handling:** Detect 429. Return `{ rateLimited: true, retryAfter: ms }`
+- **Fallback model:** Try `gemini-1.5-flash` if `gemini-2.0-flash` fails
+- **Error messages:** User-friendly. No technical jargon.
+
+### Content Script (`content.js`)
+- **IIFE wrapper:** Prevents redeclaration on multiple injections
+- **Multi-strategy extraction:** 5 fallback strategies (site-specific → full body)
+- **Sanitization pipeline:** DOM cleaning → text cleaning → AI preparation
+- **Truncation:** 8000 char limit with intelligent cutoff at sentence boundary
+- **Return format:** `{ success: boolean, content: string, error?: string }`
+
+### Popup Logic (`popup.js`)
+- **Class-based:** Main class instantiated after DOMContentLoaded
+- **View system:** `showView(viewName)` - hide all, show target
+- **Module loading:** Dynamic prototype augmentation after DOM ready
+- **Defensive programming:** Null checks everywhere. Extension context invalidation handled.
+- **Storage abstraction:** Use `getStorageItem/setStorageItem` methods. Not direct chrome.storage.
+
+### Storage Operations
+- **Keys:** `geminiApiKey`, `apiKeySet`, `hasSeenWelcome`, `theme`, `savedContent`, `chatHistory_${domain}`
+- **Async/await:** All storage operations async. Handle errors.
+- **Gallery limit:** 50 items max. Enforce in code.
+- **Migration:** `savedThreads` → `savedContent`. Handle migration on init.
+
+---
+
+## API INTEGRATION RULES
+
+### Gemini API
+- **Endpoint:** `https://generativelanguage.googleapis.com/v1beta/models/`
+- **Model:** `gemini-2.0-flash:generateContent` (primary), `gemini-1.5-flash:generateContent` (fallback)
+- **Rate limits:** 15 req/min, 1500/day (free tier)
+- **Request format:** `{ contents: [{ role: 'user', parts: [{ text: prompt }] }] }`
+- **Response parsing:** `response.data.candidates[0].content.parts[0].text`
+- **Error handling:** Parse error JSON. Extract user-friendly message.
+
+### Caching Strategy
+- **Analysis cache:** 30-minute TTL (`twitter.js`). Reduce redundant API calls.
+- **Validation cache:** 5-minute TTL (`validation.js`). Cache API key validation.
+- **Cache keys:** Hash-based. Include content hash for analysis cache.
+- **Cache invalidation:** Time-based. No manual clearing needed.
+
+### Request Optimization
+- **Request scheduler:** Prevent duplicate concurrent calls
+- **Image prompts:** Manual only. Not automatic. Saves API quota.
+- **Topic enhancer:** Disabled. Don't enable without quota analysis.
+- **Batch operations:** Group related requests. Minimize API calls.
+
+---
+
+## CONTENT GENERATION RULES
+
+### Tone System
+- **Post tones (6):** Funny, Deeper Insights, Clever Observations, Industry Insights, Expert Repurpose, Content like this
+- **Reply tones (5):** Fact Check, Amplify & Agree, Fact Check & Counter, Savage & Smart, Hypocrite Buster
+- **Comment tones (2):** Praise, Ask
+- **Custom mixing:** Allow combining any two tones. UI handles selection.
+
+### Content Sanitization
+- **Multi-layer:** DOM cleaning → text cleaning → AI preparation
+- **Noise removal:** Scripts, ads, navigation, engagement metrics, timestamps
+- **Twitter-specific:** Extract main tweet only. Not replies/timeline.
+- **Site-specific:** News, blogs, docs, forums, ecommerce handled differently
+- **Content limit:** 8000 chars max. Truncate intelligently.
+
+### Character Counting
+- **Unicode-aware:** Use `[...text].length` for grapheme-aware counting
+- **Twitter limit:** 280 characters (Unicode-aware)
+- **Generation range:** 50-2000 characters
+- **Real-time updates:** Character counter updates on every keystroke
+
+### Thread Generation
+- **Page content threads:** From current webpage. Use page content.
+- **Custom topic threads:** User-provided topic. Use AI knowledge base.
+- **Three-step process:** Outline → Expand → Smart Split
+- **Numbered cards:** Display as "1/8", "2/8", etc.
+- **Auto-save:** Threads save to gallery automatically
+- **Per-tweet prompts:** Optional image prompts per tweet
+
+---
+
+## UI/UX RULES
+
+### Design System
+- **Theme:** Glassmorphism with backdrop blur
+- **Colors:** Black & white theme. Dark mode support.
+- **Typography:** System fonts. No external fonts.
+- **Size:** 400x600px popup default
+- **Responsive:** Adapts to content. No fixed heights.
+
+### Views
+- **Welcome:** First-time onboarding
+- **API Setup:** API key configuration
+- **Chat:** Main content generation view
+- **Gallery:** Saved content view (50 items max)
+- **Settings:** Legacy API key management
+- **Privacy:** Privacy policy view
+
+### Navigation
+- **View switching:** `showView(viewName)` - hide all, show target
+- **Floating nav:** Bottom navigation bar (home, gallery)
+- **Sidebar:** Hamburger menu (settings, gallery, privacy)
+- **Back buttons:** Return to previous view
+
+### User Feedback
+- **Progress bars:** Show during API calls. `showProgressBar(message)`
+- **Toast notifications:** Success/error messages. `showToast(message, duration)`
+- **Loading states:** Spinners during operations
+- **Status text:** Page status updates (`pageStatus.textContent`)
+
+### Accessibility
+- **ARIA labels:** All interactive elements labeled
+- **Keyboard navigation:** Tab order logical
+- **Screen readers:** Semantic HTML. Proper roles.
+- **Focus management:** Focus moves appropriately on view changes
+
+---
+
+## ERROR HANDLING RULES
+
+### Extension Context Invalidation
+- **Common during dev:** Handle gracefully
+- **Error message:** "Extension reloaded. Please refresh the page and try again."
+- **Fallback:** Show welcome view. Don't crash.
+
+### API Errors
+- **429 Rate Limit:** Show friendly message. Don't retry immediately.
+- **Network errors:** Retry with exponential backoff. Max 3 attempts.
+- **Invalid API key:** Clear message. Don't leak key details.
+- **Parse errors:** Handle malformed JSON. Provide fallback.
+
+### Content Extraction Errors
+- **Failed extraction:** Show error. Allow retry.
+- **No content:** Check page type. Provide helpful message.
+- **Protected pages:** Detect chrome:// pages. Show appropriate message.
+
+### Storage Errors
+- **Quota exceeded:** Handle gracefully. Clear old data if needed.
+- **Permission denied:** Check manifest permissions. Provide fix guidance.
+
+---
+
+## PERFORMANCE RULES
+
+### Code Optimization
+- **Bundle size:** Minimize. Use esbuild minification.
+- **Lazy loading:** Load modules on demand. Not all at once.
+- **Virtual scrolling:** Gallery uses virtual scrolling for 50+ items
+- **Debounce:** Search input debounced. Don't search on every keystroke.
+
+### API Optimization
+- **Cache analysis:** 30-minute TTL. Reuse cached analysis.
+- **Batch requests:** Group related requests when possible
+- **Request deduplication:** Prevent duplicate concurrent calls
+- **Image prompts:** Manual only. Not automatic.
+
+### Memory Management
+- **Cleanup:** Remove event listeners on view changes
+- **Limit gallery:** 50 items max. Enforce strictly.
+- **Cache limits:** Don't cache indefinitely. TTL enforced.
+
+---
+
+## SECURITY RULES
+
+### API Key Storage
+- **Chrome Storage Local:** Encrypted by browser
+- **Never log:** Don't log API keys. Don't expose in errors.
+- **Validation:** Test API key before saving. Cache validation result.
+
+### Content Security
+- **XSS prevention:** Sanitize all user-generated content
+- **CSP:** Content Security Policy enforced in manifest
+- **No eval:** Never use eval or similar. No dynamic code execution.
+
+### Input Validation
+- **API keys:** Validate format. Check length. Test before save.
+- **User input:** Sanitize all inputs. Validate before processing.
+- **Content extraction:** Sanitize extracted content. Remove scripts.
+
+---
+
+## TESTING RULES
+
+### Test Files
+- **Location:** `tests/` directory
+- **Runner:** `tests/run-all.js`
+- **Coverage:** Twitter helpers, structured helpers, navigation helpers
+
+### Test Requirements
+- **New features:** Include tests with implementation
+- **Edge cases:** Test boundaries. Invalid inputs.
+- **Integration:** Test components together. Not isolated.
+
+### Missing Tests
+- **Content sanitization:** Needs comprehensive tests
+- **API retry logic:** Needs retry scenario tests
+- **Character counting:** Needs Unicode edge case tests
+
+---
+
+## MAINTENANCE RULES
+
+### Code Quality
+- **No legacy naming:** Replace "TabTalkAI" references with "Fibr"
+- **Remove unused code:** Delete disabled features completely
+- **Extract constants:** Move magic numbers to constants.js
+- **Split large files:** twitter.js (3,014 lines) needs splitting
+
+### Refactoring
+- **Clear goal:** Know why refactoring. Execute precisely.
+- **Test after:** Verify refactoring doesn't break functionality
+- **Pattern consistency:** Follow established patterns. Don't introduce new ones.
+
+### Documentation
+- **Update MasterMemory:** Keep MasterMemory.md current
+- **Code comments:** Explain why, not what
+- **API docs:** Document function signatures. Parameters. Returns.
+
+---
+
+## EXECUTION CHECKLIST
+
+Before committing code:
+- [ ] Follows IIFE module pattern
+- [ ] Uses prototype augmentation correctly
+- [ ] Handles extension context invalidation
+- [ ] Implements defensive programming
+- [ ] Caches API responses appropriately
+- [ ] Sanitizes content properly
+- [ ] Handles Unicode in character counting
+- [ ] Follows storage key conventions
+- [ ] Updates UI feedback appropriately
+- [ ] Handles errors gracefully
+- [ ] No debug code remains
+- [ ] No console.logs in production code
+- [ ] Builds successfully
+- [ ] Loads in Chrome without errors
+- [ ] Gallery limit enforced (50 items)
+- [ ] API rate limits respected
+
+---
+
+## TERMINATION PROTOCOL
+
+When task complete:
+- Deliver code.
+- State what changed.
+- Reference affected files.
+- No closing statements.
+- No follow-up questions.
+- User continues independently.
+
+---
+
+**Version:** 1.0  
+**Project:** Fibr  
+**Status:** Active
+

@@ -703,8 +703,8 @@ Naturally hilarious. Absurd comparisons, unexpected twists, relatable fails. Use
 See patterns others miss. Start with obvious \u2192 flip it \u2192 connect dots \u2192 reveal implications. Second-order thinking. Make people pause and rethink.`,"clever-observations":`TONE: Clever Observations
 Witty observations wrapped in internet culture. "This is giving...", "Not [x] doing [y]", "POV:". Smart and funny. Chronically online in the best way.`,"industry-insights":`TONE: Industry Insights
 Industry insider perspective. Drop benchmarks, metrics, insider knowledge. Sound like someone who's been in the trenches. Back everything with context.`,rephrase:`TONE: Re-Phrase
-Take the webpage content and rephrase it with better wording while preserving the EXACT same message, intent, facts, emotional tone, and ALL substance. Keep every specific detail, number, claim, and benefit exactly as meaningful. Only upgrade word choice and flow - never change the meaning or dilute the value proposition.`,"content-like-this":`TONE: Content like this
-Analyze the webpage content to map its exact format, writing patterns, audience, goal, and value proposition. Then generate brand-new content about a different but contextually adjacent subject that mirrors the same structure, voice, CTA energy, has a crystal clear value proposition, and stays focused on a single announcement (no feed UI artifacts).`,agreeing:`TONE: Amplify & Agree
+Take the webpage content and rephrase it with better wording while preserving the EXACT same message, intent, facts, emotional tone, and ALL substance. Keep every specific detail, number, claim, and benefit exactly as meaningful. Only upgrade word choice and flow - never change the meaning or dilute the value proposition.`,"content-like-this":`TONE: Shuffle
+Perform deep analysis of the webpage content to extract its template structure, main focus element, audience sophistication, and value delivery mechanism. Generate expert-quality content that preserves the exact template while intelligently substituting the main focus element with a contextually aligned, professionally credible alternative that serves the same audience with the same engagement appeal and practical value.`,agreeing:`TONE: Amplify & Agree
 Not just "I agree" - add value. Bring evidence, examples, experience that makes their point stronger. Build on their argument with receipts.`};return e[t]||e.agreeing},getToneColor:function(t){return{"fact-check":"var(--accent-medium)",agreeing:"var(--accent-color)",contradictory:"var(--accent-light)",trolling:"var(--accent-light)",funny:"var(--accent-light)","deeper-insights":"var(--accent-color)","clever-observations":"var(--accent-medium)","industry-insights":"var(--accent-color)",rephrase:"var(--accent-color)","hypocrite-buster":"var(--accent-light)"}[t]||"var(--accent-color)"},getToneIcon:function(t){return{"fact-check":"\u{1F50D}",agreeing:"\u{1F91D}",contradictory:"\u2694\uFE0F",trolling:"\u{1F608}",funny:"\u{1F602}","deeper-insights":"\u{1F4A1}","clever-observations":"\u{1F9E0}","industry-insights":"\u{1F4CA}",rephrase:"\u2728","hypocrite-buster":"\u{1F3AF}"}[t]||"\u{1F91D}"},autoSaveThread:async function(t,e,n){if(!window.TabTalkStorage||!window.TabTalkStorage.saveContent){console.warn("Storage module not available for gallery persistence");return}try{let i=Array.isArray(e)?e:[];i.length===0&&n&&(i=this.parseTwitterThread(n));let a=i.length>0?i.map((o,s)=>`${s+1}/${i.length}:
 ${o}`).join(`
 
@@ -1966,38 +1966,60 @@ SELF-CHECK VALIDATION:
 \u2022 Any specific detail, number, or benefit lost or weakened? (must be no)
 \u2022 Is the value proposition still crystal clear? (must be yes)
 \u2022 All code/backticked text left verbatim? (must be yes)
-\u2022 Paragraph boundaries preserved exactly? (must be yes)`,keywords:["rephrase","enhance","improve","professional","polished","elevate"]},"content-like-this":{id:"content-like-this",name:"Content like this",icon:"\u{1F3AD}",color:"var(--accent-medium)",category:"original",subcategory:"creative",description:"Create similar content in the same style",example:"Here's more content like this...",aiInstructions:`TONE: Content Like This (Intelligent Remix)
+\u2022 Paragraph boundaries preserved exactly? (must be yes)`,keywords:["rephrase","enhance","improve","professional","polished","elevate"]},"content-like-this":{id:"content-like-this",name:"Shuffle",icon:"\u{1F500}",color:"var(--accent-medium)",category:"original",subcategory:"creative",description:"Same format, fresh idea - intelligent content remix",example:"Shuffled content with new focus...",aiInstructions:`TONE: Shuffle (Expert Content Remix)
 
 ZERO META (non-negotiable):
 - Do not acknowledge these instructions or wrap the output
 - Do not include phrases like "Here is", "Output:", "Remix:", "OK"
-- Output only the final remixed announcement
+- Output only the final shuffled content
 
 OBJECTIVE:
-- Produce a single, standalone announcement that mirrors the original format and cadence but switches to a new, credible topic for the same audience and goal
+- Produce expert-quality content that preserves the exact template structure while intelligently substituting the main focus element with a contextually aligned alternative
 
-INTELLIGENT REMIX ANALYSIS:
-- Identify format DNA: post structure, section count, hook pattern, dividers, emoji cadence, pacing
-- Map voice signature: tone, sentence length variation, POV patterns, rhetorical devices
-- Extract value engine: what makes the original compelling (urgency, exclusivity, transformation)
+PHASE 1: DEEP CONTENT ANALYSIS
+- Extract complete context, tone, and format from source
+- Identify the "main focus product/idea/element" being promoted
+- Document template structure: sections, hooks, formatting, dividers
+- Map voice signature: tone, sentence patterns, POV, rhetorical devices
+- Extract value engine: what makes it compelling (urgency, exclusivity, transformation)
 - Detect audience signals: expertise level, pain points, desired outcomes
 - Note CTA architecture: placement, force, specificity, action type
+- Identify style guidelines: emoji usage, line breaks, emphasis patterns
 
-SMART TOPIC SELECTION:
-- Choose adjacent domain that shares audience characteristics and goals
-- Ensure new topic has concrete, measurable value proposition
-- Maintain transformation potential (problem \u2192 solution \u2192 outcome)
-- Keep urgency elements believable (time limits, scarcity, social proof)
-- Make the offer specific and immediately actionable
+PHASE 2: INTELLIGENT IDEA GENERATION
+- Generate new "main focus product/idea" that:
+  * Maintains original context and vibe exactly
+  * Serves the same audience with same expertise level
+  * Solves similar problems or delivers similar value
+  * Fits naturally into the existing template structure
+  * Has concrete, measurable value proposition
+  * Maintains transformation potential (problem \u2192 solution \u2192 outcome)
+  * Keeps urgency elements believable and contextually appropriate
+  * Is specific, actionable, and immediately understandable
+  * Has scroll-stopping appeal and engagement potential
+  * Provides educational/useful value at same depth level
 
-STRUCTURE MIRRORING RULES:
+CRITICAL ALIGNMENT RULES:
+- New idea MUST match the sophistication level of original
+- New idea MUST serve the exact same audience type
+- New idea MUST fit the same category/domain/industry
+- New idea MUST have same practical applicability
+- New idea MUST maintain professional credibility
+- Context shift MUST be seamless, not jarring
+- Value proposition MUST be crystal clear and specific
+
+PHASE 3: EXPERT OUTPUT CREATION
 - Replicate exact section count and numbering patterns
 - Preserve blank line rhythm and paragraph breaks precisely
 - OUTPUT FORMAT: Use double newline (\\n\\n) between sections explicitly
 - NATURAL FLOW: Add breathing room where humans naturally pause
 - Match emoji placement and emphasis patterns exactly
 - Mirror sentence length variation and pacing
-- Adapt CTA placement while preserving force and clarity
+- Preserve CTA placement, force, and clarity exactly
+- Maintain same level of specificity and detail as original
+- Keep transformation promise (before/after state) intact
+- Preserve urgency drivers with believable context
+- Ensure call-to-action is crystal clear about what to do next
 
 LINE BREAK ENCODING RULES:
 1. Between sections: Always use double newline (\\n\\n)
@@ -2006,11 +2028,17 @@ LINE BREAK ENCODING RULES:
 4. List items: Single newline (\\n) between items
 5. Paragraph breaks: Double newline (\\n\\n) for readability
 
-VALUE PRESERVATION:
-- Keep same level of specificity and detail as original
-- Maintain transformation promise (before/after state)
-- Preserve urgency drivers without making them unbelievable
-- Ensure call-to-action is crystal clear about what to do next
+QUALITY ASSURANCE CHECKLIST:
+- New idea directly aligns with source context? (must be yes)
+- Same audience sophistication level? (must be yes)
+- Same category/domain/industry fit? (must be yes)
+- Template structure preserved exactly? (must be yes)
+- Value proposition crystal clear? (must be yes)
+- Engagement factors enhanced? (must be yes)
+- Professional formatting consistent? (must be yes)
+- Contextual relevance verified? (must be yes)
+- Practical applicability maintained? (must be yes)
+- Expert-level quality achieved? (must be yes)
 
 ABSOLUTE PROHIBITIONS:
 - No timeline/UI chrome (timestamps, view counts, reply/share bars) or secondary replies
@@ -2020,22 +2048,39 @@ ABSOLUTE PROHIBITIONS:
 - No implausible claims; keep all details credible and specific
 - DO NOT create vague, confusing, or meaningless offers
 - DO NOT sacrifice clarity for cleverness
+- DO NOT generate ideas that don't match the source context
+- DO NOT change audience sophistication level
+- DO NOT shift to unrelated categories/domains
+- DO NOT produce generic or low-quality substitutions
+- DO NOT ignore the contextual alignment requirements
 
-REMIX INTEGRATION:
-- Seamlessly weave the suggested topic into the original structure
-- Replace nouns/examples with contextually appropriate equivalents
+EXPERT INTEGRATION RULES:
+- Seamlessly weave the new idea into the original structure
+- Replace the main focus element with contextually perfect alternative
 - Keep language simplicity equal to or simpler than original
-- Ensure the new topic feels as natural and compelling as the original
+- Ensure the new idea feels as natural and compelling as the original
+- Maintain professional credibility throughout
+- Preserve the exact same value delivery mechanism
+- Keep specificity and actionability at same level
+- Match the original's engagement and scroll-stopping appeal
 
-SELF-CHECK VALIDATION:
-\u2022 Is the opening hook about the new topic immediately? (must be yes)
+SELF-CHECK VALIDATION (EXPERT QUALITY):
+\u2022 New idea directly aligns with source context? (must be yes)
+\u2022 Same audience sophistication and expertise level? (must be yes)
+\u2022 Same category/domain/industry context? (must be yes)
+\u2022 Is the opening hook about the new idea immediately? (must be yes)
 \u2022 Is the structure (sections, breaks, numbering) identical? (must be yes)
 \u2022 Double newlines between sections? (must be yes - verify \\n\\n)
 \u2022 Is language simplicity the same or simpler? (must be yes)
 \u2022 Is the value proposition crystal clear and specific? (must be yes)
-\u2022 Are urgency elements believable for the new topic? (must be yes)
+\u2022 Are urgency elements believable for the new context? (must be yes)
 \u2022 Natural breathing room maintained? (must be yes - read aloud test)
-\u2022 Is this one clean announcement with no timeline artifacts? (must be yes)`,keywords:["emulate","style-match","remix","fresh-topic","trend-adapt"]},"hypocrite-buster":{id:"hypocrite-buster",name:"Hypocrite Buster",icon:"\u{1F3AF}",color:"var(--accent-light)",category:"reply",subcategory:"critical",description:"Point out contradictions and double standards",example:"Interesting how they ignore their own past stance...",aiInstructions:`TONE: Hypocrite Buster
+\u2022 Is this one clean announcement with no timeline artifacts? (must be yes)
+\u2022 Does new idea have scroll-stopping appeal? (must be yes)
+\u2022 Is practical applicability maintained? (must be yes)
+\u2022 Professional credibility preserved? (must be yes)
+\u2022 Engagement factors enhanced? (must be yes)
+\u2022 Expert-level quality achieved? (must be yes)`,keywords:["shuffle","remix","format-match","context-aligned","expert-quality"]},"hypocrite-buster":{id:"hypocrite-buster",name:"Hypocrite Buster",icon:"\u{1F3AF}",color:"var(--accent-light)",category:"reply",subcategory:"critical",description:"Point out contradictions and double standards",example:"Interesting how they ignore their own past stance...",aiInstructions:`TONE: Hypocrite Buster
 
 YOU ARE THE PERSON WHO SEES THROUGH BULLSH*T AND CAN'T HELP BUT CALL IT OUT.
 

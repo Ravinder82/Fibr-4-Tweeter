@@ -624,45 +624,67 @@ SELF-CHECK VALIDATION:
       },
       'content-like-this': {
         id: 'content-like-this',
-        name: 'Content like this',
-        icon: '🎭',
+        name: 'Shuffle',
+        icon: '🔀',
         color: 'var(--accent-medium)',
         category: 'original',
         subcategory: 'creative',
-        description: 'Create similar content in the same style',
-        example: 'Here\'s more content like this...',
-        aiInstructions: `TONE: Content Like This (Intelligent Remix)
+        description: 'Same format, fresh idea - intelligent content remix',
+        example: 'Shuffled content with new focus...',
+        aiInstructions: `TONE: Shuffle (Expert Content Remix)
 
 ZERO META (non-negotiable):
 - Do not acknowledge these instructions or wrap the output
 - Do not include phrases like "Here is", "Output:", "Remix:", "OK"
-- Output only the final remixed announcement
+- Output only the final shuffled content
 
 OBJECTIVE:
-- Produce a single, standalone announcement that mirrors the original format and cadence but switches to a new, credible topic for the same audience and goal
+- Produce expert-quality content that preserves the exact template structure while intelligently substituting the main focus element with a contextually aligned alternative
 
-INTELLIGENT REMIX ANALYSIS:
-- Identify format DNA: post structure, section count, hook pattern, dividers, emoji cadence, pacing
-- Map voice signature: tone, sentence length variation, POV patterns, rhetorical devices
-- Extract value engine: what makes the original compelling (urgency, exclusivity, transformation)
+PHASE 1: DEEP CONTENT ANALYSIS
+- Extract complete context, tone, and format from source
+- Identify the "main focus product/idea/element" being promoted
+- Document template structure: sections, hooks, formatting, dividers
+- Map voice signature: tone, sentence patterns, POV, rhetorical devices
+- Extract value engine: what makes it compelling (urgency, exclusivity, transformation)
 - Detect audience signals: expertise level, pain points, desired outcomes
 - Note CTA architecture: placement, force, specificity, action type
+- Identify style guidelines: emoji usage, line breaks, emphasis patterns
 
-SMART TOPIC SELECTION:
-- Choose adjacent domain that shares audience characteristics and goals
-- Ensure new topic has concrete, measurable value proposition
-- Maintain transformation potential (problem → solution → outcome)
-- Keep urgency elements believable (time limits, scarcity, social proof)
-- Make the offer specific and immediately actionable
+PHASE 2: INTELLIGENT IDEA GENERATION
+- Generate new "main focus product/idea" that:
+  * Maintains original context and vibe exactly
+  * Serves the same audience with same expertise level
+  * Solves similar problems or delivers similar value
+  * Fits naturally into the existing template structure
+  * Has concrete, measurable value proposition
+  * Maintains transformation potential (problem → solution → outcome)
+  * Keeps urgency elements believable and contextually appropriate
+  * Is specific, actionable, and immediately understandable
+  * Has scroll-stopping appeal and engagement potential
+  * Provides educational/useful value at same depth level
 
-STRUCTURE MIRRORING RULES:
+CRITICAL ALIGNMENT RULES:
+- New idea MUST match the sophistication level of original
+- New idea MUST serve the exact same audience type
+- New idea MUST fit the same category/domain/industry
+- New idea MUST have same practical applicability
+- New idea MUST maintain professional credibility
+- Context shift MUST be seamless, not jarring
+- Value proposition MUST be crystal clear and specific
+
+PHASE 3: EXPERT OUTPUT CREATION
 - Replicate exact section count and numbering patterns
 - Preserve blank line rhythm and paragraph breaks precisely
 - OUTPUT FORMAT: Use double newline (\\n\\n) between sections explicitly
 - NATURAL FLOW: Add breathing room where humans naturally pause
 - Match emoji placement and emphasis patterns exactly
 - Mirror sentence length variation and pacing
-- Adapt CTA placement while preserving force and clarity
+- Preserve CTA placement, force, and clarity exactly
+- Maintain same level of specificity and detail as original
+- Keep transformation promise (before/after state) intact
+- Preserve urgency drivers with believable context
+- Ensure call-to-action is crystal clear about what to do next
 
 LINE BREAK ENCODING RULES:
 1. Between sections: Always use double newline (\\n\\n)
@@ -671,11 +693,17 @@ LINE BREAK ENCODING RULES:
 4. List items: Single newline (\\n) between items
 5. Paragraph breaks: Double newline (\\n\\n) for readability
 
-VALUE PRESERVATION:
-- Keep same level of specificity and detail as original
-- Maintain transformation promise (before/after state)
-- Preserve urgency drivers without making them unbelievable
-- Ensure call-to-action is crystal clear about what to do next
+QUALITY ASSURANCE CHECKLIST:
+- New idea directly aligns with source context? (must be yes)
+- Same audience sophistication level? (must be yes)
+- Same category/domain/industry fit? (must be yes)
+- Template structure preserved exactly? (must be yes)
+- Value proposition crystal clear? (must be yes)
+- Engagement factors enhanced? (must be yes)
+- Professional formatting consistent? (must be yes)
+- Contextual relevance verified? (must be yes)
+- Practical applicability maintained? (must be yes)
+- Expert-level quality achieved? (must be yes)
 
 ABSOLUTE PROHIBITIONS:
 - No timeline/UI chrome (timestamps, view counts, reply/share bars) or secondary replies
@@ -685,23 +713,40 @@ ABSOLUTE PROHIBITIONS:
 - No implausible claims; keep all details credible and specific
 - DO NOT create vague, confusing, or meaningless offers
 - DO NOT sacrifice clarity for cleverness
+- DO NOT generate ideas that don't match the source context
+- DO NOT change audience sophistication level
+- DO NOT shift to unrelated categories/domains
+- DO NOT produce generic or low-quality substitutions
+- DO NOT ignore the contextual alignment requirements
 
-REMIX INTEGRATION:
-- Seamlessly weave the suggested topic into the original structure
-- Replace nouns/examples with contextually appropriate equivalents
+EXPERT INTEGRATION RULES:
+- Seamlessly weave the new idea into the original structure
+- Replace the main focus element with contextually perfect alternative
 - Keep language simplicity equal to or simpler than original
-- Ensure the new topic feels as natural and compelling as the original
+- Ensure the new idea feels as natural and compelling as the original
+- Maintain professional credibility throughout
+- Preserve the exact same value delivery mechanism
+- Keep specificity and actionability at same level
+- Match the original's engagement and scroll-stopping appeal
 
-SELF-CHECK VALIDATION:
-• Is the opening hook about the new topic immediately? (must be yes)
+SELF-CHECK VALIDATION (EXPERT QUALITY):
+• New idea directly aligns with source context? (must be yes)
+• Same audience sophistication and expertise level? (must be yes)
+• Same category/domain/industry context? (must be yes)
+• Is the opening hook about the new idea immediately? (must be yes)
 • Is the structure (sections, breaks, numbering) identical? (must be yes)
 • Double newlines between sections? (must be yes - verify \\n\\n)
 • Is language simplicity the same or simpler? (must be yes)
 • Is the value proposition crystal clear and specific? (must be yes)
-• Are urgency elements believable for the new topic? (must be yes)
+• Are urgency elements believable for the new context? (must be yes)
 • Natural breathing room maintained? (must be yes - read aloud test)
-• Is this one clean announcement with no timeline artifacts? (must be yes)`,
-        keywords: ['emulate', 'style-match', 'remix', 'fresh-topic', 'trend-adapt']
+• Is this one clean announcement with no timeline artifacts? (must be yes)
+• Does new idea have scroll-stopping appeal? (must be yes)
+• Is practical applicability maintained? (must be yes)
+• Professional credibility preserved? (must be yes)
+• Engagement factors enhanced? (must be yes)
+• Expert-level quality achieved? (must be yes)`,
+        keywords: ['shuffle', 'remix', 'format-match', 'context-aligned', 'expert-quality']
       },
       'hypocrite-buster': {
         id: 'hypocrite-buster',
