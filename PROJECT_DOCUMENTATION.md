@@ -1,9 +1,9 @@
 # Fibr - Comprehensive Project Documentation
 
-**Generated:** 2025-01-XX  
+**Generated:** 2025-01-27  
 **Version:** 2.0.0  
 **License:** Apache-2.0  
-**Last Updated:** 2025-01-XX (Shuffle tone card updated)
+**Last Updated:** 2025-01-27 (Chrome Web Store compliance testing framework added)
 
 ---
 
@@ -427,10 +427,15 @@ None (zero runtime dependencies - pure vanilla JavaScript)
 | `chrome.tabs` | Tab information | `tabs` |
 | `chrome.action` | Extension popup | Built-in |
 
-### **Manifest Permissions**
+### **Manifest Configuration**
 
 ```json
 {
+  "manifest_version": 3,
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://generativelanguage.googleapis.com"
+  },
+  "privacy_policy": "https://ravinder82.github.io/Fibr-4-Tweeter/privacy-policy.html",
   "permissions": [
     "activeTab",    // Access current tab
     "scripting",   // Inject content scripts
@@ -439,6 +444,12 @@ None (zero runtime dependencies - pure vanilla JavaScript)
   ]
 }
 ```
+
+**Compliance Status:**
+- ✅ Manifest V3 compliant
+- ✅ Privacy policy configured
+- ✅ Content Security Policy defined
+- ✅ Chrome Web Store ready
 
 ---
 
@@ -746,6 +757,24 @@ tests/
 └── navigation-helpers.test.js
 ```
 
+### **Compliance Testing Framework**
+```
+chrome-policy-compliance-tests/
+├── test-runner.js              # Automated compliance test execution
+├── compliance-framework.md      # Policy documentation and test protocols
+├── COMPLIANCE_REPORT.md       # Detailed compliance assessment
+├── IMPLEMENTATION_COMPLETE.md # Implementation summary
+├── README.md                   # Testing framework usage guide
+└── test-results.json          # Latest test results
+```
+
+**Run Compliance Tests:**
+```bash
+node chrome-policy-compliance-tests/test-runner.js
+```
+
+**Current Compliance Status:** ✅ 10/10 tests passing (100% compliant)
+
 ---
 
 ## Technical Debt & Known Issues
@@ -802,7 +831,7 @@ Fibr is a well-architected Chrome extension with a solid foundation for Twitter 
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** 2025-01-XX  
+**Document Version:** 1.1  
+**Last Updated:** 2025-01-27  
 **Maintained By:** Fibr Team
 

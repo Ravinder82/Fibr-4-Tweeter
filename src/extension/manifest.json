@@ -4,6 +4,10 @@
     "description": "Generate premium Twitter/X threads from any page. Local-only keys. No external fonts.",
     "version": "2.0.0",
     "manifest_version": 3,
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://generativelanguage.googleapis.com"
+    },
+    "privacy_policy": "https://ravinder82.github.io/Fibr-4-Tweeter/privacy-policy.html",
     "background": {
         "service_worker": "background.js"
     },
